@@ -1,4 +1,9 @@
 Rails.application.routes.draw do
+  get "sessions/index"
+  get "sessions/show"
+  get "sessions/new"
+  get "movies/index"
+  get "movies/show"
   devise_for :users
   root to: "pages#home"
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html

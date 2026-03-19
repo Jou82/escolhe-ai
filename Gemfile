@@ -45,6 +45,8 @@ gem "devise"
 #Douglas: Adicionando gem para alterar idioma de "devise" para PT-BR
 gem 'rails-i18n'
 gem 'devise-i18n'
+gem 'omniauth-google-oauth2'
+gem 'omniauth-rails_csrf_protection'
 #Douglas: Fim
 gem "autoprefixer-rails"
 gem "font-awesome-sass", "~> 6.1"

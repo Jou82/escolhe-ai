@@ -7,7 +7,7 @@
     <%= f.input :email,
                 required: true,
                 autofocus: true,
-                input_html: { autocomplete: "email" }%>
+                input_html: { autocomplete: "email" } %>
     <%= f.input :password,
                 required: true,
                 hint: ("#{@minimum_password_length} characters minimum" if @minimum_password_length),
@@ -17,9 +17,23 @@
                 input_html: { autocomplete: "new-password" } %>
   </div>
 
-  <div class="form-actions">
-    <%= f.button :submit, "Sign up" %>
+  <div class="form-actions mb-3">
+    <%= f.button :submit, "Sign up", class: "btn btn-primary w-100" %>
   </div>
 <% end %>
+
+<div class="text-center my-3">
+  <p class="text-muted small">ou crie sua conta com</p>
+
+  <%= button_to user_google_oauth2_omniauth_authorize_path,
+      method: :post,
+      data: { turbo: false },
+      class: "btn btn-outline-dark w-100 d-flex align-items-center justify-content-center gap-2" do %>
+    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" style="width: 18px;">
+    Cadastrar com Google
+  <% end %>
+</div>
+
+<hr>
 
 <%= render "devise/shared/links" %>

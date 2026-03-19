@@ -4,7 +4,9 @@ Rails.application.routes.draw do
   get "sessions/new"
   get "movies/index"
   get "movies/show"
-  devise_for :users
+  devise_for :users, controllers: {
+    omniauth_callbacks: 'users/omniauth_callbacks'
+  }
   root to: "pages#home"
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
   resources :sessions, only: [:new, :create, :show, :index]

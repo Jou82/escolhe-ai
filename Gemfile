@@ -52,6 +52,7 @@ gem "simple_form", github: "heartcombo/simple_form"
 gem "sassc-rails"
 gem "cloudinary"
 gem 'anthropic', '~> 1.25'
+gem "faraday", "~> 2.0"
 
 group :development, :test do
   gem "dotenv-rails"

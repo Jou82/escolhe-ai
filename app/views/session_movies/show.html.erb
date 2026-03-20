@@ -1,0 +1,206 @@
+<%# app/views/session_movies/show.html.erb %>
+
+<div class="movie-detail">
+
+  <%# Hero backdrop %>
+  <div class="movie-hero">
+    <div class="movie-hero__backdrop">
+      <%= image_tag "https://image.tmdb.org/t/p/w1280/1XS1oqL89opfnbLl8WnZY1O1uJx.jpg", alt: "Game of Thrones" %>
+      <div class="movie-hero__backdrop-placeholder"></div>
+    </div>
+    <div class="movie-hero__fade"></div>
+  </div>
+
+  <%# Back + Badge + Title %>
+  <div class="movie-header container">
+    <%= link_to "", class: "movie-header__back" do %>
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M10 3L5 8L10 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      VOLTAR
+    <% end %>
+
+    <div class="movie-header__meta">
+      <%# <span class="badge-recommended">✦ MAIS RECOMENDADO</span> %>
+      <span class="movie-header__score">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="#F5C542"><path d="M7 1l1.8 3.6L13 5.3l-3 2.9.7 4.1L7 10.3l-3.7 2 .7-4.1-3-2.9 4.2-.7z"/></svg>
+        8.7
+      </span>
+    </div>
+
+    <h1 class="movie-header__title">A Casa do Dragão</h1>
+
+    <div class="movie-header__info">
+      <span>2014</span>
+      <span class="dot">•</span>
+      <span>Sci-Fi • Adventure • Drama</span>
+      <span class="dot">•</span>
+      <span>2h 49m</span>
+      <span class="dot">•</span>
+      <span class="badge-rating">PG-13</span>
+    </div>
+
+    <div class="movie-header__actions">
+      <button class="btn-watch">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <circle cx="9" cy="9" r="8" stroke="white" stroke-width="1.2"/>
+          <path d="M7 6l5 3-5 3V6z" fill="white"/>
+        </svg>
+        ASSISTIR TRAILER
+      </button>
+      <button class="btn-share">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <circle cx="14" cy="3" r="2" stroke="currentColor" stroke-width="1.3"/>
+          <circle cx="14" cy="15" r="2" stroke="currentColor" stroke-width="1.3"/>
+          <circle cx="4" cy="9" r="2" stroke="currentColor" stroke-width="1.3"/>
+          <path d="M6 8l6-4M6 10l6 4" stroke="currentColor" stroke-width="1.3"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <%# Main content grid %>
+  <div class="movie-content container">
+
+    <%# Left column %>
+    <div class="movie-content__left">
+
+      <%# Why we recommend %>
+      <div class="card card--why">
+        <div class="card__header">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M8 2l1.5 3 3.3.5-2.4 2.3.6 3.2L8 9.5l-3 1.5.6-3.2L3.2 5.5l3.3-.5z" fill="#4F8EF7"/>
+          </svg>
+          <span class="card__title-blue">Por que recomendamos isso</span>
+        </div>
+        <div class="card__reasons">
+          <div class="card__reason">
+            <div class="card__reason-icon card__reason-icon--blue">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M8 2a6 6 0 100 12A6 6 0 008 2z" stroke="#4F8EF7" stroke-width="1.2"/>
+                <path d="M5 8l2 2 4-4" stroke="#4F8EF7" stroke-width="1.2" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div>
+              <p class="card__reason-title">Ficção científica atmosférica</p>
+              <p class="card__reason-text">Fidelidade visual impressionante e exploração espacial com base científica que proporciona uma sensação imersiva.</p>
+            </div>
+          </div>
+          <div class="card__reason">
+            <div class="card__reason-icon card__reason-icon--red">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M8 3c2.5 0 5 2 5 4.5 0 2-2 4.5-5 6-3-1.5-5-4-5-6C3 5 5.5 3 8 3z" stroke="#E05B7F" stroke-width="1.2"/>
+              </svg>
+            </div>
+            <div>
+              <p class="card__reason-title">Ressonância Emocional</p>
+              <p class="card__reason-text">Uma história profundamente humana sobre o vínculo entre um pai e uma filha através do tempo e do espaço.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <%# Synopsis %>
+      <div class="section-synopsis">
+        <h2 class="section-title">Sinopse</h2>
+        <p class="synopsis-text">
+          Quando a Terra se tornar inabitável no futuro, um fazendeiro e ex-piloto da NASA, Joseph Cooper, é recrutado para liderar uma expedição pelo espaço em busca de um novo lar para a humanidade.
+        </p>
+      </div>
+
+      <%# Top Cast %>
+      <div class="section-cast">
+        <h2 class="section-title">Top Cast</h2>
+        <div class="cast-grid">
+          <div class="cast-card">
+            <div class="cast-card__avatar cast-card__avatar--1"></div>
+            <p class="cast-card__name">Matthew McConaughey</p>
+            <p class="cast-card__role">COOPER</p>
+          </div>
+          <div class="cast-card">
+            <div class="cast-card__avatar cast-card__avatar--2"></div>
+            <p class="cast-card__name">Anne Hathaway</p>
+            <p class="cast-card__role">BRAND</p>
+          </div>
+          <div class="cast-card">
+            <div class="cast-card__avatar cast-card__avatar--3"></div>
+            <p class="cast-card__name">Jessica Chastain</p>
+            <p class="cast-card__role">MURPH</p>
+          </div>
+          <div class="cast-card">
+            <div class="cast-card__avatar cast-card__avatar--4"></div>
+            <p class="cast-card__name">Michael Caine</p>
+            <p class="cast-card__role">PROF. BRAND</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <%# Right column %>
+    <div class="movie-content__right">
+
+      <%# Rating summary %>
+      <div class="card card--rating">
+        <h3 class="card__label">Resumo da classificação</h3>
+        <div class="rating-score">
+          <span class="rating-score__number">4.7</span>
+          <div class="rating-score__stars">
+            <svg width="72" height="14" viewBox="0 0 72 14" fill="#F5C542">
+              <path d="M7 1l1.5 3 3.3.5-2.4 2.3.6 3.2L7 8.5l-3 1.5.6-3.2L2.2 4.5l3.3-.5z"/>
+              <path d="M21 1l1.5 3 3.3.5-2.4 2.3.6 3.2L21 8.5l-3 1.5.6-3.2L16.2 4.5l3.3-.5z"/>
+              <path d="M35 1l1.5 3 3.3.5-2.4 2.3.6 3.2L35 8.5l-3 1.5.6-3.2L30.2 4.5l3.3-.5z"/>
+              <path d="M49 1l1.5 3 3.3.5-2.4 2.3.6 3.2L49 8.5l-3 1.5.6-3.2L44.2 4.5l3.3-.5z"/>
+              <path d="M63 1l1.5 3 3.3.5-2.4 2.3.6 3.2L63 8.5l-3 1.5.6-3.2L58.2 4.5l3.3-.5z" fill-opacity="0.3"/>
+            </svg>
+            <span class="rating-score__count">1.2M Reviews</span>
+          </div>
+        </div>
+        <div class="rating-bars">
+          <div class="rating-bar"><span>5</span><div class="bar"><div class="bar__fill" style="width: 82%"></div></div><span>82%</span></div>
+          <div class="rating-bar"><span>4</span><div class="bar"><div class="bar__fill bar__fill--dim" style="width: 12%"></div></div><span>12%</span></div>
+          <div class="rating-bar"><span>3</span><div class="bar"><div class="bar__fill bar__fill--dim" style="width: 4%"></div></div><span>4%</span></div>
+          <div class="rating-bar"><span>2</span><div class="bar"><div class="bar__fill bar__fill--dim" style="width: 1%"></div></div><span>1%</span></div>
+          <div class="rating-bar"><span>1</span><div class="bar"><div class="bar__fill bar__fill--dim" style="width: 1%"></div></div><span>1%</span></div>
+        </div>
+      </div>
+
+      <%# Where to watch %>
+      <div class="card card--watch">
+        <h3 class="card__label">Onde assistir</h3>
+        <div class="watch-list">
+          <div class="watch-item">
+            <div class="watch-item__logo watch-item__logo--prime">Prime</div>
+            <span>Prime Video</span>
+          </div>
+          <div class="watch-item">
+            <div class="watch-item__logo watch-item__logo--netflix">N</div>
+            <span>Netflix</span>
+          </div>
+          <div class="watch-item">
+            <div class="watch-item__logo watch-item__logo--apple">TV</div>
+            <span>Apple TV</span>
+          </div>
+        </div>
+      </div>
+
+      <%# Crew %>
+      <div class="crew">
+        <div class="crew__item">
+          <span class="crew__label">DIRECTOR</span>
+          <span class="crew__value">Christopher Nolan</span>
+        </div>
+        <div class="crew__item">
+          <span class="crew__label">WRITERS</span>
+          <span class="crew__value">Jonathan Nolan, Christopher Nolan</span>
+        </div>
+        <div class="crew__item">
+          <span class="crew__label">STUDIO</span>
+          <span class="crew__value">Paramount Pictures, Warner Bros.</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>

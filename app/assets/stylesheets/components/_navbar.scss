@@ -1,5 +1,5 @@
 // ===== NAVBAR =====
-.navbar {
+.site-navbar {
   position: fixed;
   top: 0;
   width: 100%;
@@ -8,17 +8,15 @@
   background: rgba(8, 10, 25, 0.95);
   backdrop-filter: blur(14px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-  display: flex;
-  justify-content: center;
 }
 
-.navbar-container {
+.site-navbar-container {
   max-width: 1120px;
   width: 100%;
   margin: 0 auto;
   padding: 0 2rem;
-  display: flex !important;
-  justify-content: space-between !important;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
 }
 
@@ -76,12 +74,12 @@
   }
 }
 
-// ===== DROPDOWN =====
-.dropdown {
+// ===== USER MENU DROPDOWN =====
+.user-menu {
   position: relative;
 }
 
-.dropdown-toggle {
+.user-menu-toggle {
   background: none;
   border: none;
   color: $text-muted;
@@ -99,7 +97,7 @@
   }
 }
 
-.dropdown-menu {
+.user-menu-panel {
   position: absolute;
   top: calc(100% + 0.6rem);
   right: 0;
@@ -122,7 +120,7 @@
   }
 }
 
-.dropdown-item {
+.user-menu-item {
   display: flex;
   align-items: center;
   gap: 0.7rem;
@@ -149,7 +147,7 @@
   }
 }
 
-.dropdown-logout {
+.user-menu-logout {
   color: $accent-blue;
 
   svg {
@@ -161,7 +159,7 @@
   }
 }
 
-.dropdown-divider {
+.user-menu-divider {
   height: 1px;
   background: rgba(255, 255, 255, 0.06);
   margin: 0.3rem 0;

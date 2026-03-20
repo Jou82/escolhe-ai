@@ -1,9 +1,208 @@
+# app/services/tmdb_service.rb
 class TmdbService
   BASE_URL = "https://api.themoviedb.org/3"
 
   def initialize(title, year = nil)
     @title = title
     @year = year
+  end
+
+  WEIGHTS = {
+    frequency: 0.35,
+    rating: 0.25,
+    popularity: 0.25,
+    votes: 0.15
+  }.freeze
+
+  def self.find_candidates(movies, top_n: 15)
+    # 1. Buscar os 3 filmes em paralelo
+    user_movies = movies.map { |title| Thread.new { new(title).send(:search_movie) } }
+                        .filter_map do |t|
+                          movie = t.value
+                          next unless movie
+
+                          { tmdb_id: movie["id"], title: movie["title"] }
+                        end
+
+    return [] if user_movies.empty?
+
+    # 2. Buscar relacionados + filmografia do diretor em paralelo (2 threads por filme)
+    threads = user_movies.flat_map do |um|
+      [
+        Thread.new { [:related, um[:tmdb_id], fetch_related(um[:tmdb_id])] },
+        Thread.new { [:director, um[:tmdb_id], fetch_director_filmography(um[:tmdb_id])] }
+      ]
+    end
+
+    # 3. Coletar resultados
+    user_director_ids = Set.new
+    similar_by_source = {}
+    director_film_ids = Set.new
+
+    # Inicializar
+    user_movies.each { |um| similar_by_source[um[:tmdb_id]] = [] }
+
+    threads.each do |t|
+      type, tmdb_id, data = t.value
+      case type
+      when :related
+        similar_by_source[tmdb_id].concat(data)
+      when :director
+        dir_ids, dir_films = data
+        user_director_ids.merge(dir_ids)
+        director_film_ids.merge(dir_films.map { |f| f["id"] })
+        similar_by_source[tmdb_id].concat(dir_films)
+      end
+    end
+
+    # Deduplicar por fonte
+    similar_by_source.transform_values! { |v| v.uniq { |m| m["id"] } }
+
+    scored = score_candidates(similar_by_source, user_movies)
+
+    # Remover filmes dos mesmos diretores APÓS o scoring (sem chamadas extras!)
+    scored.reject { |c| director_film_ids.include?(c[:tmdb_id]) }
+          .first(top_n)
+  end
+
+  # Combina /recommendations + /similar (2 páginas cada) pra maximizar overlap
+  # Combina /recommendations + /similar (2 páginas cada) em paralelo
+  def self.fetch_related(movie_id)
+    threads = [1, 2].flat_map do |page|
+      [
+        Thread.new do
+          response = Faraday.get(
+            "#{BASE_URL}/movie/#{movie_id}/recommendations",
+            { api_key: ENV.fetch("TMDB_API_KEY", nil), language: "pt-BR", page: page }
+          )
+          JSON.parse(response.body)["results"] || []
+        end,
+        Thread.new do
+          response = Faraday.get(
+            "#{BASE_URL}/movie/#{movie_id}/similar",
+            { api_key: ENV.fetch("TMDB_API_KEY", nil), language: "pt-BR", page: page }
+          )
+          JSON.parse(response.body)["results"] || []
+        end
+      ]
+    end
+
+    all = threads.flat_map(&:value)
+    all.uniq { |m| m["id"] }
+  end
+
+  # Busca filmografia do diretor — retorna [director_ids, filmes]
+  def self.fetch_director_filmography(movie_id)
+    # 1. Pegar credits do filme pra encontrar o diretor
+    credits_response = Faraday.get(
+      "#{BASE_URL}/movie/#{movie_id}/credits",
+      { api_key: ENV.fetch("TMDB_API_KEY", nil) }
+    )
+    credits = JSON.parse(credits_response.body)
+    directors = credits["crew"]&.select { |c| c["job"] == "Director" } || []
+    return [[], []] if directors.empty?
+
+    director_ids = directors.map { |d| d["id"] }
+    all_films = []
+
+    # 2. Buscar filmes de cada diretor
+    directors.each do |director|
+      person_response = Faraday.get(
+        "#{BASE_URL}/person/#{director['id']}/movie_credits",
+        { api_key: ENV.fetch("TMDB_API_KEY", nil), language: "pt-BR" }
+      )
+      person_credits = JSON.parse(person_response.body)
+
+      films = person_credits["crew"]
+              &.select { |c| c["job"] == "Director" }
+              &.reject { |c| c["id"] == movie_id } || []
+      all_films.concat(films)
+    end
+
+    [director_ids, all_films]
+  end
+
+  # ← fix: def self.score_candidates (era def score.score_candidates)
+  def self.score_candidates(similar_by_source, user_movies)
+    user_ids = user_movies.map { |m| m[:tmdb_id] } # ← fix: user_movies (era user.movies)
+    total_sources = similar_by_source.keys.size # ← fix: .keys (era .key)
+    candidate_map = {}
+
+    similar_by_source.each_value do |similar_movies|
+      similar_movies.each do |movie|
+        tmdb_id = movie["id"]
+        next if user_ids.include?(tmdb_id)
+
+        if candidate_map[tmdb_id]
+          candidate_map[tmdb_id][:frequency] += 1
+        else
+          candidate_map[tmdb_id] = {
+            tmdb_id: tmdb_id,
+            title: movie["title"],
+            original_title: movie["original_title"],
+            overview: movie["overview"],
+            poster_path: movie["poster_path"],
+            vote_average: movie["vote_average"] || 0,
+            vote_count: movie["vote_count"] || 0,
+            popularity: movie["popularity"] || 0,
+            release_date: movie["release_date"],
+            genre_ids: movie["genre_ids"] || [],
+            frequency: 1
+          }
+        end
+      end
+    end
+
+    candidate_map.values.each { |c| c[:score] = calculate_score(c, total_sources) }
+                 .sort_by { |c| -c[:score] }
+  end
+
+  def self.calculate_score(candidate, total_sources)
+    freq = frequency_score(candidate[:frequency], total_sources)
+    rating = rating_score(candidate[:vote_average])
+    pop = popularity_score(candidate[:popularity])
+    votes = votes_score(candidate[:vote_count])
+
+    ((freq * WEIGHTS[:frequency]) +
+     (rating * WEIGHTS[:rating]) +
+     (pop * WEIGHTS[:popularity]) +
+     (votes * WEIGHTS[:votes])).round(1)
+  end
+
+  def self.frequency_score(frequency, total_sources)
+    return 0 if total_sources.zero?
+
+    (frequency.to_f / total_sources * 100).clamp(0, 100) # ← fix: .to_f (era .to.f)
+  end
+
+  def self.rating_score(vote_average)
+    (vote_average.to_f * 10).clamp(0, 100)
+  end
+
+  def self.popularity_score(popularity)
+    pop = popularity.to_f
+    if pop >= 10_000
+      20
+    elsif pop >= 1_000
+      30
+    elsif pop >= 100
+      40
+    elsif pop >= 10
+      10
+    else
+      5
+    end
+  end
+
+  def self.votes_score(vote_count)
+    case vote_count.to_i
+    when 10_000.. then 100
+    when 5_000..  then 80
+    when 1_000..  then 60
+    when 500..    then 40
+    when 100..    then 20
+    else               0
+    end
   end
 
   def call
@@ -30,9 +229,7 @@ class TmdbService
     recommendations.map do |rec|
       tmdb_data = new(rec["title"], rec["year"]).call
 
-      if tmdb_data.nil? && rec["original_title"]
-        tmdb_data = new(rec["original_title"], rec["year"]).call
-      end
+      tmdb_data = new(rec["original_title"], rec["year"]).call if tmdb_data.nil? && rec["original_title"]
 
       rec.merge("tmdb" => tmdb_data)
     end
@@ -42,7 +239,7 @@ class TmdbService
 
   def search_movie
     params = {
-      api_key: ENV["TMDB_API_KEY"],
+      api_key: ENV.fetch("TMDB_API_KEY", nil),
       query: @title,
       language: "pt-BR",
       region: "BR"
@@ -57,7 +254,7 @@ class TmdbService
   def fetch_providers(movie_id)
     response = Faraday.get(
       "#{BASE_URL}/movie/#{movie_id}/watch/providers",
-      { api_key: ENV["TMDB_API_KEY"] }
+      { api_key: ENV.fetch("TMDB_API_KEY", nil) }
     )
     JSON.parse(response.body)["results"]
   end
@@ -74,6 +271,7 @@ class TmdbService
 
   def poster_url(path, size = "w500")
     return nil unless path
+
     "https://image.tmdb.org/t/p/#{size}#{path}"
   end
 end

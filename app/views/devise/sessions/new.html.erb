@@ -1,34 +1,44 @@
-<h2>Log in</h2>
+<div class="container mt-5" style="max-width: 400px;">
+  <h2 class="text-center mb-4">Log in</h2>
 
-<%= simple_form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
-  <div class="form-inputs">
-    <%= f.input :email,
-                required: false,
-                autofocus: true,
-                input_html: { autocomplete: "email" } %>
-    <%= f.input :password,
-                required: false,
-                input_html: { autocomplete: "current-password" } %>
-    <%= f.input :remember_me, as: :boolean if devise_mapping.rememberable? %>
-  </div>
+  <%= simple_form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
+    <div class="form-inputs">
+      <%= f.input :email,
+                  required: false,
+                  autofocus: true,
+                  input_html: { autocomplete: "email", class: "mb-3" } %>
+      <%= f.input :password,
+                  required: false,
+                  input_html: { autocomplete: "current-password", class: "mb-3" } %>
+      <%= f.input :remember_me, as: :boolean if devise_mapping.rememberable? %>
+    </div>
 
-  <div class="form-actions mb-3">
-    <%= f.button :submit, "Log in", class: "btn btn-primary w-100" %>
-  </div>
-<% end %>
-
-<div class="text-center my-3">
-  <p class="text-muted small">ou</p>
-
-  <%= button_to user_google_oauth2_omniauth_authorize_path,
-      method: :post,
-      data: { turbo: false },
-      class: "btn btn-outline-dark w-100 d-flex align-items-center justify-center gap-2" do %>
-    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" style="width: 18px;">
-    Entrar com Google
+    <div class="form-actions mb-3">
+      <%= f.button :submit, "Log in", class: "btn btn-primary w-100 py-2 shadow-sm" %>
+    </div>
   <% end %>
+
+  <div class="text-center my-4">
+    <div class="d-flex align-items-center justify-content-center">
+      <hr class="flex-grow-1 text-muted">
+      <span class="mx-3 text-muted small">ou</span>
+      <hr class="flex-grow-1 text-muted">
+    </div>
+  </div>
+
+  <div class="mb-4">
+    <%= button_to user_google_oauth2_omniauth_authorize_path,
+        method: :post,
+        data: { turbo: false },
+        class: "btn btn-outline-dark w-100 d-flex align-items-center justify-content-center gap-2 py-2 shadow-sm" do %>
+      <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png"
+           alt="Google"
+           style="width: 20px; height: 20px;">
+      <span style="font-weight: 500;">Entrar com Google</span>
+    <% end %>
+  </div>
+
+  <div class="text-center">
+    <%= render "devise/shared/links" %>
+  </div>
 </div>
-
-<hr>
-
-<%= render "devise/shared/links" %>

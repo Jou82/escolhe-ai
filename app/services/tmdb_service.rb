@@ -1,4 +1,3 @@
-
 # app/services/tmdb_service.rb
 class TmdbService
   BASE_URL = "https://api.themoviedb.org/3"
@@ -21,6 +20,7 @@ class TmdbService
                         .filter_map do |t|
                           movie = t.value
                           next unless movie
+
                           { tmdb_id: movie["id"], title: movie["title"] }
                         end
 
@@ -70,20 +70,20 @@ class TmdbService
   def self.fetch_related(movie_id)
     threads = [1, 2].flat_map do |page|
       [
-        Thread.new {
+        Thread.new do
           response = Faraday.get(
             "#{BASE_URL}/movie/#{movie_id}/recommendations",
             { api_key: ENV.fetch("TMDB_API_KEY", nil), language: "pt-BR", page: page }
           )
           JSON.parse(response.body)["results"] || []
-        },
-        Thread.new {
+        end,
+        Thread.new do
           response = Faraday.get(
             "#{BASE_URL}/movie/#{movie_id}/similar",
             { api_key: ENV.fetch("TMDB_API_KEY", nil), language: "pt-BR", page: page }
           )
           JSON.parse(response.body)["results"] || []
-        }
+        end
       ]
     end
 
@@ -114,17 +114,18 @@ class TmdbService
       person_credits = JSON.parse(person_response.body)
 
       films = person_credits["crew"]
-                &.select { |c| c["job"] == "Director" }
-                &.reject { |c| c["id"] == movie_id } || []
+              &.select { |c| c["job"] == "Director" }
+              &.reject { |c| c["id"] == movie_id } || []
       all_films.concat(films)
     end
 
     [director_ids, all_films]
   end
 
-  def self.score_candidates(similar_by_source, user_movies)  # ← fix: def self.score_candidates (era def score.score_candidates)
-    user_ids = user_movies.map { |m| m[:tmdb_id] }          # ← fix: user_movies (era user.movies)
-    total_sources = similar_by_source.keys.size              # ← fix: .keys (era .key)
+  # ← fix: def self.score_candidates (era def score.score_candidates)
+  def self.score_candidates(similar_by_source, user_movies)
+    user_ids = user_movies.map { |m| m[:tmdb_id] } # ← fix: user_movies (era user.movies)
+    total_sources = similar_by_source.keys.size # ← fix: .keys (era .key)
     candidate_map = {}
 
     similar_by_source.each_value do |similar_movies|
@@ -152,8 +153,7 @@ class TmdbService
       end
     end
 
-    candidate_map.values
-                 .each { |c| c[:score] = calculate_score(c, total_sources) }
+    candidate_map.each_value { |c| c[:score] = calculate_score(c, total_sources) }
                  .sort_by { |c| -c[:score] }
   end
 
@@ -172,7 +172,7 @@ class TmdbService
   def self.frequency_score(frequency, total_sources)
     return 0 if total_sources.zero?
 
-    (frequency.to_f / total_sources * 100).clamp(0, 100)    # ← fix: .to_f (era .to.f)
+    (frequency.to_f / total_sources * 100).clamp(0, 100) # ← fix: .to_f (era .to.f)
   end
 
   def self.rating_score(vote_average)

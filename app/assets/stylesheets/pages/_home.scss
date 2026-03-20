@@ -170,7 +170,7 @@ body {
 
 // ===== HOW IT WORKS =====
 .how-it-works {
-  padding: 3rem 2rem 5rem;
+  padding: 3rem 2rem 2rem;
   max-width: 1120px;
   margin: 0 auto;
 }
@@ -245,7 +245,7 @@ body {
 // ===== SHOWCASE =====
 .showcase {
   position: relative;
-  height: 200px;
+  height: 100px;
   background: linear-gradient(180deg, $bg-primary 0%, #0c1129 50%, $bg-primary 100%);
   overflow: hidden;
 }
@@ -254,78 +254,6 @@ body {
   position: absolute;
   inset: 0;
   background: radial-gradient(ellipse at 50% 80%, rgba(59, 130, 246, 0.06) 0%, transparent 60%);
-}
-
-// ===== FOOTER =====
-.site-footer {
-  padding: 1.2rem 2rem;
-  background: $bg-primary;
-  border-top: 1px solid $border-card;
-}
-
-.footer-container {
-  max-width: 1120px;
-  margin: 0 auto;
-}
-
-.footer-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  .footer-brand,
-  p,
-  a:last-child {
-    flex: 1;
-  }
-
-  p {
-    color: $text-dim;
-    font-size: 0.75rem;
-    font-weight: 400;
-    text-align: center;
-    margin: 0;
-  }
-
-  a:last-child {
-    color: $text-muted;
-    text-decoration: none;
-    font-size: 0.8rem;
-    font-weight: 500;
-    text-align: right;
-    transition: color 0.2s;
-
-    &:hover {
-      color: $text-white;
-    }
-  }
-
-
-
-
-  a {
-    color: $text-muted;
-    text-decoration: none;
-    font-size: 0.8rem;
-    font-weight: 500;
-    transition: color 0.2s;
-
-    &:hover {
-      color: $text-white;
-    }
-  }
-}
-
-.footer-bottom {
-  border-top: 1px solid $border-card;
-  padding: 1.2rem 0;
-  text-align: center;
-
-  p {
-    color: $text-dim;
-    font-size: 0.75rem;
-    font-weight: 400;
-  }
 }
 
 // ===== ANIMATIONS =====
@@ -339,4 +267,3 @@ body {
     transform: translateY(0);
   }
 }
-

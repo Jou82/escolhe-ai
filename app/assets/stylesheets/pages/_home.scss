@@ -68,7 +68,10 @@ body {
   letter-spacing: -0.03em;
 
   .highlight {
-    color: $accent-blue;
+    background: linear-gradient(180deg, #ffffff 0%, #3b82f6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     display: block;
   }
 }

@@ -1,22 +1,26 @@
 // ===== RESULTS PAGE =====
-.results-back {
+.results-top {
   max-width: 1120px;
   margin: 0 auto;
-  padding: 6rem 2rem 0;
-  text-align: center;
+  padding: 5rem 2rem 0;
+  display: flex;
+  align-items: center;
+  min-height: 50px;
 }
 
 .back-link {
+  flex: 1;
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
   color: $text-muted;
   text-decoration: none;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 1.5px;
   text-transform: uppercase;
   transition: color 0.2s;
+  white-space: nowrap;
 
   &:hover {
     color: $text-white;
@@ -24,23 +28,26 @@
 }
 
 // ===== HEADER =====
-.results-header {
-  max-width: 1120px;
-  margin: 0 auto;
-  padding: 2.5rem 2rem 0;
+.results-header-text {
+  flex: 1;
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-end;
 
   h1 {
     font-family: 'DM Sans', sans-serif;
-    font-size: 2rem;
+    font-size: 1.2rem;
     font-weight: 800;
     color: $text-white;
-    margin-bottom: 0.4rem;
+    margin-bottom: 0.15rem;
     letter-spacing: -0.02em;
   }
 }
 
 .results-based {
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   color: $text-muted;
   font-weight: 400;
 }
@@ -54,16 +61,16 @@
 .results-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
+  gap: 1rem;
   max-width: 1120px;
   margin: 0 auto;
-  padding: 2.5rem 2rem;
+  padding: 1.2rem 2rem;
 }
 
 .movie-card {
   background: $bg-card;
   border: 1px solid $border-card;
-  border-radius: 14px;
+  border-radius: 12px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -71,8 +78,8 @@
 
   &:hover {
     border-color: rgba(59, 130, 246, 0.15);
-    transform: translateY(-4px);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
   }
 }
 
@@ -80,13 +87,14 @@
 .movie-poster {
   position: relative;
   width: 100%;
-  aspect-ratio: 2 / 3;
+  aspect-ratio: 3 / 4;
   overflow: hidden;
 
   img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: bottom;
     transition: transform 0.4s;
   }
 
@@ -97,57 +105,56 @@
 
 // ===== INFO =====
 .movie-info {
-  padding: 1.2rem 1.2rem 0;
+  padding: 0.7rem 0.9rem 0;
   flex: 1;
 }
 
 .movie-title-row {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 0.8rem;
+  align-items: center;
+  margin-bottom: 0.3rem;
 
   h3 {
     font-family: 'DM Sans', sans-serif;
-    font-size: 1rem;
+    font-size: 0.85rem;
     font-weight: 700;
     color: $text-white;
-    letter-spacing: -0.01em;
     flex: 1;
-    margin-right: 0.5rem;
+    margin-right: 0.4rem;
   }
 }
 
 .movie-rating {
   color: #f59e0b;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 700;
   white-space: nowrap;
 }
 
 .movie-meta {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: $text-muted;
   font-weight: 400;
 }
 
 // ===== ACTION =====
 .movie-action {
-  padding: 1.2rem;
+  padding: 0.6rem 0.9rem 0.7rem;
   margin-top: auto;
 }
 
 .btn-details {
   display: block;
   text-align: center;
-  padding: 0.7rem;
+  padding: 0.5rem;
   background: $accent-blue;
   color: #ffffff;
   font-family: 'DM Sans', sans-serif;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 600;
   border: none;
-  border-radius: 10px;
+  border-radius: 8px;
   text-decoration: none;
   transition: all 0.2s;
 
@@ -158,23 +165,22 @@
 }
 
 // ===== TRY AGAIN =====
-.results-retry {
-  text-align: center;
-  padding: 1rem 2rem 4rem;
-}
-
 .btn-retry {
+  flex: 1;
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 2rem;
+  justify-content: center;
+  max-width: 200px;
+  margin: 0 auto;
+  gap: 0.4rem;
+  padding: 0.55rem 1.8rem;
   background: rgba(255, 255, 255, 0.06);
   color: $text-light;
   font-family: 'DM Sans', sans-serif;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 600;
   border: 1px solid $border-card;
-  border-radius: 10px;
+  border-radius: 8px;
   text-decoration: none;
   transition: all 0.2s;
 
@@ -187,20 +193,15 @@
 
 // ===== RESPONSIVE =====
 @media (max-width: 768px) {
+  .results-top {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 4rem 1.5rem 0;
+    gap: 0.8rem;
+  }
+
   .results-grid {
     grid-template-columns: 1fr;
-    max-width: 350px;
-  }
-
-  .results-header {
-    padding: 2rem 1.5rem 0;
-
-    h1 {
-      font-size: 1.5rem;
-    }
-  }
-
-  .results-back {
-    padding: 5rem 1.5rem 0;
+    max-width: 320px;
   }
 }

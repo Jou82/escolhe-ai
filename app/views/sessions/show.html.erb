@@ -1,2 +1,72 @@
-<h1>Sessions#show</h1>
-<p>Find me in app/views/sessions/show.html.erb</p>
+<!-- BACK BUTTON -->
+<div class="results-back">
+  <%= link_to root_path, class: "back-link" do %>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+    VOLTAR
+  <% end %>
+</div>
+
+<!-- RESULTS HEADER -->
+<div class="results-header">
+  <h1>Recomendações para você</h1>
+  <p class="results-based">Baseado nos seus interesses '<span class="results-highlight">The Matrix</span>, ....'</p>
+</div>
+
+<!-- MOVIE CARDS -->
+<div class="results-grid">
+  <div class="movie-card">
+    <div class="movie-poster">
+      <img src="https://image.tmdb.org/t/p/w500/1XS1oqL89opfnbLl8WnZY1O1uJx.jpg" alt="Game of Thrones">
+    </div>
+    <div class="movie-info">
+      <div class="movie-title-row">
+        <h3>Game of Thrones</h3>
+        <span class="movie-rating">★ 8.8</span>
+      </div>
+      <p class="movie-meta">2010 • Sci-Fi / Action</p>
+    </div>
+    <div class="movie-action">
+      <a href="#" class="btn-details">Ver detalhes</a>
+    </div>
+  </div>
+
+  <div class="movie-card">
+    <div class="movie-poster">
+      <img src="https://image.tmdb.org/t/p/w500/z2yahl2uefxDCl0nogcRBstwruJ.jpg" alt="A Casa dos Dragões">
+    </div>
+    <div class="movie-info">
+      <div class="movie-title-row">
+        <h3>A Casa dos Dragões</h3>
+        <span class="movie-rating">★ 8.8</span>
+      </div>
+      <p class="movie-meta">2017 • Sci-Fi / Drama</p>
+    </div>
+    <div class="movie-action">
+      <a href="#" class="btn-details">Ver detalhes</a>
+    </div>
+  </div>
+
+  <div class="movie-card">
+    <div class="movie-poster">
+      <img src="https://www.themoviedb.org/t/p/w1280/rDFy1fUU6OC3Mm0CLFB7u0fGwVN.jpg" alt="Vikings Valhalla">
+    </div>
+    <div class="movie-info">
+      <div class="movie-title-row">
+        <h3>Vikings Valhalla</h3>
+        <span class="movie-rating">★ 7.6</span>
+      </div>
+      <p class="movie-meta">1998 • Sci-Fi / Mystery</p>
+    </div>
+    <div class="movie-action">
+      <a href="#" class="btn-details">Ver detalhes</a>
+    </div>
+  </div>
+</div>
+
+<!-- TRY AGAIN -->
+<div class="results-retry">
+  <%= link_to root_path, class: "btn-retry" do %>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+    Tente outra vez
+  <% end %>
+</div>

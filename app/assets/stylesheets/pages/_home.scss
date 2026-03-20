@@ -143,31 +143,6 @@ body {
   }
 }
 
-// ===== TRENDING =====
-.trending {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
-  font-size: 0.8rem;
-}
-
-.trending-label {
-  color: $text-dim;
-  font-weight: 500;
-}
-
-.trending-tag {
-  color: $text-muted;
-  text-decoration: none;
-  transition: color 0.2s;
-  font-weight: 500;
-
-  &:hover {
-    color: $accent-blue-light;
-  }
-}
-
 // ===== HOW IT WORKS =====
 .how-it-works {
   padding: 3rem 2rem 4rem;

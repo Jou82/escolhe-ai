@@ -5,7 +5,7 @@
   <%# Hero backdrop %>
   <div class="movie-hero">
     <div class="movie-hero__backdrop">
-      <img src="https://image.tmdb.org/t/p/w1280/1XS1oqL89opfnbLl8WnZY1O1uJx.jpg" alt="Game of Thrones">
+      <%= image_tag "https://image.tmdb.org/t/p/w1280/1XS1oqL89opfnbLl8WnZY1O1uJx.jpg", alt: "Game of Thrones" %>
       <div class="movie-hero__backdrop-placeholder"></div>
     </div>
     <div class="movie-hero__fade"></div>
@@ -13,12 +13,12 @@
 
   <%# Back + Badge + Title %>
   <div class="movie-header container">
-    <a href="#" class="movie-header__back">
+    <%= link_to session_path(@session), class: "movie-header__back" do %>
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
         <path d="M10 3L5 8L10 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
       VOLTAR
-    </a>
+    <% end %>
 
     <div class="movie-header__meta">
       <%# <span class="badge-recommended">✦ MAIS RECOMENDADO</span> %>

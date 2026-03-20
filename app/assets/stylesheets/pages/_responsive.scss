@@ -1,0 +1,233 @@
+// ===== MOBILE RESPONSIVE =====
+
+@media (max-width: 768px) {
+
+  // === NAVBAR ===
+  .site-navbar-container {
+    padding: 0 1rem;
+  }
+
+  .navbar-brand {
+    font-size: 0.95rem;
+  }
+
+  .navbar-link {
+    display: none;
+  }
+
+  .user-menu-panel {
+    right: -1rem;
+    min-width: 180px;
+  }
+
+  // === HERO ===
+  .hero {
+    padding: 6rem 1.2rem 2.5rem;
+    min-height: auto;
+  }
+
+  .hero-glow {
+    width: 400px;
+    height: 300px;
+  }
+
+  .hero-badge {
+    font-size: 0.55rem;
+    padding: 0.35rem 0.8rem;
+    letter-spacing: 1.5px;
+    margin-bottom: 1.5rem;
+  }
+
+  .hero h1 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  .hero-subtitle {
+    font-size: 0.85rem;
+    margin-bottom: 2rem;
+  }
+
+  .search-box {
+    flex-direction: column;
+    padding: 0.6rem;
+    gap: 0.5rem;
+    max-width: 100%;
+
+    .search-icon {
+      display: none;
+    }
+
+    .search-input {
+      width: 100%;
+      text-align: center;
+      padding: 0.6rem;
+    }
+
+    .btn-suggest {
+      width: 100%;
+      padding: 0.7rem;
+    }
+  }
+
+  .trending {
+    flex-wrap: wrap;
+    font-size: 0.7rem;
+    gap: 0.4rem;
+  }
+
+  // === HOW IT WORKS ===
+  .how-it-works {
+    padding: 3rem 1.2rem;
+  }
+
+  .section-header {
+    margin-bottom: 2rem;
+
+    h2 {
+      font-size: 1.5rem;
+    }
+
+    p {
+      font-size: 0.8rem;
+    }
+  }
+
+  .steps-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .step-card {
+    padding: 1.5rem 1.2rem;
+  }
+
+  // === SHOWCASE ===
+  .showcase {
+    height: 60px;
+  }
+
+  // === RESULTS PAGE ===
+  .results-top {
+    flex-direction: column;
+    align-items: center;
+    padding: 5rem 1.2rem 0;
+    gap: 1rem;
+    text-align: center;
+  }
+
+  .back-link {
+    flex: none;
+  }
+
+  .btn-retry {
+    flex: none;
+    max-width: 100%;
+  }
+
+  .results-header-text {
+    flex: none;
+    text-align: center;
+    align-items: center;
+    margin-top: 0;
+
+    h1 {
+      font-size: 1.2rem;
+    }
+  }
+
+  .results-grid {
+    grid-template-columns: 1fr;
+    max-width: 320px;
+    margin: 0 auto;
+    padding: 1rem 1.2rem;
+  }
+
+  .movie-poster {
+    aspect-ratio: 2 / 3;
+  }
+
+  .movie-info {
+    padding: 0.8rem 1rem 0;
+  }
+
+  .movie-title-row h3 {
+    font-size: 0.95rem;
+  }
+
+  .movie-action {
+    padding: 0.8rem 1rem;
+  }
+
+  // === AUTH PAGES ===
+  .auth-page {
+    padding: 5rem 1.2rem 2rem;
+  }
+
+  .auth-card {
+    padding: 2rem 1.2rem;
+  }
+
+  .auth-header h2 {
+    font-size: 1.3rem;
+  }
+
+  // === FOOTER ===
+  .site-footer {
+    padding: 0 1.2rem;
+  }
+
+  .footer-top {
+    flex-direction: column;
+    gap: 0.8rem;
+    text-align: center;
+    padding: 1.2rem 0;
+  }
+
+  .footer-links {
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .footer-row {
+    flex-direction: column;
+    gap: 0.6rem;
+    text-align: center;
+
+    .footer-brand,
+    p,
+    a:last-child {
+      flex: none;
+      text-align: center;
+    }
+  }
+
+  .footer-bottom {
+    padding: 0.8rem 0;
+  }
+}
+
+// ===== SMALL PHONES =====
+@media (max-width: 380px) {
+  .hero h1 {
+    font-size: 1.7rem;
+  }
+
+  .hero-badge {
+    font-size: 0.5rem;
+    padding: 0.3rem 0.6rem;
+  }
+
+  .hero-subtitle {
+    font-size: 0.8rem;
+  }
+
+  .results-grid {
+    max-width: 280px;
+  }
+
+  .auth-card {
+    padding: 1.5rem 1rem;
+  }
+}

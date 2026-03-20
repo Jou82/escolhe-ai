@@ -4,6 +4,7 @@ Rails.application.routes.draw do
   }
 
   root to: "pages#home"
+  patch "profile", to: "pages#update_profile", as: :update_profile
 
   resources :sessions, only: [:new, :create, :show, :index]
   resources :movies,   only: [:index, :show]
@@ -13,4 +14,3 @@ Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
   get "profile", to: "pages#profile", as: :profile
 end
-

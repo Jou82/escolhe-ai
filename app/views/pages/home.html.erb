@@ -9,16 +9,10 @@
     <form action="/movies" method="post" class="search-box" data-turbo="false">
       <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
       <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-      <input type="text" name="movies" class="search-input" placeholder="Digite 3 filmes separados por vírgula (ex: Clube da Luta, A Origem, Batman Begins)">
+      <input type="text" name="movies" class="search-input" placeholder="Digite 3 filmes separados por vírgula">
       <button type="submit" class="btn-suggest">Descobrir Filmes</button>
     </form>
 
-    <div class="trending">
-      <span class="trending-label">Trending:</span>
-      <%= link_to "Inception", "", class: "trending-tag" %>
-      <%= link_to "The Bear", "", class: "trending-tag" %>
-      <%= link_to "Past Lives", "", class: "trending-tag" %>
-    </div>
   </div>
 </section>
 
@@ -26,7 +20,7 @@
 <section class="how-it-works" id="how">
   <div class="section-header">
     <h2>Como funciona</h2>
-    <p>How our algorithm finds the perfect match for your movie night.</p>
+    <p>O nosso algoritmo encontra o match perfeito para a sua noite de cinema.</p>
   </div>
 
   <div class="steps-grid">

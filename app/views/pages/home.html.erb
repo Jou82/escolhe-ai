@@ -3,14 +3,15 @@
   <div class="hero-glow"></div>
   <div class="hero-content">
     <span class="hero-badge">PARE DE PERDER TEMPO ESCOLHENDO O QUE QUER ASSISTIR</span>
-    <h1>Encontre seu próximo<span class="highlight">Filme Favorito</span></h1>
+    <h1>Encontre seu próximo<span class="highlight">filme favorito</span></h1>
     <p class="hero-subtitle">Digite um filme que você ama e descubra recomendações personalizadas instantaneamente</p>
 
-    <div class="search-box">
+    <form action="/movies" method="post" class="search-box" data-turbo="false">
+      <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
       <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-      <input type="text" class="search-input" placeholder="Digite 3 filmes que você ama"> <%# herb:disable html-input-require-autocomplete %>
-      <button class="btn-suggest">Sugestão</button>
-    </div>
+      <input type="text" name="movies" class="search-input" placeholder="Digite 3 filmes separados por vírgula (ex: Clube da Luta, A Origem, Batman Begins)">
+      <button type="submit" class="btn-suggest">Descobrir Filmes</button>
+    </form>
 
     <div class="trending">
       <span class="trending-label">Trending:</span>

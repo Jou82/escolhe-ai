@@ -16,11 +16,11 @@ body {
 // ===== HERO =====
 .hero {
   position: relative;
-  min-height: 80vh;
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8rem 2rem 4rem;
+  padding: 10rem 2rem 6rem;
   text-align: center;
   overflow: hidden;
 }
@@ -167,7 +167,7 @@ body {
 
 // ===== HOW IT WORKS =====
 .how-it-works {
-  padding: 5rem 2rem;
+  padding: 3rem 2rem 5rem;
   max-width: 1120px;
   margin: 0 auto;
 }
@@ -242,7 +242,7 @@ body {
 // ===== SHOWCASE =====
 .showcase {
   position: relative;
-  height: 300px;
+  height: 200px;
   background: linear-gradient(180deg, $bg-primary 0%, #0c1129 50%, $bg-primary 100%);
   overflow: hidden;
 }

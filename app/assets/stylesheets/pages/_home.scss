@@ -290,6 +290,9 @@ body {
 .footer-links {
   display: flex;
   gap: 2rem;
+  padding-right: 3rem;
+
+
 
   a {
     color: $text-muted;

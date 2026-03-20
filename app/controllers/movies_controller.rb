@@ -15,8 +15,7 @@ class MoviesController < ApplicationController
       return redirect_to root_path
     end
 
-    result = RecommendationPipeline.new(@movies).call
-
+    result = RecommendationPipeline.new(@movies, current_user).call
     @analysis = result[:analysis]
     @recommendations = result[:recommendations]
 

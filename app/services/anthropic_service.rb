@@ -1,8 +1,10 @@
+# app/services/anthropic_service.rb
 class AnthropicService
   class RecommendationError < StandardError; end
 
-  def initialize(movies)
+  def initialize(movies, candidates = [])
     @movies = movies
+    @candidates = candidates
   end
 
   def call
@@ -43,13 +45,13 @@ class AnthropicService
        Responda APENAS com JSON válido, sem nenhum texto antes ou depois.
        Use exatamente esta estrutura:
        {
-         "analysis": "Descrição breve do perfil de gosto do usuário (2-3 frases em português BR)",
+         "analysis": "Descrição breve do perfil de gosto do usuário (1 frase em português BR)",
          "recommendations": [
            {
              "title": "Título do Filme",
              "original_title": "Original Title (se diferente)",
              "year": 2020,
-             "reason": "Por que esse filme combina com o gosto do usuário (2-3 frases)",
+             "reason": "Por que esse filme combina com o gosto do usuário (1 frase)",
              "genres": ["Drama", "Thriller"]
            },
            {
@@ -80,7 +82,33 @@ class AnthropicService
   end
 
   def user_prompt
-    "Meus filmes favoritos são: #{@movies.join(', ')}"
+    if @candidates.any?
+      user_prompt_with_candidates
+    else
+      "Meus filmes favoritos são: #{@movies.join(', ')}"
+    end
+  end
+
+  def user_prompt_with_candidates
+    movies_text = @movies.map { |m| "- #{m}" }.join("\n")
+
+    candidates_text = @candidates.map.with_index(1) do |c, i|
+      overview = c[:overview].to_s.truncate(300)
+
+      <<~CANDIDATE
+        #{i}. #{c[:title]} (#{c[:release_date]&.slice(0, 4) || '?'}) — TMDB ID: #{c[:tmdb_id]}
+           Nota: #{c[:vote_average]}/10 (#{c[:vote_count]} votos) | Freq: #{c[:frequency]}/3 | Score: #{c[:score]}
+           Sinopse: #{overview}
+      CANDIDATE
+    end.join("\n")
+
+    <<~USER
+      ## MEUS 3 FILMES FAVORITOS:
+      #{movies_text}
+
+      ## CANDIDATOS PRÉ-FILTRADOS (escolha os 3 melhores):
+      #{candidates_text}
+    USER
   end
 
   def validate!(parsed)

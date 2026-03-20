@@ -5,6 +5,14 @@ class User < ApplicationRecord
          :recoverable, :rememberable, :validatable, :omniauthable, omniauth_providers: [:google_oauth2]
   has_many :sessions, dependent: :destroy
 
+  serialize :streaming_platforms, coder: JSON
+
+  STREAMING_OPTIONS = [
+    "Netflix", "Amazon Prime Video", "Disney Plus", "HBO Max",
+    "Globoplay", "Apple TV+", "Paramount+", "MUBI",
+    "Telecine", "Crunchyroll", "Claro tv+", "Star+", "Looke"
+  ].freeze
+
   def self.from_omniauth(auth)
     where(provider: auth.provider, uid: auth.uid).first_or_create do |user|
       user.email = auth.info.email

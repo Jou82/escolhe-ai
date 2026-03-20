@@ -30,7 +30,9 @@ class TmdbService
     recommendations.map do |rec|
       tmdb_data = new(rec["title"], rec["year"]).call
 
-      tmdb_data = new(rec["original_title"], rec["year"]).call if tmdb_data.nil? && rec["original_title"]
+      if tmdb_data.nil? && rec["original_title"]
+        tmdb_data = new(rec["original_title"], rec["year"]).call
+      end
 
       rec.merge("tmdb" => tmdb_data)
     end
@@ -40,7 +42,7 @@ class TmdbService
 
   def search_movie
     params = {
-      api_key: ENV.fetch("TMDB_API_KEY", nil),
+      api_key: ENV["TMDB_API_KEY"],
       query: @title,
       language: "pt-BR",
       region: "BR"
@@ -55,7 +57,7 @@ class TmdbService
   def fetch_providers(movie_id)
     response = Faraday.get(
       "#{BASE_URL}/movie/#{movie_id}/watch/providers",
-      { api_key: ENV.fetch("TMDB_API_KEY", nil) }
+      { api_key: ENV["TMDB_API_KEY"] }
     )
     JSON.parse(response.body)["results"]
   end
@@ -72,7 +74,6 @@ class TmdbService
 
   def poster_url(path, size = "w500")
     return nil unless path
-
     "https://image.tmdb.org/t/p/#{size}#{path}"
   end
 end

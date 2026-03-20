@@ -525,6 +525,7 @@ DEPENDENCIES
   devise
   devise-i18n
   dotenv-rails
+  faraday (~> 2.0)
   font-awesome-sass (~> 6.1)
   image_processing (~> 1.2)
   importmap-rails

@@ -1,0 +1,16 @@
+<h1>Suas Recomendações</h1>
+<p><%= @analysis %></p>
+
+<% @recommendations.each do |rec| %>
+  <div>
+    <h2><%= rec["title"] %></h2>
+    <p><%= rec["reason"] %></p>
+    <p><strong>Vibe:</strong> <%= rec["vibe"] %></p>
+    <% if rec.dig("tmdb", :streaming)&.any? %>
+      <p><strong>Streaming:</strong> <%= rec.dig("tmdb", :streaming).map { |s| s[:name] }.join(", ") %></p>
+    <% end %>
+    <% if rec.dig("tmdb", :poster_url) %>
+      <img src="<%= rec.dig("tmdb", :poster_url) %>" width="200">
+    <% end %>
+  </div>
+<% end %>

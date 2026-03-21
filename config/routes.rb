@@ -12,4 +12,5 @@ Rails.application.routes.draw do
 
   get "up" => "rails/health#show", as: :rails_health_check
   get "profile", to: "pages#profile", as: :profile
+  patch "profile", to: "pages#update_profile", as: :update_profile
 end

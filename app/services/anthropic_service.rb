@@ -78,6 +78,7 @@ class AnthropicService
        - O motivo deve referenciar padrões específicos encontrados nos 3 filmes
        - Inclua o título original quando for filme estrangeiro
        - Responda tudo em português (BR)
+       - NUNCA recomende filmes que não estejam disponíveis em streaming por assinatura no Brasil. Isso é uma regra absoluta.
     PROMPT
   end
 

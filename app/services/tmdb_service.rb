@@ -260,11 +260,15 @@ class TmdbService
   end
 
   def extract_br_providers(providers, type)
-    br = providers&.dig("BR", type) || []
-    br.map do |p|
+    br_data = providers&.dig("BR") || {}
+    link = br_data["link"]
+    items = br_data[type] || []
+
+    items.map do |p|
       {
         name: p["provider_name"],
-        logo_url: poster_url(p["logo_path"], "w92")
+        logo_url: poster_url(p["logo_path"], "w92"),
+        link: link
       }
     end
   end

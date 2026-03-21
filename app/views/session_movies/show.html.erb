@@ -128,21 +128,49 @@
         </div>
       <% end %>
 
-      <%# Where to watch %>
+      <%  # Where to watch %>
+   <%# Where to watch %>
       <div class="card card--watch">
         <h3 class="card__label">Onde assistir</h3>
         <div class="watch-list">
           <% streaming = @rec_data&.dig("tmdb", "streaming") || [] %>
-          <% streaming.each do |s| %>
-            <div class="watch-item">
-              <% if s["logo_url"] %>
-                <%= image_tag s["logo_url"], class: "watch-item__logo", alt: s["name"] %>
-              <% end %>
-              <span><%= s["name"] %></span>
-            </div>
+          <% rent = @rec_data&.dig("tmdb", "rent") || [] %>
+          <% buy = @rec_data&.dig("tmdb", "buy") || [] %>
+          <% if streaming.any? %>
+            <p class="card__label">Assinatura</p>
+            <% streaming.each do |s| %>
+              <div class="watch-item">
+                <% if s["logo_url"] %>
+                  <%= image_tag s["logo_url"], class: "watch-item__logo", alt: s["name"] %>
+                <% end %>
+                <span><%= s["name"] %></span>
+              </div>
+            <% end %>
           <% end %>
-          <% if streaming.empty? %>
-            <p>Indisponível no streaming no momento</p>
+          <% if rent.any? %>
+            <p class="card__label">Aluguel</p>
+            <% rent.each do |r| %>
+              <div class="watch-item">
+                <% if r["logo_url"] %>
+                  <%= image_tag r["logo_url"], class: "watch-item__logo", alt: r["name"] %>
+                <% end %>
+                <span><%= r["name"] %></span>
+              </div>
+            <% end %>
+          <% end %>
+          <% if buy.any? %>
+            <p class="card__label">Comprar</p>
+            <% buy.each do |b| %>
+              <div class="watch-item">
+                <% if b["logo_url"] %>
+                  <%= image_tag b["logo_url"], class: "watch-item__logo", alt: b["name"] %>
+                <% end %>
+                <span><%= b["name"] %></span>
+              </div>
+            <% end %>
+          <% end %>
+          <% if streaming.empty? && rent.empty? && buy.empty? %>
+            <p>Indisponível no momento</p>
           <% end %>
         </div>
       </div>

@@ -37,9 +37,9 @@
         <p class="movie-meta"><%= rec["year"] %> • <%= rec["genres"]&.join(" / ") %></p>
       </div>
       <div class="movie-action">
-        <% link = rec.dig("tmdb", "streaming")&.first&.dig("link") %>
-        <% if link %>
-          <%= link_to "Ver detalhes", link, class: "btn-details", target: "_blank" %>
+        <% movie = @suggested_movies.find { |m| m.title == rec["title"] } %>
+        <% if movie %>
+          <%= link_to "Ver detalhes", session_movie_path(@session_record, movie), class: "btn-details" %>
         <% else %>
           <%= link_to "Ver detalhes", "#", class: "btn-details" %>
         <% end %>

@@ -71,6 +71,17 @@
         </div>
         <div class="card__reasons">
           <div class="card__reason">
+            <div class="card__reason-icon card__reason-icon--red">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M8 3c2.5 0 5 2 5 4.5 0 2-2 4.5-5 6-3-1.5-5-4-5-6C3 5 5.5 3 8 3z" stroke="#E05B7F" stroke-width="1.2"/>
+              </svg>
+            </div>
+            <div>
+              <p class="card__reason-title">Seu perfil</p>
+              <p class="card__reason-text"><%= @session_record.analysis %></p>
+            </div>
+          </div>
+          <div class="card__reason">
             <div class="card__reason-icon card__reason-icon--blue">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <path d="M8 2a6 6 0 100 12A6 6 0 008 2z" stroke="#4F8EF7" stroke-width="1.2"/>
@@ -78,6 +89,7 @@
               </svg>
             </div>
             <div>
+              <p class="card__reason-title">Por que esse filme</p>
               <p class="card__reason-text"><%= @rec_data&.dig("reason") %></p>
             </div>
           </div>

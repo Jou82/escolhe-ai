@@ -66,7 +66,11 @@
   gap: 1rem;
   max-width: 1120px;
   margin: 0 auto;
-  padding: 1.2rem 2rem;
+  padding: 1.2rem 2rem 3rem;
+}
+
+.results-space {
+  height: 50px;
 }
 
 .movie-card {
@@ -77,6 +81,7 @@
   display: flex;
   flex-direction: column;
   transition: all 0.3s;
+  min-height: 600px;
 
   &:hover {
     border-color: rgba(59, 130, 246, 0.15);
@@ -200,10 +205,5 @@
     align-items: flex-start;
     padding: 4rem 1.5rem 0;
     gap: 0.8rem;
-  }
-
-  .results-grid {
-    grid-template-columns: 1fr;
-    max-width: 320px;
   }
 }

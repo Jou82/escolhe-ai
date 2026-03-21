@@ -1,0 +1,16 @@
+<h1>Minhas Plataformas</h1>
+
+<form action="<%= update_profile_path %>" method="post" data-turbo="false">
+  <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
+  <input type="hidden" name="_method" value="patch">
+
+  <% User::STREAMING_OPTIONS.each do |platform| %>
+    <label>
+      <input type="checkbox" name="streaming_platforms[]" value="<%= platform %>"
+        <%= "checked" if current_user.streaming_platforms&.include?(platform) %>>
+      <%= platform %>
+    </label><br>
+  <% end %>
+
+  <button type="submit" class="btn-suggest">Salvar</button>
+</form>

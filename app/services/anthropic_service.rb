@@ -1,10 +1,10 @@
-# app/services/anthropic_service.rb
 class AnthropicService
   class RecommendationError < StandardError; end
 
-  def initialize(movies, candidates = [])
+  def initialize(movies, candidates = [], user_platforms = [])
     @movies = movies
     @candidates = candidates
+    @user_platforms = user_platforms
   end
 
   def call
@@ -31,6 +31,15 @@ class AnthropicService
 
   private
 
+  def platform_instruction
+    if @user_platforms.any?
+      "O usuário possui APENAS estas plataformas: #{@user_platforms.join(', ')}. " \
+      "Recomende SOMENTE filmes disponíveis nessas plataformas. Isso é OBRIGATÓRIO."
+    else
+      "Recomende filmes disponíveis em qualquer plataforma de streaming no Brasil."
+    end
+  end
+
   def client
     @client ||= Anthropic::Client.new(api_key: ENV.fetch("ANTHROPIC_API_KEY", nil))
   end
@@ -41,6 +50,8 @@ class AnthropicService
        brasileiros e internacionais. Analise os 3 filmes favoritos do usuário
        para identificar padrões de gosto: gênero, tom, temas, ritmo,
        estilo visual e abordagem de direção.
+
+       #{platform_instruction}
 
        Responda APENAS com JSON válido, sem nenhum texto antes ou depois.
        Use exatamente esta estrutura:

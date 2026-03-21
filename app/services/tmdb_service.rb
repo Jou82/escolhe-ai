@@ -14,6 +14,22 @@ class TmdbService
     votes: 0.15
   }.freeze
 
+  PROVIDER_IDS = {
+    "Netflix" => 8,
+    "Amazon Prime Video" => 119,
+    "Disney Plus" => 337,
+    "HBO Max" => 384,
+    "Globoplay" => 307,
+    "Apple TV+" => 350,
+    "Paramount+" => 531,
+    "MUBI" => 11,
+    "Telecine" => 227,
+    "Crunchyroll" => 283,
+    "Claro tv+" => 1968,
+    "Star+" => 619,
+    "Looke" => 47
+  }.freeze
+
   def self.find_candidates(movies, top_n: 15)
     # 1. Buscar os 3 filmes em paralelo
     user_movies = movies.map { |title| Thread.new { new(title).send(:search_movie) } }
@@ -205,6 +221,51 @@ class TmdbService
     end
   end
 
+  def self.discover_by_platform(platform_names, genre_ids, exclude_titles = [], limit: 10)
+    provider_ids = platform_names.filter_map { |name| PROVIDER_IDS[name] }
+    return [] if provider_ids.empty? || genre_ids.empty?
+
+    results = []
+
+    provider_ids.each do |provider_id|
+      response = Faraday.get(
+        "#{BASE_URL}/discover/movie",
+        {
+          api_key: ENV.fetch("TMDB_API_KEY", nil),
+          language: "pt-BR",
+          watch_region: "BR",
+          with_watch_providers: provider_id,
+          with_genres: genre_ids.first(3).join(","),
+          sort_by: "vote_average.desc",
+          "vote_count.gte" => 50,
+          page: 1
+        }
+      )
+      movies = JSON.parse(response.body)["results"] || []
+      results.concat(movies)
+    end
+
+    results.uniq { |m| m["id"] }
+           .reject { |m| exclude_titles.include?(m["title"]) }
+           .first(limit)
+           .map do |movie|
+      {
+        tmdb_id: movie["id"],
+        title: movie["title"],
+        original_title: movie["original_title"],
+        overview: movie["overview"],
+        poster_path: movie["poster_path"],
+        vote_average: movie["vote_average"] || 0,
+        vote_count: movie["vote_count"] || 0,
+        popularity: movie["popularity"] || 0,
+        release_date: movie["release_date"],
+        genre_ids: movie["genre_ids"] || [],
+        frequency: 1,
+        score: 50
+      }
+    end
+  end
+  
   def call
     movie = search_movie
     return nil unless movie

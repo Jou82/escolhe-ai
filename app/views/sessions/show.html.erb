@@ -1,10 +1,4 @@
-<div style="background: yellow; padding: 20px; color: black; font-size: 18px;">
-  <p><strong>ANÁLISE:</strong> <%= @analysis %></p>
-  <p><strong>TOTAL RECS:</strong> <%= @recommendations.size %></p>
-  <% @recommendations.each do |rec| %>
-    <p><%= rec["title"] %> — <%= rec.dig("tmdb", "streaming")&.first&.dig("name") %></p>
-  <% end %>
-</div>->
+<!-- HEADER WITH BACK -->
 <div class="results-top">
   <%= link_to root_path, class: "back-link" do %>
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
@@ -18,58 +12,39 @@
 
   <div class="results-header-text">
     <h1>Recomendações para você</h1>
-    <p class="results-based">Baseado nos seus interesses '<span class="results-highlight">The Matrix</span>, ....'</p>
+    <p class="results-based">Baseado nos seus interesses '<span class="results-highlight"><%= @user_movies.map(&:title).join("', '") %></span>'</p>
   </div>
 </div>
 
 <!-- MOVIE CARDS -->
 <div class="results-grid">
-  <div class="movie-card">
-    <div class="movie-poster">
-      <%= image_tag "https://image.tmdb.org/t/p/w500/1XS1oqL89opfnbLl8WnZY1O1uJx.jpg", alt: "Game of Thrones" %>
-    </div>
-    <div class="movie-info">
-      <div class="movie-title-row">
-        <h3>Game of Thrones</h3>
-        <span class="movie-rating">★ 8.8</span>
+  <% @recommendations.each do |rec| %>
+    <div class="movie-card">
+      <div class="movie-poster">
+        <% poster = rec.dig("tmdb", "poster_url") %>
+        <% if poster %>
+          <%= image_tag poster, alt: rec["title"] %>
+        <% end %>
       </div>
-      <p class="movie-meta">2010 • Sci-Fi / Action</p>
-    </div>
-    <div class="movie-action">
-      <%= link_to "Ver detalhes", "", class: "btn-details" %>
-    </div>
-  </div>
-
-  <div class="movie-card">
-    <div class="movie-poster">
-      <%= image_tag "https://image.tmdb.org/t/p/w500/z2yahl2uefxDCl0nogcRBstwruJ.jpg", alt: "A Casa dos Dragões" %>
-    </div>
-    <div class="movie-info">
-      <div class="movie-title-row">
-        <h3>A Casa dos Dragões</h3>
-        <span class="movie-rating">★ 8.8</span>
+      <div class="movie-info">
+        <div class="movie-title-row">
+          <h3><%= rec["title"] %></h3>
+          <% vote = rec.dig("tmdb", "vote_average") %>
+          <% if vote %>
+            <span class="movie-rating">★ <%= vote.round(1) %></span>
+          <% end %>
+        </div>
+        <p class="movie-meta"><%= rec["year"] %> • <%= rec["genres"]&.join(" / ") %></p>
       </div>
-      <p class="movie-meta">2017 • Sci-Fi / Drama</p>
-    </div>
-    <div class="movie-action">
-      <%= link_to "Ver detalhes", "", class: "btn-details" %>
-    </div>
-  </div>
-
-  <div class="movie-card">
-    <div class="movie-poster">
-      <%= image_tag "https://www.themoviedb.org/t/p/w1280/rDFy1fUU6OC3Mm0CLFB7u0fGwVN.jpg", alt: "Vikings Valhalla" %>
-    </div>
-    <div class="movie-info">
-      <div class="movie-title-row">
-        <h3>Vikings Valhalla</h3>
-        <span class="movie-rating">★ 7.6</span>
+      <div class="movie-action">
+        <% link = rec.dig("tmdb", "streaming")&.first&.dig("link") %>
+        <% if link %>
+          <%= link_to "Ver detalhes", link, class: "btn-details", target: "_blank" %>
+        <% else %>
+          <%= link_to "Ver detalhes", "#", class: "btn-details" %>
+        <% end %>
       </div>
-      <p class="movie-meta">1998 • Sci-Fi / Mystery</p>
     </div>
-    <div class="movie-action">
-      <%= link_to "Ver detalhes", "", class: "btn-details" %>
-    </div>
-  </div>
+  <% end %>
 </div>
 <div class="results-space"></div>

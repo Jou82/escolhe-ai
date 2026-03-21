@@ -264,7 +264,8 @@ class TmdbService
     link = br_data["link"]
     items = br_data[type] || []
 
-    items.map do |p|
+    items.reject { |p| p["provider_name"].to_s.downcase.include?("ads") || p["provider_name"].to_s.downcase.include?("with ads") }
+         .map do |p|
       {
         name: p["provider_name"],
         logo_url: poster_url(p["logo_path"], "w92"),

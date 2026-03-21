@@ -135,7 +135,13 @@
       <div class="card card--watch">
         <h3 class="card__label">Onde assistir</h3>
         <div class="watch-list">
-          <% streaming = @rec_data&.dig("tmdb", "streaming") || [] %>
+         <% all_streaming = @rec_data&.dig("tmdb", "streaming") || [] %>
+          <% user_platforms = current_user.streaming_platforms || [] %>
+          <% if user_platforms.any? %>
+            <% streaming = all_streaming.select { |s| user_platforms.include?(s["name"]) } %>
+          <% else %>
+            <% streaming = all_streaming %>
+          <% end %>
           <% rent = @rec_data&.dig("tmdb", "rent") || [] %>
           <% buy = @rec_data&.dig("tmdb", "buy") || [] %>
           <% if streaming.any? %>

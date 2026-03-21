@@ -5,7 +5,7 @@
   <%# Hero backdrop %>
   <div class="movie-hero">
     <div class="movie-hero__backdrop">
-      <% backdrop = @rec_data&.dig("tmdb", "poster_url") %>
+      <% backdrop = @rec_data&.dig("tmdb", "poster_url")&.gsub("w500", "original") %>
       <% if backdrop %>
         <%= image_tag backdrop, alt: @movie.title %>
       <% end %>

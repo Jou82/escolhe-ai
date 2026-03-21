@@ -11,7 +11,13 @@ class RecommendationPipeline
     ai_result = AnthropicService.new(@movies, candidates).call
     recommendations = TmdbService.enrich_recommendations(ai_result["recommendations"])
 
+    # Filtrar por streaming disponível
     available = recommendations.select { |r| r.dig("tmdb", :streaming)&.any? }
+
+    # Se user tem plataformas salvas, filtra só por elas
+    if @user&.streaming_platforms&.any?
+      available = filter_by_user_platforms(available)
+    end
 
     retries = 0
     already_recommended = recommendations.map { |r| r["title"] }
@@ -24,7 +30,12 @@ class RecommendationPipeline
       new_result = AnthropicService.new(@movies, remaining_candidates).call
       new_recs = TmdbService.enrich_recommendations(new_result["recommendations"])
       already_recommended.concat(new_recs.map { |r| r["title"] })
-      available.concat(new_recs.select { |r| r.dig("tmdb", :streaming)&.any? })
+
+      new_available = new_recs.select { |r| r.dig("tmdb", :streaming)&.any? }
+      if @user&.streaming_platforms&.any?
+        new_available = filter_by_user_platforms(new_available)
+      end
+      available.concat(new_available)
     end
 
     final_recs = available.first(3).map do |rec|
@@ -45,9 +56,7 @@ class RecommendationPipeline
 
   private
 
-  def filter_by_streaming(recommendations)
-    return recommendations unless @user&.streaming_platforms&.any?
-
+  def filter_by_user_platforms(recommendations)
     user_platforms = @user.streaming_platforms
 
     recommendations.select do |rec|

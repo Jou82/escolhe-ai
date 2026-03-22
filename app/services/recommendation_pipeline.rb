@@ -1,7 +1,7 @@
 class RecommendationPipeline
   MAX_RETRIES = 5
-  TMDB_TIMEOUT = 25        # ← ALTERADO: 10 → 25
-  ANTHROPIC_TIMEOUT = 45   # ← ALTERADO: 45 mantido
+  TMDB_TIMEOUT = 25
+  ANTHROPIC_TIMEOUT = 45
 
   def initialize(movies, user = nil)
     @movies = movies
@@ -9,18 +9,18 @@ class RecommendationPipeline
   end
 
   def call
-    # ← ALTERADO: Busca candidatos com timeout maior e retry infinito
     candidates = fetch_candidates_guaranteed
 
-    available = []
+    # 🔥 Separa os filmes por tipo
+    platform_movies = []
+    rent_buy_movies = []
     already_recommended = []
     retries = 0
 
-    while available.size < 3 && retries <= MAX_RETRIES
+    while (platform_movies.size < 2 || rent_buy_movies.size < 1) && retries <= MAX_RETRIES * 2
       current_candidates = remaining_candidates(candidates, already_recommended)
       break if current_candidates.empty?
 
-      # ← ALTERADO: Chamada da IA com timeout maior e retry
       ai_result = fetch_ai_guaranteed(current_candidates)
       @analysis ||= ai_result["analysis"] if ai_result
 
@@ -29,57 +29,113 @@ class RecommendationPipeline
         next
       end
 
-      # ← ALTERADO: Enriquecimento com TMDB com retry
       new_recs = enrich_guaranteed(ai_result["recommendations"])
       already_recommended.concat(new_recs.map { |r| r["title"] })
 
-      new_recs.each do |r|
-        next unless r.dig("tmdb", :streaming)&.any?
+      new_recs.each do |movie|
         if user_has_platforms?
-          next unless matches_user_platforms?(r)
+          streaming_match = movie.dig("tmdb", :streaming)&.any? { |s| user_platforms.include?(s[:name]) }
+          rent_match = movie.dig("tmdb", :rent)&.any? { |s| user_platforms.include?(s[:name]) }
+          buy_match = movie.dig("tmdb", :buy)&.any? { |s| user_platforms.include?(s[:name]) }
+
+          # Filme na plataforma do usuário
+          if streaming_match || rent_match || buy_match
+            movie["_type"] = "platform"
+            platform_movies << movie unless platform_movies.any? { |m| m["title"] == movie["title"] }
+          # Aluguel/compra em qualquer plataforma
+          elsif movie.dig("tmdb", :rent)&.any? || movie.dig("tmdb", :buy)&.any?
+            movie["_type"] = "rent_buy"
+            rent_buy_movies << movie unless rent_buy_movies.any? { |m| m["title"] == movie["title"] }
+          end
+        else
+          # Se não tem plataformas, aceita qualquer opção
+          if movie.dig("tmdb", :streaming)&.any? ||
+             movie.dig("tmdb", :rent)&.any? ||
+             movie.dig("tmdb", :buy)&.any?
+            rent_buy_movies << movie unless rent_buy_movies.any? { |m| m["title"] == movie["title"] }
+          end
         end
-        available << r unless available.any? { |a| a["title"] == r["title"] }
       end
 
       retries += 1
     end
 
-    if available.size < 3 && user_has_platforms?
-      genre_ids = candidates.flat_map { |c| c[:genre_ids] || [] }.tally.sort_by { |_, v| -v }.first(3).map(&:first)
-      already_titles = already_recommended + available.map { |a| a["title"] }
-      platform_candidates = TmdbService.discover_by_platform(user_platforms, genre_ids, already_titles, limit: 15)
-      fallback_retries = 0
-      while available.size < 3 && fallback_retries < 3 && platform_candidates.any?
-        current_candidates = remaining_candidates(platform_candidates, already_recommended)
-        break if current_candidates.empty?
+    # 🔥 FASE 2: Se não tem 2 filmes na plataforma, busca especificamente
+    if user_has_platforms? && platform_movies.size < 2
+      Rails.logger.info "🎯 Buscando filmes nas plataformas: #{user_platforms.join(', ')}"
 
-        ai_result = fetch_ai_guaranteed(current_candidates)
-        @analysis ||= ai_result["analysis"] if ai_result
+      user_platforms.each do |platform|
+        platform_candidates = TmdbService.discover_by_single_platform(platform, already_recommended, limit: 20)
 
-        if ai_result.nil?
-          fallback_retries += 1
-          next
+        platform_candidates.each do |candidate|
+          tmdb_data = TmdbService.new(candidate[:title], candidate[:release_date]&.slice(0, 4)).call
+          next unless tmdb_data
+
+          streaming_match = tmdb_data[:streaming]&.any? { |s| user_platforms.include?(s[:name]) }
+          rent_match = tmdb_data[:rent]&.any? { |s| user_platforms.include?(s[:name]) }
+          buy_match = tmdb_data[:buy]&.any? { |s| user_platforms.include?(s[:name]) }
+
+          if streaming_match || rent_match || buy_match
+            movie = {
+              "title" => candidate[:title],
+              "original_title" => candidate[:original_title] || candidate[:title],
+              "year" => candidate[:release_date]&.slice(0, 4)&.to_i || 2024,
+              "reason" => "Disponível em #{platform}",
+              "genres" => [],
+              "tmdb" => tmdb_data,
+              "_type" => "platform"
+            }
+            platform_movies << movie unless platform_movies.any? { |m| m["title"] == movie["title"] }
+            break if platform_movies.size >= 2
+          end
         end
-
-        new_recs = enrich_guaranteed(ai_result["recommendations"])
-        already_recommended.concat(new_recs.map { |r| r["title"] })
-        new_recs.each do |r|
-          next unless r.dig("tmdb", :streaming)&.any?
-          next unless matches_user_platforms?(r)
-          available << r unless available.any? { |a| a["title"] == r["title"] }
-        end
-        fallback_retries += 1
+        break if platform_movies.size >= 2
       end
     end
 
-    final_recs = available.first(3).map do |rec|
-      if rec["tmdb"].is_a?(Hash)
-        rec["tmdb"] = rec["tmdb"].transform_keys(&:to_s)
-        rec["tmdb"]["streaming"] = rec["tmdb"]["streaming"]&.map { |s| s.transform_keys(&:to_s) }
-        rec["tmdb"]["rent"] = rec["tmdb"]["rent"]&.map { |r| r.transform_keys(&:to_s) }
-        rec["tmdb"]["buy"] = rec["tmdb"]["buy"]&.map { |b| b.transform_keys(&:to_s) }
+    # 🔥 FASE 3: Se não tem 1 filme para alugar/comprar, busca especificamente
+    if user_has_platforms? && rent_buy_movies.size < 1
+      Rails.logger.info "🎯 Buscando filmes para alugar/comprar"
+
+      rent_buy_candidates = fetch_rent_buy_candidates(already_recommended + platform_movies.map { |m| m["title"] })
+
+      rent_buy_candidates.each do |candidate|
+        tmdb_data = TmdbService.new(candidate[:title], candidate[:release_date]&.slice(0, 4)).call
+        next unless tmdb_data
+
+        if tmdb_data[:rent].any? || tmdb_data[:buy].any?
+          movie = {
+            "title" => candidate[:title],
+            "original_title" => candidate[:original_title] || candidate[:title],
+            "year" => candidate[:release_date]&.slice(0, 4)&.to_i || 2024,
+            "reason" => "Disponível para alugar ou comprar",
+            "genres" => [],
+            "tmdb" => tmdb_data,
+            "_type" => "rent_buy"
+          }
+          rent_buy_movies << movie unless rent_buy_movies.any? { |m| m["title"] == movie["title"] }
+          break if rent_buy_movies.size >= 1
+        end
       end
-      rec
+    end
+
+    # 🔥 COMBINA OS RESULTADOS: 2 da plataforma + 1 aluguel/compra
+    available = platform_movies.first(2) + rent_buy_movies.first(1)
+
+    # Se ainda não tem 3, completa com o que tiver
+    if available.size < 3
+      available = (platform_movies + rent_buy_movies).first(3)
+    end
+
+    final_recs = available.first(3).map do |movie|
+      movie.delete("_type")
+      if movie["tmdb"].is_a?(Hash)
+        movie["tmdb"] = movie["tmdb"].transform_keys(&:to_s)
+        movie["tmdb"]["streaming"] = movie["tmdb"]["streaming"]&.map { |s| s.transform_keys(&:to_s) }
+        movie["tmdb"]["rent"] = movie["tmdb"]["rent"]&.map { |r| r.transform_keys(&:to_s) }
+        movie["tmdb"]["buy"] = movie["tmdb"]["buy"]&.map { |b| b.transform_keys(&:to_s) }
+      end
+      movie
     end
 
     {
@@ -90,7 +146,52 @@ class RecommendationPipeline
 
   private
 
-  # ← NOVO: Método garantido para buscar candidatos (retry infinito)
+  def fetch_rent_buy_candidates(exclude_titles)
+    retries = 0
+    loop do
+      begin
+        Timeout.timeout(TMDB_TIMEOUT) do
+          response = Faraday.get(
+            "#{TmdbService::BASE_URL}/discover/movie",
+            {
+              api_key: ENV.fetch("TMDB_API_KEY", nil),
+              language: "pt-BR",
+              watch_region: "BR",
+              sort_by: "popularity.desc",
+              page: 1,
+              "vote_count.gte" => 100
+            }
+          )
+          movies = JSON.parse(response.body)["results"] || []
+
+          return movies.reject { |m| exclude_titles.include?(m["title"]) }
+                        .first(20)
+                        .map do |movie|
+            {
+              tmdb_id: movie["id"],
+              title: movie["title"],
+              original_title: movie["original_title"],
+              overview: movie["overview"],
+              poster_path: movie["poster_path"],
+              vote_average: movie["vote_average"] || 0,
+              vote_count: movie["vote_count"] || 0,
+              popularity: movie["popularity"] || 0,
+              release_date: movie["release_date"],
+              genre_ids: movie["genre_ids"] || [],
+              frequency: 1,
+              score: 50
+            }
+          end
+        end
+      rescue Timeout::Error, Errno::ECONNREFUSED, SocketError => e
+        retries += 1
+        wait_time = [2 ** retries, 10].min
+        Rails.logger.warn "TMDB rent/buy tentativa #{retries} falhou: #{e.message}. Aguardando #{wait_time}s..."
+        sleep(wait_time)
+      end
+    end
+  end
+
   def fetch_candidates_guaranteed
     retries = 0
     loop do
@@ -108,7 +209,6 @@ class RecommendationPipeline
     end
   end
 
-  # ← NOVO: Método garantido para buscar IA (retry infinito)
   def fetch_ai_guaranteed(candidates)
     retries = 0
     loop do
@@ -130,7 +230,6 @@ class RecommendationPipeline
     end
   end
 
-  # ← NOVO: Método garantido para enriquecimento (retry infinito)
   def enrich_guaranteed(recommendations)
     retries = 0
     loop do
@@ -157,10 +256,5 @@ class RecommendationPipeline
 
   def user_platforms
     @user&.streaming_platforms || []
-  end
-
-  def matches_user_platforms?(rec)
-    streaming = rec.dig("tmdb", :streaming) || []
-    streaming.any? { |s| @user.streaming_platforms.include?(s[:name]) }
   end
 end

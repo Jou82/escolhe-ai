@@ -3,7 +3,7 @@ class TmdbService
   BASE_URL = "https://api.themoviedb.org/3"
 
   # 🔥 NOVAS CONSTANTES (já estão no seu código)
-  TIMEOUT = 8
+  TIMEOUT = 5
   MAX_RETRIES = 2
 
   def initialize(title, year = nil)
@@ -43,6 +43,46 @@ class TmdbService
     response.status == 200
   rescue
     false
+  end
+
+  # 🔥 NOVO: Busca filmes em uma plataforma específica
+  def self.discover_by_single_platform(platform_name, exclude_titles = [], limit: 20)
+    provider_id = PROVIDER_IDS[platform_name]
+    return [] unless provider_id
+
+    response = Faraday.get(
+      "#{BASE_URL}/discover/movie",
+      {
+        api_key: ENV.fetch("TMDB_API_KEY", nil),
+        language: "pt-BR",
+        watch_region: "BR",
+        with_watch_providers: provider_id,
+        sort_by: "popularity.desc",
+        page: 1,
+        "vote_count.gte" => 50
+      }
+    )
+
+    movies = JSON.parse(response.body)["results"] || []
+
+    movies.reject { |m| exclude_titles.include?(m["title"]) }
+          .first(limit)
+          .map do |movie|
+      {
+        tmdb_id: movie["id"],
+        title: movie["title"],
+        original_title: movie["original_title"],
+        overview: movie["overview"],
+        poster_path: movie["poster_path"],
+        vote_average: movie["vote_average"] || 0,
+        vote_count: movie["vote_count"] || 0,
+        popularity: movie["popularity"] || 0,
+        release_date: movie["release_date"],
+        genre_ids: movie["genre_ids"] || [],
+        frequency: 1,
+        score: 50
+      }
+    end
   end
 
   def self.find_candidates(movies, top_n: 15)

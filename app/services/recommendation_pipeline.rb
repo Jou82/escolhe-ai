@@ -11,14 +11,20 @@ class RecommendationPipeline
 
   def call
     candidates = fetch_candidates_guaranteed
+    # Garantir que candidates seja um array
+    candidates ||= []
+    if candidates.empty?
+      Rails.logger.error "❌ Nenhum candidato encontrado. Abortando pipeline."
+      return { analysis: nil, recommendations: [] }
+    end
 
-    # ========== ADIÇÕES: separar por tipo ==========
     platform_movies = []
     rent_buy_movies = []
     already_recommended = []
     retries = 0
 
-    while (platform_movies.size < 2 || rent_buy_movies.size < 1) && retries <= MAX_RETRIES * 2
+    # Prioridade: tentar obter 3 filmes da plataforma
+    while platform_movies.size < 3 && retries <= MAX_RETRIES * 2
       current_candidates = remaining_candidates(candidates, already_recommended)
       break if current_candidates.empty?
 
@@ -40,16 +46,13 @@ class RecommendationPipeline
           buy_match = movie.dig("tmdb", :buy)&.any? { |s| user_platforms.include?(s[:name]) }
 
           if streaming_match || rent_match || buy_match
-            # Filme disponível na plataforma do usuário (streaming, aluguel ou compra)
             movie["_type"] = "platform"
             platform_movies << movie unless platform_movies.any? { |m| m["title"] == movie["title"] }
           elsif movie.dig("tmdb", :rent)&.any? || movie.dig("tmdb", :buy)&.any?
-            # Aluguel/compra em qualquer plataforma (não nas do usuário)
             movie["_type"] = "rent_buy"
             rent_buy_movies << movie unless rent_buy_movies.any? { |m| m["title"] == movie["title"] }
           end
         else
-          # Se não tem plataformas, aceita qualquer streaming/aluguel/compra
           if movie.dig("tmdb", :streaming)&.any? ||
              movie.dig("tmdb", :rent)&.any? ||
              movie.dig("tmdb", :buy)&.any?
@@ -61,8 +64,8 @@ class RecommendationPipeline
       retries += 1
     end
 
-    # ========== FASE 2: garantir 2 filmes na plataforma ==========
-    if user_has_platforms? && platform_movies.size < 2
+    # FASE 2: se ainda não temos 3 filmes da plataforma, busca diretamente
+    if user_has_platforms? && platform_movies.size < 3
       Rails.logger.info "🎯 Buscando filmes nas plataformas: #{user_platforms.join(', ')}"
 
       user_platforms.each do |platform|
@@ -77,24 +80,26 @@ class RecommendationPipeline
           buy_match = tmdb_data[:buy]&.any? { |s| user_platforms.include?(s[:name]) }
 
           if streaming_match || rent_match || buy_match
+            # Inclui os gêneros do filme (se disponíveis)
+            genres = tmdb_data[:genres] || []
             movie = {
               "title" => candidate[:title],
               "original_title" => candidate[:original_title] || candidate[:title],
               "year" => candidate[:release_date]&.slice(0, 4)&.to_i || 2024,
-              "reason" => "Disponível em #{platform}",
-              "genres" => [],
+              "reason" => nil,  # será preenchido depois
+              "genres" => genres,
               "tmdb" => tmdb_data,
               "_type" => "platform"
             }
             platform_movies << movie unless platform_movies.any? { |m| m["title"] == movie["title"] }
-            break if platform_movies.size >= 2
+            break if platform_movies.size >= 3
           end
         end
-        break if platform_movies.size >= 2
+        break if platform_movies.size >= 3
       end
     end
 
-    # ========== FASE 3: garantir 1 filme para alugar/comprar ==========
+    # FASE 3: se ainda não temos 1 filme para alugar/comprar (caso precise complementar)
     if user_has_platforms? && rent_buy_movies.size < 1
       Rails.logger.info "🎯 Buscando filmes para alugar/comprar"
 
@@ -105,12 +110,13 @@ class RecommendationPipeline
         next unless tmdb_data
 
         if tmdb_data[:rent].any? || tmdb_data[:buy].any?
+          genres = tmdb_data[:genres] || []
           movie = {
             "title" => candidate[:title],
             "original_title" => candidate[:original_title] || candidate[:title],
             "year" => candidate[:release_date]&.slice(0, 4)&.to_i || 2024,
-            "reason" => "Disponível para alugar ou comprar",
-            "genres" => [],
+            "reason" => nil,
+            "genres" => genres,
             "tmdb" => tmdb_data,
             "_type" => "rent_buy"
           }
@@ -120,21 +126,29 @@ class RecommendationPipeline
       end
     end
 
-    # ========== COMBINA OS RESULTADOS ==========
-    available = platform_movies.first(2) + rent_buy_movies.first(1)
+    # ========== COMBINAÇÃO FINAL ==========
+    if platform_movies.size >= 3
+      available = platform_movies.first(3)
+    elsif platform_movies.size >= 2
+      available = platform_movies.first(2) + rent_buy_movies.first(1)
+    else
+      available = rent_buy_movies.first(3)
+    end
 
-    # Fallback caso ainda não tenha 3 filmes
     if available.size < 3
       available = (platform_movies + rent_buy_movies).first(3)
     end
 
-    # Se mesmo assim não tiver nada, tenta um fallback geral
     if available.empty?
       available = fetch_popular_fallback(already_recommended)
     end
 
+    # ========== GARANTIR QUE O CAMPO "reason" SEJA PERSONALIZADO ==========
     final_recs = available.first(3).map do |movie|
       movie.delete("_type")
+      if movie["reason"].blank?
+        movie["reason"] = generate_personalized_reason(movie)
+      end
       if movie["tmdb"].is_a?(Hash)
         movie["tmdb"] = movie["tmdb"].transform_keys(&:to_s)
         movie["tmdb"]["streaming"] = movie["tmdb"]["streaming"]&.map { |s| s.transform_keys(&:to_s) }
@@ -152,7 +166,46 @@ class RecommendationPipeline
 
   private
 
-  # ========== NOVO MÉTODO: buscar candidatos para aluguel/compra ==========
+  def generate_personalized_reason(movie)
+    begin
+      client = Anthropic::Client.new(api_key: ENV.fetch("ANTHROPIC_API_KEY", nil))
+      response = client.messages.create(
+        model: "claude-haiku-4-5-20251001",
+        max_tokens: 200,
+        messages: [
+          {
+            role: "user",
+            content: "Filmes favoritos do usuário: #{@movies.join(', ')}. " \
+                     "Filme recomendado: #{movie['title']} (#{movie['year']}). " \
+                     "Escreva em 1 frase por que esse filme combina com o gosto do usuário. " \
+                     "Tom descontraído, como se fosse um amigo indicando. Responda só o texto, sem aspas."
+          }
+        ]
+      )
+      response.content.first.text.strip
+    rescue => e
+      Rails.logger.warn("Erro ao gerar reason: #{e.message}")
+      "Recomendado baseado nos seus filmes favoritos: #{@movies.join(', ')}."
+    end
+  end
+
+  def user_movies_genres_from_tmdb
+    @user_movies_genres ||= begin
+      genres = Set.new
+      @movies.each do |title|
+        tmdb_data = TmdbService.new(title).call
+        if tmdb_data && tmdb_data[:genres]
+          genres.merge(tmdb_data[:genres])
+        end
+      end
+      genres.to_a
+    rescue => e
+      Rails.logger.warn "Não foi possível buscar gêneros dos filmes do usuário no TMDB: #{e.message}"
+      []
+    end
+  end
+
+  # ========== MÉTODOS AUXILIARES (mantidos inalterados) ==========
   def fetch_rent_buy_candidates(exclude_titles)
     retries = 0
     loop do
@@ -199,7 +252,6 @@ class RecommendationPipeline
     end
   end
 
-  # ========== NOVO MÉTODO: fallback popular ==========
   def fetch_popular_fallback(exclude_titles)
     retries = 0
     loop do
@@ -217,7 +269,7 @@ class RecommendationPipeline
               "title" => m["title"],
               "original_title" => m["original_title"],
               "year" => m["release_date"]&.slice(0, 4)&.to_i || 2024,
-              "reason" => "Filme popular recomendado",
+              "reason" => nil,
               "genres" => [],
               "tmdb" => {
                 "streaming" => [],
@@ -241,7 +293,6 @@ class RecommendationPipeline
     end
   end
 
-  # ========== MÉTODOS ORIGINAIS (já existentes, mantidos) ==========
   def fetch_candidates_guaranteed
     retries = 0
     loop do
@@ -297,6 +348,7 @@ class RecommendationPipeline
   end
 
   def remaining_candidates(candidates, already_recommended)
+    return [] if candidates.blank?
     candidates.reject { |c| already_recommended.include?(c[:title]) }
   end
 

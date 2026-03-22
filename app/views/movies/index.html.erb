@@ -1,2 +1,30 @@
-<h1>Movies#index</h1>
-<p>Find me in app/views/movies/index.html.erb</p>
+<%# app/views/movies/index.html.erb %>
+
+<style>
+  .loading {
+    display: none;
+    margin-top: 20px;
+    padding: 10px;
+    background: #f0f0f0;
+    border-radius: 5px;
+  }
+  .loading.active {
+    display: block;
+  }
+</style>
+
+<%= form_with url: movies_path, method: :post, local: true, id: "movie-form" do |f| %>
+  <%= f.text_field :movies, placeholder: "Digite 3 filmes separados por vírgula", required: true %>
+  <%= f.submit "Buscar Recomendações", id: "submit-btn" %>
+  <div class="loading" id="loading">
+    <p>🎬 Buscando recomendações...</p>
+    <p>Isso pode levar até 30 segundos enquanto a IA analisa seus filmes favoritos.</p>
+  </div>
+<% end %>
+
+<script>
+  document.getElementById("movie-form").addEventListener("submit", function() {
+    document.getElementById("submit-btn").disabled = true;
+    document.getElementById("loading").classList.add("active");
+  });
+</script>

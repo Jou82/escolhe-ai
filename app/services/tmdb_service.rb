@@ -109,34 +109,39 @@ class TmdbService
 
   # Busca filmografia do diretor — retorna [director_ids, filmes]
   def self.fetch_director_filmography(movie_id)
-    # 1. Pegar credits do filme pra encontrar o diretor
-    credits_response = Faraday.get(
-      "#{BASE_URL}/movie/#{movie_id}/credits",
-      { api_key: ENV.fetch("TMDB_API_KEY", nil) }
-    )
-    credits = JSON.parse(credits_response.body)
-    directors = credits["crew"]&.select { |c| c["job"] == "Director" } || []
-    return [[], []] if directors.empty?
+  credits_response = Faraday.get(
+    "#{BASE_URL}/movie/#{movie_id}/credits",
+    { api_key: ENV.fetch("TMDB_API_KEY", nil) }
+  )
+  credits = JSON.parse(credits_response.body)
+  directors = credits["crew"]&.select { |c| c["job"] == "Director" } || []
+  return [[], []] if directors.empty?
 
-    director_ids = directors.map { |d| d["id"] }
-    all_films = []
+  director_ids = directors.map { |d| d["id"] }
+  all_films = []
 
-    # 2. Buscar filmes de cada diretor
-    directors.each do |director|
+  directors.each do |director|
+    begin
       person_response = Faraday.get(
         "#{BASE_URL}/person/#{director['id']}/movie_credits",
         { api_key: ENV.fetch("TMDB_API_KEY", nil), language: "pt-BR" }
       )
       person_credits = JSON.parse(person_response.body)
-
       films = person_credits["crew"]
               &.select { |c| c["job"] == "Director" }
               &.reject { |c| c["id"] == movie_id } || []
       all_films.concat(films)
+    rescue Faraday::ConnectionFailed, Faraday::TimeoutError => e
+      Rails.logger.warn "TMDB timeout for director #{director['id']}: #{e.message}"
+      next
     end
-
-    [director_ids, all_films]
   end
+
+  [director_ids, all_films]
+rescue Faraday::ConnectionFailed, Faraday::TimeoutError => e
+  Rails.logger.warn "TMDB timeout fetching credits for movie #{movie_id}: #{e.message}"
+  [[], []]
+end
 
   # ← fix: def self.score_candidates (era def score.score_candidates)
   def self.score_candidates(similar_by_source, user_movies)
@@ -265,7 +270,7 @@ class TmdbService
       }
     end
   end
-  
+
   def call
     movie = search_movie
     return nil unless movie
@@ -287,13 +292,20 @@ class TmdbService
   end
 
   def self.enrich_recommendations(recommendations)
-    recommendations.map do |rec|
+  recommendations.map do |rec|
+    begin
       tmdb_data = new(rec["title"], rec["year"]).call
 
-      tmdb_data = new(rec["original_title"], rec["year"]).call if tmdb_data.nil? && rec["original_title"]
+      if tmdb_data.nil? && rec["original_title"]
+        tmdb_data = new(rec["original_title"], rec["year"]).call
+      end
 
       rec.merge("tmdb" => tmdb_data)
+    rescue Faraday::ConnectionFailed, Faraday::TimeoutError => e
+      Rails.logger.warn "TMDB timeout enriching '#{rec["title"]}': #{e.message}"
+      rec.merge("tmdb" => nil)
     end
+  end
   end
 
   private
@@ -308,9 +320,18 @@ class TmdbService
     params[:year] = @year if @year
 
     response = Faraday.get("#{BASE_URL}/search/movie", params)
-    results = JSON.parse(response.body)["results"]
+    return nil unless response.status == 200
+
+    body = response.body
+    return nil if body.nil? || body.start_with?("<")
+
+    results = JSON.parse(body)["results"]
     results&.first
+  rescue JSON::ParserError, Faraday::Error => e
+    Rails.logger.warn("TMDB error searching '#{@title}': #{e.message}")
+    nil
   end
+
 
   def fetch_providers(movie_id)
     response = Faraday.get(

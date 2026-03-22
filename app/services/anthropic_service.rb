@@ -9,7 +9,7 @@ class AnthropicService
 
   def call
     response = client.messages.create(
-      model: "claude-haiku-4-5-20251001",
+      model: "claude-opus-4-6",
       max_tokens: 1024,
       system: system_prompt,
       messages: [
@@ -25,7 +25,7 @@ class AnthropicService
     parsed
   rescue JSON::ParserError => e
     raise RecommendationError, "Erro ao processar resposta da IA: #{e.message}"
-  rescue Anthropic::Error => e
+  rescue Anthropic::Errors => e
     raise RecommendationError, "Erro de conexão com Anthropic: #{e.message}"
   end
 

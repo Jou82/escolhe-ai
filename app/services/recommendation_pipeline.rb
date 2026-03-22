@@ -1,8 +1,8 @@
 # app/services/recommendation_pipeline.rb
 class RecommendationPipeline
-  MAX_RETRIES = 5
-  TMDB_TIMEOUT = 25
-  ANTHROPIC_TIMEOUT = 45
+  MAX_RETRIES = 2
+  TMDB_TIMEOUT = 12
+  ANTHROPIC_TIMEOUT = 20
 
   def initialize(movies, user = nil)
     @movies = movies

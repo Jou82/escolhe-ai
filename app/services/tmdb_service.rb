@@ -3,8 +3,8 @@ class TmdbService
   BASE_URL = "https://api.themoviedb.org/3"
 
   # 🔥 NOVAS CONSTANTES (já estão no seu código)
-  TIMEOUT = 5
-  MAX_RETRIES = 2
+  TIMEOUT = 4
+  MAX_RETRIES = 1
 
   def initialize(title, year = nil)
     @title = title

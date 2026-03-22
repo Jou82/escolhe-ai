@@ -9,8 +9,8 @@ class AnthropicService
 
   def call
     response = client.messages.create(
-      model: "claude-sonnet-4-6",
-      max_tokens: 800,
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 600,
       system: system_prompt,
       messages: [
         { role: "user", content: user_prompt }

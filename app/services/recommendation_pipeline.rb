@@ -1,5 +1,7 @@
 class RecommendationPipeline
   MAX_RETRIES = 5
+  TMDB_TIMEOUT = 25        # ← ALTERADO: 10 → 25
+  ANTHROPIC_TIMEOUT = 45   # ← ALTERADO: 45 mantido
 
   def initialize(movies, user = nil)
     @movies = movies
@@ -7,7 +9,9 @@ class RecommendationPipeline
   end
 
   def call
-    candidates = TmdbService.find_candidates(@movies, top_n: 30)
+    # ← ALTERADO: Busca candidatos com timeout maior e retry infinito
+    candidates = fetch_candidates_guaranteed
+
     available = []
     already_recommended = []
     retries = 0
@@ -16,10 +20,17 @@ class RecommendationPipeline
       current_candidates = remaining_candidates(candidates, already_recommended)
       break if current_candidates.empty?
 
-      ai_result = AnthropicService.new(@movies, current_candidates, user_platforms).call
-      @analysis ||= ai_result["analysis"]
+      # ← ALTERADO: Chamada da IA com timeout maior e retry
+      ai_result = fetch_ai_guaranteed(current_candidates)
+      @analysis ||= ai_result["analysis"] if ai_result
 
-      new_recs = TmdbService.enrich_recommendations(ai_result["recommendations"])
+      if ai_result.nil?
+        retries += 1
+        next
+      end
+
+      # ← ALTERADO: Enriquecimento com TMDB com retry
+      new_recs = enrich_guaranteed(ai_result["recommendations"])
       already_recommended.concat(new_recs.map { |r| r["title"] })
 
       new_recs.each do |r|
@@ -41,9 +52,16 @@ class RecommendationPipeline
       while available.size < 3 && fallback_retries < 3 && platform_candidates.any?
         current_candidates = remaining_candidates(platform_candidates, already_recommended)
         break if current_candidates.empty?
-        ai_result = AnthropicService.new(@movies, current_candidates, user_platforms).call
-        @analysis ||= ai_result["analysis"]
-        new_recs = TmdbService.enrich_recommendations(ai_result["recommendations"])
+
+        ai_result = fetch_ai_guaranteed(current_candidates)
+        @analysis ||= ai_result["analysis"] if ai_result
+
+        if ai_result.nil?
+          fallback_retries += 1
+          next
+        end
+
+        new_recs = enrich_guaranteed(ai_result["recommendations"])
         already_recommended.concat(new_recs.map { |r| r["title"] })
         new_recs.each do |r|
           next unless r.dig("tmdb", :streaming)&.any?
@@ -71,6 +89,63 @@ class RecommendationPipeline
   end
 
   private
+
+  # ← NOVO: Método garantido para buscar candidatos (retry infinito)
+  def fetch_candidates_guaranteed
+    retries = 0
+    loop do
+      begin
+        Timeout.timeout(TMDB_TIMEOUT) do
+          candidates = TmdbService.find_candidates(@movies, top_n: 30)
+          return candidates if candidates.present?
+        end
+      rescue Timeout::Error, Errno::ECONNREFUSED, SocketError => e
+        retries += 1
+        wait_time = [2 ** retries, 10].min
+        Rails.logger.warn "TMDB tentativa #{retries} falhou: #{e.message}. Aguardando #{wait_time}s..."
+        sleep(wait_time)
+      end
+    end
+  end
+
+  # ← NOVO: Método garantido para buscar IA (retry infinito)
+  def fetch_ai_guaranteed(candidates)
+    retries = 0
+    loop do
+      begin
+        Timeout.timeout(ANTHROPIC_TIMEOUT) do
+          return AnthropicService.new(@movies, candidates, user_platforms).call
+        end
+      rescue Timeout::Error => e
+        retries += 1
+        wait_time = [2 ** retries, 10].min
+        Rails.logger.warn "Anthropic tentativa #{retries} falhou: #{e.message}. Aguardando #{wait_time}s..."
+        sleep(wait_time)
+      rescue => e
+        retries += 1
+        wait_time = [2 ** retries, 10].min
+        Rails.logger.warn "Anthropic erro #{retries}: #{e.message}. Aguardando #{wait_time}s..."
+        sleep(wait_time)
+      end
+    end
+  end
+
+  # ← NOVO: Método garantido para enriquecimento (retry infinito)
+  def enrich_guaranteed(recommendations)
+    retries = 0
+    loop do
+      begin
+        Timeout.timeout(TMDB_TIMEOUT) do
+          return TmdbService.enrich_recommendations(recommendations)
+        end
+      rescue Timeout::Error, Errno::ECONNREFUSED, SocketError => e
+        retries += 1
+        wait_time = [2 ** retries, 10].min
+        Rails.logger.warn "TMDB enrich tentativa #{retries} falhou: #{e.message}. Aguardando #{wait_time}s..."
+        sleep(wait_time)
+      end
+    end
+  end
 
   def remaining_candidates(candidates, already_recommended)
     candidates.reject { |c| already_recommended.include?(c[:title]) }

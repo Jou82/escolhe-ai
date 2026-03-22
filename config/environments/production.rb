@@ -68,6 +68,7 @@ Rails.application.configure do
   #   port: 587,
   #   authentication: :plain
   # }
+  config.cache_store = :file_store, Rails.root.join('tmp/cache')
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).

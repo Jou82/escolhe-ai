@@ -1,3 +1,4 @@
+# app/services/recommendation_pipeline.rb
 class RecommendationPipeline
   MAX_RETRIES = 5
   TMDB_TIMEOUT = 25
@@ -11,7 +12,7 @@ class RecommendationPipeline
   def call
     candidates = fetch_candidates_guaranteed
 
-    # 🔥 Separa os filmes por tipo
+    # ========== ADIÇÕES: separar por tipo ==========
     platform_movies = []
     rent_buy_movies = []
     already_recommended = []
@@ -38,17 +39,17 @@ class RecommendationPipeline
           rent_match = movie.dig("tmdb", :rent)&.any? { |s| user_platforms.include?(s[:name]) }
           buy_match = movie.dig("tmdb", :buy)&.any? { |s| user_platforms.include?(s[:name]) }
 
-          # Filme na plataforma do usuário
           if streaming_match || rent_match || buy_match
+            # Filme disponível na plataforma do usuário (streaming, aluguel ou compra)
             movie["_type"] = "platform"
             platform_movies << movie unless platform_movies.any? { |m| m["title"] == movie["title"] }
-          # Aluguel/compra em qualquer plataforma
           elsif movie.dig("tmdb", :rent)&.any? || movie.dig("tmdb", :buy)&.any?
+            # Aluguel/compra em qualquer plataforma (não nas do usuário)
             movie["_type"] = "rent_buy"
             rent_buy_movies << movie unless rent_buy_movies.any? { |m| m["title"] == movie["title"] }
           end
         else
-          # Se não tem plataformas, aceita qualquer opção
+          # Se não tem plataformas, aceita qualquer streaming/aluguel/compra
           if movie.dig("tmdb", :streaming)&.any? ||
              movie.dig("tmdb", :rent)&.any? ||
              movie.dig("tmdb", :buy)&.any?
@@ -60,7 +61,7 @@ class RecommendationPipeline
       retries += 1
     end
 
-    # 🔥 FASE 2: Se não tem 2 filmes na plataforma, busca especificamente
+    # ========== FASE 2: garantir 2 filmes na plataforma ==========
     if user_has_platforms? && platform_movies.size < 2
       Rails.logger.info "🎯 Buscando filmes nas plataformas: #{user_platforms.join(', ')}"
 
@@ -93,7 +94,7 @@ class RecommendationPipeline
       end
     end
 
-    # 🔥 FASE 3: Se não tem 1 filme para alugar/comprar, busca especificamente
+    # ========== FASE 3: garantir 1 filme para alugar/comprar ==========
     if user_has_platforms? && rent_buy_movies.size < 1
       Rails.logger.info "🎯 Buscando filmes para alugar/comprar"
 
@@ -119,12 +120,17 @@ class RecommendationPipeline
       end
     end
 
-    # 🔥 COMBINA OS RESULTADOS: 2 da plataforma + 1 aluguel/compra
+    # ========== COMBINA OS RESULTADOS ==========
     available = platform_movies.first(2) + rent_buy_movies.first(1)
 
-    # Se ainda não tem 3, completa com o que tiver
+    # Fallback caso ainda não tenha 3 filmes
     if available.size < 3
       available = (platform_movies + rent_buy_movies).first(3)
+    end
+
+    # Se mesmo assim não tiver nada, tenta um fallback geral
+    if available.empty?
+      available = fetch_popular_fallback(already_recommended)
     end
 
     final_recs = available.first(3).map do |movie|
@@ -146,6 +152,7 @@ class RecommendationPipeline
 
   private
 
+  # ========== NOVO MÉTODO: buscar candidatos para aluguel/compra ==========
   def fetch_rent_buy_candidates(exclude_titles)
     retries = 0
     loop do
@@ -192,6 +199,49 @@ class RecommendationPipeline
     end
   end
 
+  # ========== NOVO MÉTODO: fallback popular ==========
+  def fetch_popular_fallback(exclude_titles)
+    retries = 0
+    loop do
+      begin
+        Timeout.timeout(TMDB_TIMEOUT) do
+          response = Faraday.get(
+            "#{TmdbService::BASE_URL}/movie/popular",
+            { api_key: ENV.fetch("TMDB_API_KEY", nil), language: "pt-BR" }
+          )
+          movies = JSON.parse(response.body)["results"] || []
+          movies = movies.reject { |m| exclude_titles.include?(m["title"]) }.first(5)
+
+          return movies.map do |m|
+            {
+              "title" => m["title"],
+              "original_title" => m["original_title"],
+              "year" => m["release_date"]&.slice(0, 4)&.to_i || 2024,
+              "reason" => "Filme popular recomendado",
+              "genres" => [],
+              "tmdb" => {
+                "streaming" => [],
+                "rent" => [],
+                "buy" => [],
+                "overview" => m["overview"],
+                "release_date" => m["release_date"]
+              },
+              "_type" => "fallback"
+            }
+          end
+        end
+      rescue => e
+        retries += 1
+        wait_time = [2 ** retries, 10].min
+        Rails.logger.warn "Fallback popular tentativa #{retries} falhou: #{e.message}. Aguardando #{wait_time}s..."
+        sleep(wait_time)
+        retry if retries < 3
+        return []
+      end
+    end
+  end
+
+  # ========== MÉTODOS ORIGINAIS (já existentes, mantidos) ==========
   def fetch_candidates_guaranteed
     retries = 0
     loop do

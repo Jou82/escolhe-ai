@@ -1,10 +1,11 @@
 class AnthropicService
   class RecommendationError < StandardError; end
 
-  def initialize(movies, candidates = [], user_platforms = [])
+  def initialize(movies, candidates = [], user_platforms = [], exclude_titles = [])
     @movies = movies
     @candidates = candidates
     @user_platforms = user_platforms
+    @exclude_titles = exclude_titles
   end
 
   def call
@@ -106,6 +107,14 @@ class AnthropicService
         "Recomende SOMENTE filmes disponíveis nessas plataformas. Isso é OBRIGATÓRIO."
     else
       "Recomende filmes disponíveis em qualquer plataforma de streaming no Brasil."
+    end
+  end
+
+  def format_exclude_titles
+    if @exclude_titles.any?
+      "\n\n**FILMES PROIBIDOS (NÃO RECOMENDAR SOB NENHUMA HIPÓTESE):** #{@exclude_titles.join(', ')}"
+    else
+      ""
     end
   end
 

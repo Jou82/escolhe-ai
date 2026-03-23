@@ -113,9 +113,9 @@ class MoviesController < ApplicationController
       redirect_to processing_movies_path(id: session_record.id)
     end
 
-  rescue AnthropicService::RecommendationError => e
-    flash[:alert] = "Erro ao gerar recomendações: #{e.message}"
-    redirect_to root_path
+  def check_status
+    session = current_user.sessions.find(params[:id])
+    render json: { status: session.status, completed: session.status == 1 }
   end
 
   def processing

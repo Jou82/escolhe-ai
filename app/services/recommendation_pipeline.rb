@@ -8,13 +8,14 @@ class RecommendationPipeline
     @movies = movies
     @user = user
     @exclude = exclude
+    @candidates = []
   end
 
   def call
-    candidates = fetch_candidates_guaranteed
+    @candidates = fetch_candidates_guaranteed
     # Garantir que candidates seja um array
-    candidates ||= []
-    if candidates.empty?
+    @candidates ||= []
+    if @candidates.empty?
       Rails.logger.error "❌ Nenhum candidato encontrado. Abortando pipeline."
       return { analysis: nil, recommendations: [] }
     end
@@ -26,7 +27,7 @@ class RecommendationPipeline
 
     # Prioridade: tentar obter 3 filmes da plataforma
     while platform_movies.size < 3 && retries <= MAX_RETRIES * 2
-      current_candidates = remaining_candidates(candidates, already_recommended)
+      current_candidates = remaining_candidates(@candidates, already_recommended)
       break if current_candidates.empty?
 
       ai_result = fetch_ai_guaranteed(current_candidates)
@@ -151,6 +152,9 @@ class RecommendationPipeline
       movie
     end
 
+    # ========== FILTRO FINAL PARA EVITAR REPETIÇÃO ==========
+    final_recs = filter_recommendations(final_recs, @exclude)
+
     {
       analysis: @analysis,
       recommendations: final_recs
@@ -194,7 +198,6 @@ class RecommendationPipeline
     end
   end
 
-  # ========== MÉTODOS AUXILIARES (mantidos inalterados) ==========
   def fetch_rent_buy_candidates(exclude_titles)
     retries = 0
     loop do
@@ -338,5 +341,38 @@ class RecommendationPipeline
 
   def user_platforms
     @user&.streaming_platforms || []
+  end
+
+  # NOVO MÉTODO: Filtra recomendações para evitar repetição
+  def filter_recommendations(recommendations, exclude_titles)
+    filtered = recommendations.reject do |rec|
+      exclude_titles.include?(rec["title"]) ||
+      exclude_titles.include?(rec["original_title"])
+    end
+
+    Rails.logger.info "🔍 Filtro: #{recommendations.size} → #{filtered.size} recomendações (excluindo: #{exclude_titles.join(', ')})"
+
+    if filtered.size < 3
+      needed = 3 - filtered.size
+      Rails.logger.warn "⚠️ Faltam #{needed} recomendações. Buscando alternativas..."
+
+      more_candidates = @candidates.reject do |c|
+        exclude_titles.include?(c[:title]) ||
+        filtered.any? { |r| r["title"] == c[:title] }
+      end
+
+      more_candidates.first(needed).each do |candidate|
+        filtered << {
+          "title" => candidate[:title],
+          "original_title" => candidate[:original_title],
+          "year" => candidate[:release_date]&.slice(0, 4),
+          "reason" => generate_personalized_reason(candidate),
+          "genres" => candidate[:genres],
+          "tmdb" => candidate
+        }
+      end
+    end
+
+    filtered.first(3)
   end
 end

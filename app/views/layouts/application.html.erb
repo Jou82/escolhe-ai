@@ -23,10 +23,11 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
-    <%= render "shared/navbar" %>
-    <%= render "shared/flashes" %>
-    <%= yield %>
-    <%= render "shared/footer" %>
+  <body data-controller="login-modal">
+  <%= render "shared/login_modal" unless user_signed_in? %>
+  <%= render "shared/navbar" %>
+  <%= render "shared/flashes" %>
+  <%= yield %>
+  <%= render "shared/footer" %>
   </body>
 </html>

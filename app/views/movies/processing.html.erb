@@ -1,0 +1,142 @@
+<%# app/views/movies/processing.html.erb %>
+<style>
+  .progress-container {
+    width: 80%;
+    max-width: 400px;
+    margin: 20px auto;
+    background-color: #f3f3f3;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+
+  .progress-bar {
+    width: 0%;
+    height: 8px;
+    background: linear-gradient(90deg, #3b82f6, #60a5fa);
+    transition: width 0.3s ease;
+    border-radius: 10px;
+  }
+
+  .percentage {
+    font-size: 24px;
+    font-weight: bold;
+    color: #3b82f6;
+    margin-top: 10px;
+  }
+
+  .loading-text {
+    font-size: 14px;
+    color: #666;
+    margin-top: 10px;
+  }
+
+  .spinner {
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #3b82f6;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+</style>
+
+<div style="display: flex; align-items: center; justify-content: center; min-height: 100vh;">
+  <div style="text-align: center; padding: 20px;">
+    <div class="spinner"></div>
+
+    <p style="font-size: 20px; font-weight: bold; color: #333; margin-bottom: 20px;">
+      Analisando seus filmes...
+    </p>
+
+    <div class="progress-container">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <div class="percentage" id="percentage">0%</div>
+    <div class="loading-text" id="statusText">Iniciando análise...</div>
+  </div>
+</div>
+
+<%= content_tag :div, nil,
+    id: "status-checker",
+    data: {
+      session_id: @session_record.id,
+      url: check_status_movies_path
+    } %>
+
+<script>
+  let progress = 0;
+  let interval;
+
+  // Função para atualizar a barra de progresso
+  function updateProgress(percentage, status) {
+    const progressBar = document.getElementById('progressBar');
+    const percentageEl = document.getElementById('percentage');
+    const statusText = document.getElementById('statusText');
+
+    progressBar.style.width = percentage + '%';
+    percentageEl.textContent = Math.floor(percentage) + '%';
+    statusText.textContent = status;
+  }
+
+  // Simular progresso enquanto espera
+  function simulateProgress() {
+    interval = setInterval(() => {
+      if (progress < 90) {
+        // Aumenta progresso mais devagar conforme chega perto de 90%
+        const increment = progress < 50 ? 5 : (progress < 80 ? 2 : 1);
+        progress = Math.min(progress + increment, 90);
+        updateProgress(progress, 'Processando filmes...');
+      }
+    }, 500);
+  }
+
+  // Iniciar simulação de progresso
+  simulateProgress();
+
+  // Verificar status real do job
+  const sessionId = document.getElementById('status-checker').dataset.sessionId;
+  const checkUrl = document.getElementById('status-checker').dataset.url;
+
+  function checkStatus() {
+    fetch(`${checkUrl}?id=${sessionId}`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'completed') {
+          // Job concluído - completar barra
+          clearInterval(interval);
+          updateProgress(100, 'Concluído! Redirecionando...');
+          setTimeout(() => {
+            window.location.href = data.url;
+          }, 500);
+        } else if (data.status === 'failed') {
+          clearInterval(interval);
+          updateProgress(0, 'Erro: ' + data.error);
+          alert('Erro: ' + data.error);
+          setTimeout(() => {
+            window.location.href = '/';
+          }, 2000);
+        } else {
+          // Atualizar progresso baseado no tempo real se disponível
+          if (data.progress) {
+            progress = data.progress;
+            updateProgress(progress, data.status_message || 'Processando...');
+          }
+          setTimeout(checkStatus, 2000);
+        }
+      })
+      .catch(() => {
+        setTimeout(checkStatus, 3000);
+      });
+  }
+
+  // Iniciar verificação
+  setTimeout(checkStatus, 1000);
+</script>

@@ -41,7 +41,7 @@ class TmdbService
       { api_key: ENV.fetch("TMDB_API_KEY", nil) }
     )
     response.status == 200
-  rescue
+  rescue StandardError
     false
   end
 
@@ -195,22 +195,20 @@ class TmdbService
         all_films = []
 
         directors.each do |director|
-          begin
-            Timeout.timeout(TIMEOUT) do
-              person_response = Faraday.get(
-                "#{BASE_URL}/person/#{director['id']}/movie_credits",
-                { api_key: ENV.fetch("TMDB_API_KEY", nil), language: "pt-BR" }
-              )
-              person_credits = JSON.parse(person_response.body)
-              films = person_credits["crew"]
-                      &.select { |c| c["job"] == "Director" }
-                      &.reject { |c| c["id"] == movie_id } || []
-              all_films.concat(films)
-            end
-          rescue Timeout::Error, Faraday::ConnectionFailed, Faraday::TimeoutError => e
-            Rails.logger.warn "TMDB timeout for director #{director['id']}: #{e.message}"
-            next
+          Timeout.timeout(TIMEOUT) do
+            person_response = Faraday.get(
+              "#{BASE_URL}/person/#{director['id']}/movie_credits",
+              { api_key: ENV.fetch("TMDB_API_KEY", nil), language: "pt-BR" }
+            )
+            person_credits = JSON.parse(person_response.body)
+            films = person_credits["crew"]
+                    &.select { |c| c["job"] == "Director" }
+                    &.reject { |c| c["id"] == movie_id } || []
+            all_films.concat(films)
           end
+        rescue Timeout::Error, Faraday::ConnectionFailed, Faraday::TimeoutError => e
+          Rails.logger.warn "TMDB timeout for director #{director['id']}: #{e.message}"
+          next
         end
 
         [director_ids, all_films]
@@ -258,7 +256,7 @@ class TmdbService
       end
     end
 
-    candidate_map.values.each { |c| c[:score] = calculate_score(c, total_sources) }
+    candidate_map.each_value { |c| c[:score] = calculate_score(c, total_sources) }
                  .sort_by { |c| -c[:score] }
   end
 
@@ -401,18 +399,16 @@ class TmdbService
         Timeout.timeout(TIMEOUT) do
           tmdb_data = new(rec["title"], rec["year"]).call
 
-          if tmdb_data.nil? && rec["original_title"]
-            tmdb_data = new(rec["original_title"], rec["year"]).call
-          end
+          tmdb_data = new(rec["original_title"], rec["year"]).call if tmdb_data.nil? && rec["original_title"]
         end
       rescue Timeout::Error, Faraday::ConnectionFailed, Faraday::TimeoutError => e
         retries += 1
         if retries <= MAX_RETRIES
-          Rails.logger.warn "TMDB enrich timeout (tentativa #{retries}) para '#{rec["title"]}', tentando novamente..."
+          Rails.logger.warn "TMDB enrich timeout (tentativa #{retries}) para '#{rec['title']}', tentando novamente..."
           sleep(2)
           retry
         else
-          Rails.logger.warn "TMDB timeout enriching '#{rec["title"]}': #{e.message}"
+          Rails.logger.warn "TMDB timeout enriching '#{rec['title']}': #{e.message}"
           tmdb_data = nil
         end
       end
@@ -458,7 +454,9 @@ class TmdbService
     link = br_data["link"]
     items = br_data[type] || []
 
-    items.reject { |p| p["provider_name"].to_s.downcase.include?("ads") || p["provider_name"].to_s.downcase.include?("with ads") }
+    items.reject do |p|
+      p["provider_name"].to_s.downcase.include?("ads") || p["provider_name"].to_s.downcase.include?("with ads")
+    end
          .map do |p|
       {
         name: p["provider_name"],

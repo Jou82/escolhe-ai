@@ -1,0 +1,254 @@
+// ===== LOGIN MODAL =====
+.login-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(6px);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+
+  &.open {
+    display: flex;
+  }
+}
+
+.login-modal {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  background: #111430;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 2.5rem 2rem;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6);
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+// === CLOSE BUTTON ===
+.login-modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  color: $text-muted;
+  cursor: pointer;
+  padding: 0.3rem;
+  border-radius: 8px;
+  transition: all 0.2s;
+
+  &:hover {
+    color: $text-white;
+    background: rgba(255, 255, 255, 0.06);
+  }
+}
+
+// === HEADER ===
+.login-modal-header {
+  text-align: center;
+  margin-bottom: 1.8rem;
+
+  h2 {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: $text-white;
+    margin-bottom: 0.3rem;
+  }
+
+  p {
+    font-size: 0.8rem;
+    color: $text-muted;
+    font-weight: 400;
+  }
+}
+
+// === OAUTH ===
+.login-modal-oauth {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 1.5rem;
+}
+
+.login-oauth-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.7rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: $text-light;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.15);
+  }
+}
+
+// === DIVIDER ===
+.login-modal-divider {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  span {
+    padding: 0 1rem;
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    color: $text-dim;
+  }
+}
+
+// === FORM ===
+.login-modal-form {
+  margin-bottom: 1.5rem;
+}
+
+.login-field {
+  margin-bottom: 1rem;
+
+  label {
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: $text-muted;
+    margin-bottom: 0.4rem;
+  }
+
+  // Override simple_form
+  .form-group {
+    margin-bottom: 0;
+  }
+}
+
+.login-field-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.4rem;
+
+  label {
+    margin-bottom: 0;
+  }
+}
+
+.login-forgot {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: $text-dim;
+  text-decoration: none;
+  transition: color 0.2s;
+
+  &:hover {
+    color: $accent-blue;
+  }
+}
+
+.login-input,
+.login-modal-form .form-control {
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  color: $text-light;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  outline: none;
+  transition: all 0.2s;
+
+  &::placeholder {
+    color: $text-dim;
+  }
+
+  &:focus {
+    border-color: rgba(59, 130, 246, 0.4);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.08);
+    background: rgba(255, 255, 255, 0.04);
+    color: $text-light;
+  }
+}
+
+// === SUBMIT ===
+.login-submit-btn {
+  width: 100%;
+  padding: 0.75rem;
+  background: $accent-blue;
+  color: #ffffff;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 0.5rem;
+
+  &:hover {
+    background: lighten($accent-blue, 6%);
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+  }
+}
+
+// === FOOTER ===
+.login-modal-footer {
+  text-align: center;
+
+  p {
+    font-size: 0.8rem;
+    color: $text-muted;
+  }
+}
+
+.login-create-link {
+  color: $text-white;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s;
+
+  &:hover {
+    color: $accent-blue;
+  }
+}
+
+// === RESPONSIVE ===
+@media (max-width: 768px) {
+  .login-modal {
+    max-width: 340px;
+    padding: 2rem 1.5rem;
+    margin: 0 1rem;
+  }
+}

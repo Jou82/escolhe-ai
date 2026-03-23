@@ -1,0 +1,9 @@
+// ─── Layout Base ──────────────────────────────────────────────
+body {
+}
+
+main {
+  padding-top: 68px;
+  min-height: calc(100vh - 68px);
+  box-sizing: border-box;
+}

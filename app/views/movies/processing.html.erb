@@ -1,0 +1,39 @@
+<%# app/views/movies/processing.html.erb %>
+<div style="display: flex; align-items: center; justify-content: center; min-height: 100vh;">
+  <div style="text-align: center;">
+    <div>
+      <p style="font-size: 20px; font-weight: 600; color: #3B82F6; margin-bottom: 8px;">Analisando seus filmes...</p>
+      <p style="font-size: 14px; color: #3B7CF0;">Isso pode levar alguns segundos</p>
+    </div>
+  </div>
+</div>
+
+<%= content_tag :div, nil,
+    id: "status-checker",
+    data: {
+      session_id: @session_record.id,
+      url: check_status_movies_path
+    } %>
+
+<script>
+  const sessionId = document.getElementById('status-checker').dataset.sessionId;
+  const checkUrl = document.getElementById('status-checker').dataset.url;
+
+  function checkStatus() {
+    fetch(`${checkUrl}?id=${sessionId}`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'completed') {
+          window.location.href = data.url;
+        } else if (data.status === 'failed') {
+          alert('Erro: ' + data.error);
+          window.location.href = '/';
+        } else {
+          setTimeout(checkStatus, 2000);
+        }
+      })
+      .catch(() => setTimeout(checkStatus, 3000));
+  }
+
+  setTimeout(checkStatus, 1000);
+</script>

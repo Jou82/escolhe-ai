@@ -72,45 +72,45 @@
   </div>
 
   <%# Main content grid %>
-  <div class="movie-content container">
+    <div class="movie-content container">
 
-    <%# Left column %>
-    <div class="movie-content__left">
+      <%# Left column %>
+      <div class="movie-content__left">
 
-      <%# Why we recommend %>
-      <div class="card card--why">
-        <div class="card__header">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M8 2l1.5 3 3.3.5-2.4 2.3.6 3.2L8 9.5l-3 1.5.6-3.2L3.2 5.5l3.3-.5z" fill="#4F8EF7"/>
-          </svg>
-          <span class="card__title-blue">Por que recomendamos isso</span>
-        </div>
-        <div class="card__reasons">
-          <div class="card__reason">
-            <div class="card__reason-icon card__reason-icon--red">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M8 3c2.5 0 5 2 5 4.5 0 2-2 4.5-5 6-3-1.5-5-4-5-6C3 5 5.5 3 8 3z" stroke="#E05B7F" stroke-width="1.2"/>
-              </svg>
+        <%# Why we recommend %>
+        <div class="card card--why">
+          <div class="card__header">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M8 2l1.5 3 3.3.5-2.4 2.3.6 3.2L8 9.5l-3 1.5.6-3.2L3.2 5.5l3.3-.5z" fill="#4F8EF7"/>
+            </svg>
+            <span class="card__title-blue">Por que recomendamos isso</span>
+          </div>
+          <div class="card__reasons">
+            <div class="card__reason">
+              <div class="card__reason-icon card__reason-icon--red">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M8 3c2.5 0 5 2 5 4.5 0 2-2 4.5-5 6-3-1.5-5-4-5-6C3 5 5.5 3 8 3z" stroke="#E05B7F" stroke-width="1.2"/>
+                </svg>
+              </div>
+              <div>
+                <p class="card__reason-title">Seu perfil</p>
+                <p class="card__reason-text"><%= @session_record.analysis %></p>
+              </div>
             </div>
-            <div>
-              <p class="card__reason-title">Seu perfil</p>
-              <p class="card__reason-text"><%= @session_record.analysis %></p>
+            <div class="card__reason">
+              <div class="card__reason-icon card__reason-icon--blue">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M8 2a6 6 0 100 12A6 6 0 008 2z" stroke="#4F8EF7" stroke-width="1.2"/>
+                  <path d="M5 8l2 2 4-4" stroke="#4F8EF7" stroke-width="1.2" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <div>
+                <p class="card__reason-title">Por que esse filme</p>
+                <p class="card__reason-text"><%= @rec_data&.dig("reason") %></p>
+              </div>
             </div>
           </div>
-          <div class="card__reason">
-            <div class="card__reason-icon card__reason-icon--blue">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M8 2a6 6 0 100 12A6 6 0 008 2z" stroke="#4F8EF7" stroke-width="1.2"/>
-                <path d="M5 8l2 2 4-4" stroke="#4F8EF7" stroke-width="1.2" stroke-linecap="round"/>
-              </svg>
-            </div>
-            <div>
-              <p class="card__reason-title">Por que esse filme</p>
-              <p class="card__reason-text"><%= @rec_data&.dig("reason") %></p>
-            </div>
-          </div>
         </div>
-      </div>
 
       <%# Synopsis %>
       <div class="section-synopsis">
@@ -150,27 +150,29 @@
 
     </div><%# fim movie-content__left %>
 
-    <%# Right column %>
-    <div class="movie-content__right">
+      </div>
 
-      <%# Rating summary %>
-      <% if vote %>
-        <div class="card card--rating">
-          <h3 class="card__label">Avaliação</h3>
-          <div class="rating-score">
-            <span class="rating-score__number"><%= vote.round(1) %></span>
-            <div class="rating-score__stars">
-              <svg width="72" height="14" viewBox="0 0 72 14" fill="#F5C542">
-                <path d="M7 1l1.5 3 3.3.5-2.4 2.3.6 3.2L7 8.5l-3 1.5.6-3.2L2.2 4.5l3.3-.5z"/>
-                <path d="M21 1l1.5 3 3.3.5-2.4 2.3.6 3.2L21 8.5l-3 1.5.6-3.2L16.2 4.5l3.3-.5z"/>
-                <path d="M35 1l1.5 3 3.3.5-2.4 2.3.6 3.2L35 8.5l-3 1.5.6-3.2L30.2 4.5l3.3-.5z"/>
-                <path d="M49 1l1.5 3 3.3.5-2.4 2.3.6 3.2L49 8.5l-3 1.5.6-3.2L44.2 4.5l3.3-.5z"/>
-                <path d="M63 1l1.5 3 3.3.5-2.4 2.3.6 3.2L63 8.5l-3 1.5.6-3.2L58.2 4.5l3.3-.5z" fill-opacity="0.3"/>
-              </svg>
+      <%# Right column %>
+      <div class="movie-content__right">
+
+        <%# Rating summary %>
+        <% if vote %>
+          <div class="card card--rating">
+            <h3 class="card__label">Avaliação</h3>
+            <div class="rating-score">
+              <span class="rating-score__number"><%= vote.round(1) %></span>
+              <div class="rating-score__stars">
+                <svg width="72" height="14" viewBox="0 0 72 14" fill="#F5C542">
+                  <path d="M7 1l1.5 3 3.3.5-2.4 2.3.6 3.2L7 8.5l-3 1.5.6-3.2L2.2 4.5l3.3-.5z"/>
+                  <path d="M21 1l1.5 3 3.3.5-2.4 2.3.6 3.2L21 8.5l-3 1.5.6-3.2L16.2 4.5l3.3-.5z"/>
+                  <path d="M35 1l1.5 3 3.3.5-2.4 2.3.6 3.2L35 8.5l-3 1.5.6-3.2L30.2 4.5l3.3-.5z"/>
+                  <path d="M49 1l1.5 3 3.3.5-2.4 2.3.6 3.2L49 8.5l-3 1.5.6-3.2L44.2 4.5l3.3-.5z"/>
+                  <path d="M63 1l1.5 3 3.3.5-2.4 2.3.6 3.2L63 8.5l-3 1.5.6-3.2L58.2 4.5l3.3-.5z" fill-opacity="0.3"/>
+                </svg>
+              </div>
             </div>
           </div>
-        </div>
-      <% end %>
+        <% end %>
 
       <%# Where to watch %>
       <div class="card card--watch">
@@ -195,34 +197,46 @@
                 <span><%= s["name"] %></span>
               </div>
             <% end %>
-          <% end %>
-          <% if rent.any? %>
-            <p class="card__label">Aluguel</p>
-            <% rent.each do |r| %>
-              <div class="watch-item">
-                <% if r["logo_url"] %>
-                  <%= image_tag r["logo_url"], class: "watch-item__logo", alt: r["name"] %>
-                <% end %>
-                <span><%= r["name"] %></span>
-              </div>
+            <% rent = @rec_data&.dig("tmdb", "rent") || [] %>
+            <% buy = @rec_data&.dig("tmdb", "buy") || [] %>
+            <% if streaming.any? %>
+              <p class="card__label">Assinatura</p>
+              <% streaming.each do |s| %>
+                <div class="watch-item">
+                  <% if s["logo_url"] %>
+                    <%= image_tag s["logo_url"], class: "watch-item__logo", alt: s["name"] %>
+                  <% end %>
+                  <span><%= s["name"] %></span>
+                </div>
+              <% end %>
             <% end %>
-          <% end %>
-          <% if buy.any? %>
-            <p class="card__label">Comprar</p>
-            <% buy.each do |b| %>
-              <div class="watch-item">
-                <% if b["logo_url"] %>
-                  <%= image_tag b["logo_url"], class: "watch-item__logo", alt: b["name"] %>
-                <% end %>
-                <span><%= b["name"] %></span>
-              </div>
+            <% if rent.any? %>
+              <p class="card__label">Aluguel</p>
+              <% rent.each do |r| %>
+                <div class="watch-item">
+                  <% if r["logo_url"] %>
+                    <%= image_tag r["logo_url"], class: "watch-item__logo", alt: r["name"] %>
+                  <% end %>
+                  <span><%= r["name"] %></span>
+                </div>
+              <% end %>
             <% end %>
-          <% end %>
-          <% if streaming.empty? && rent.empty? && buy.empty? %>
-            <p>Indisponível no momento</p>
-          <% end %>
+            <% if buy.any? %>
+              <p class="card__label">Comprar</p>
+              <% buy.each do |b| %>
+                <div class="watch-item">
+                  <% if b["logo_url"] %>
+                    <%= image_tag b["logo_url"], class: "watch-item__logo", alt: b["name"] %>
+                  <% end %>
+                  <span><%= b["name"] %></span>
+                </div>
+              <% end %>
+            <% end %>
+            <% if streaming.empty? && rent.empty? && buy.empty? %>
+              <p>Indisponível no momento</p>
+            <% end %>
+          </div>
         </div>
-      </div>
 
     </div><%# fim movie-content__right %>
 

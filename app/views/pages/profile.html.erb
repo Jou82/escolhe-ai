@@ -1,16 +1,179 @@
-<h1>Minhas Plataformas</h1>
+<%# app/views/pages/profile.html.erb %>
+<%# Página de Conta & Perfil — sem sidebar nem footer %>
 
-<form action="<%= update_profile_path %>" method="post" data-turbo="false">
-  <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
-  <input type="hidden" name="_method" value="patch">
+<div class="account-page" data-controller="profile">
 
-  <% User::STREAMING_OPTIONS.each do |platform| %>
-    <label>
-      <input type="checkbox" name="streaming_platforms[]" value="<%= platform %>"
-        <%= "checked" if current_user.streaming_platforms&.include?(platform) %>>
-      <%= platform %>
-    </label><br>
-  <% end %>
+  <%# ── Page Header ─────────────────────────────────────── %>
+  <header class="account-page__header">
+    <span class="account-page__eyebrow">Gerencie suas preferências de curadoria digital</span>
+    <h1 class="account-page__title">Conta & Perfil</h1>
+  </header>
 
-  <button type="submit" class="btn-suggest">Salvar</button>
-</form>
+  <%# ── Main Grid ───────────────────────────────────────── %>
+  <div class="account-page__grid">
+
+    <%# ── LEFT COLUMN ─────────────────────────────────── %>
+    <div class="account-page__left">
+
+      <%# Card: Profile Info (visual — sem backend por enquanto) %>
+      <div class="profile-card">
+        <div class="profile-card__body">
+
+          <%# Avatar — inicial do email %>
+          <div class="profile-card__avatar-wrapper" data-controller="avatar-picker">
+            <div class="profile-card__avatar" data-action="click->avatar-picker#open">
+              <% if current_user.avatar.present? %>
+                <img src="<%= current_user.avatar_url %>" class="profile-card__avatar-img" alt="Avatar">
+              <% else %>
+                <span class="profile-card__initials"><%= current_user.email[0].upcase %></span>
+              <% end %>
+              <div class="profile-card__avatar-edit">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+              </div>
+            </div>
+
+            <%# Modal %>
+            <div class="avatar-modal" data-avatar-picker-target="modal">
+              <div class="avatar-modal__backdrop" data-action="click->avatar-picker#close"></div>
+              <div class="avatar-modal__box">
+                <h3 class="avatar-modal__title">Escolha seu avatar</h3>
+                <div class="avatar-modal__grid">
+                  <% User::AVATARS.each do |av| %>
+                    <button type="button"
+                            class="avatar-option <%= 'avatar-option--active' if current_user.avatar == av %>"
+                            data-action="click->avatar-picker#select"
+                            data-avatar="<%= av %>">
+                      <img src="https://res.cloudinary.com/dyplenk9j/image/upload/<%= av %>.png" alt="<%= av %>">
+                    </button>
+                  <% end %>
+                </div>
+                <div class="avatar-modal__actions">
+                  <button type="button" class="btn btn--outline" data-action="click->avatar-picker#close">Cancelar</button>
+                  <button type="button" class="btn btn--primary" data-action="click->avatar-picker#save">Salvar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <%# ───────────────────────────────────── %>
+          <%# INFOS %>
+          <div class="profile-card__fields">
+            <div class="profile-card__row">
+              <div class="form-group">
+                <label class="form-label" for="user_display_name">Display Name</label>
+                <input type="text" id="user_display_name" class="form-input" placeholder="Seu nome" value="<%= current_user.email.split('@').first.capitalize %>">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="user_email">Email Address</label>
+                <input type="email" id="user_email" class="form-input" value="<%= current_user.email %>" placeholder="seu@email.com" readonly>
+              </div>
+            </div>
+
+
+            <%#
+            <div class="form-group">
+              <label class="form-label" for="user_bio">Bio</label>
+              <textarea id="user_bio" class="form-textarea" rows="3" placeholder="Conte um pouco sobre você..."></textarea>
+            </div>
+            %>
+            <div class="profile-card__actions">
+              <button type="button" class="btn btn--primary">Salvar alterações</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <%# Card: Streaming Services (funcional) ─────────── %>
+      <div class="streaming-card" data-controller="streaming-search"
+           data-streaming-search-update-url-value="<%= update_profile_path %>">
+        <div class="streaming-card__header">
+          <h2 class="streaming-card__title">Serviços de Streaming</h2>
+          <p class="streaming-card__subtitle">Selecione as plataformas que utiliza para recomendações personalizadas.</p>
+        </div>
+
+        <div class="streaming-card__search">
+          <svg class="streaming-card__search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+          </svg>
+          <input type="text"
+                 class="streaming-card__search-input"
+                 placeholder="Procure serviços de streaming (Netflix, Prime, etc...)"
+                 data-streaming-search-target="input"
+                 data-action="input->streaming-search#filter focus->streaming-search#filter"
+                 autocomplete="off">
+
+          <%# Dropdown — gerado a partir de User::STREAMING_OPTIONS %>
+          <div class="streaming-card__dropdown" data-streaming-search-target="dropdown" hidden>
+            <% User::STREAMING_OPTIONS.each do |platform| %>
+              <button type="button"
+                      class="streaming-card__dropdown-item"
+                      data-action="click->streaming-search#select"
+                      data-platform="<%= platform %>">
+                <%= platform %>
+              </button>
+            <% end %>
+          </div>
+        </div>
+
+        <%# Tags já selecionadas pelo usuário %>
+        <div class="streaming-card__tags" data-streaming-search-target="tags">
+          <% (current_user.streaming_platforms || []).each do |platform| %>
+            <span class="streaming-tag" data-platform="<%= platform %>">
+              <span class="streaming-tag__name"><%= platform.upcase %></span>
+              <button type="button" class="streaming-tag__remove" data-action="click->streaming-search#remove" data-platform="<%= platform %>" aria-label="Remover <%= platform %>">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+              </button>
+            </span>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <%# ── RIGHT COLUMN ────────────────────────────────── %>
+    <div class="account-page__right">
+
+      <%# Card: Segurança (visual — sem backend por enquanto) %>
+      <div class="security-card">
+        <div class="security-card__icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+        </div>
+        <h2 class="security-card__title">Segurança</h2>
+        <p class="security-card__subtitle">Use uma palavra-passe forte para manter sua conta segura.</p>
+
+        <div class="security-card__form">
+          <div class="form-group">
+            <label class="form-label" for="current_password">Senha Atual</label>
+            <input type="password" id="current_password" class="form-input" placeholder="••••••••">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="new_password">Nova Senha</label>
+            <input type="password" id="new_password" class="form-input" placeholder="••••••••">
+          </div>
+          <button type="button" class="btn btn--outline btn--full">Atualizar senha</button>
+        </div>
+      </div>
+
+      <%# Card: Zona de Perigo (visual — sem backend por enquanto)
+      <div class="danger-card">
+        <div class="danger-card__icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/>
+          </svg>
+        </div>
+        <h2 class="danger-card__title">Zona de perigo</h2>
+        <p class="danger-card__subtitle">A eliminação da sua conta é permanente. Todas as suas listas e pontuações serão apagadas.</p>
+
+        <button type="button" class="btn btn--danger btn--full">
+          Deletar Conta
+        </button>
+      </div>
+      %>
+
+    </div>
+  </div>
+</div>

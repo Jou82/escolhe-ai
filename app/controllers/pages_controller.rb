@@ -8,8 +8,12 @@ class PagesController < ApplicationController
 
   def update_profile
     platforms = params[:streaming_platforms] || []
-    current_user.update(streaming_platforms: platforms.reject(&:blank?))
-    flash[:notice] = "Plataformas atualizadas!"
-    redirect_to profile_path
+    avatar = params.dig(:user, :avatar)
+
+    attrs = { streaming_platforms: platforms.reject(&:blank?) }
+    attrs[:avatar] = avatar if avatar.present?
+
+    current_user.update(attrs)
+    render json: { success: true }
   end
 end

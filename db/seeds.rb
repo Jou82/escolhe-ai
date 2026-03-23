@@ -21,3 +21,4 @@ User.create!([
 ])
 
 puts "Seed done! #{User.count} users created."
+

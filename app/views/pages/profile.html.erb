@@ -20,12 +20,45 @@
         <div class="profile-card__body">
 
           <%# Avatar — inicial do email %>
-          <div class="profile-card__avatar-wrapper">
-            <div class="profile-card__avatar profile-card__avatar--initials">
-              <span class="profile-card__initials"><%= current_user.email[0].upcase %></span>
+          <div class="profile-card__avatar-wrapper" data-controller="avatar-picker">
+            <div class="profile-card__avatar" data-action="click->avatar-picker#open">
+              <% if current_user.avatar.present? %>
+                <img src="<%= current_user.avatar_url %>" class="profile-card__avatar-img" alt="Avatar">
+              <% else %>
+                <span class="profile-card__initials"><%= current_user.email[0].upcase %></span>
+              <% end %>
+              <div class="profile-card__avatar-edit">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+              </div>
+            </div>
+
+            <%# Modal %>
+            <div class="avatar-modal" data-avatar-picker-target="modal">
+              <div class="avatar-modal__backdrop" data-action="click->avatar-picker#close"></div>
+              <div class="avatar-modal__box">
+                <h3 class="avatar-modal__title">Escolha seu avatar</h3>
+                <div class="avatar-modal__grid">
+                  <% User::AVATARS.each do |av| %>
+                    <button type="button"
+                            class="avatar-option <%= 'avatar-option--active' if current_user.avatar == av %>"
+                            data-action="click->avatar-picker#select"
+                            data-avatar="<%= av %>">
+                      <img src="https://res.cloudinary.com/dyplenk9j/image/upload/avatares_2/<%= av %>.png" alt="<%= av %>">
+                    </button>
+                  <% end %>
+                </div>
+                <div class="avatar-modal__actions">
+                  <button type="button" class="btn btn--outline" data-action="click->avatar-picker#close">Cancelar</button>
+                  <button type="button" class="btn btn--primary" data-action="click->avatar-picker#save">Salvar</button>
+                </div>
+              </div>
             </div>
           </div>
 
+          <%# ───────────────────────────────────── %>
           <%# INFOS %>
           <div class="profile-card__fields">
             <div class="profile-card__row">

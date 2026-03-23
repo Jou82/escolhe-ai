@@ -63,8 +63,6 @@ class MoviesController < ApplicationController
     session = current_user.sessions.find(params[:id])
     render json: { status: session.status, completed: session.status == 1 }
   end
-<<<<<<< Updated upstream
-=======
 end
 EOFcat > app/controllers/movies_controller.rb << 'EOF'
 class MoviesController < ApplicationController
@@ -132,5 +130,4 @@ class MoviesController < ApplicationController
     session = current_user.sessions.find(params[:id])
     render json: { status: session.status, completed: session.status == 1 }
   end
->>>>>>> Stashed changes
 end

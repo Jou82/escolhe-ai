@@ -411,6 +411,11 @@ $radius-lg:       16px;
   text-transform: uppercase;
   animation: tagIn 0.25s ease-out;
 
+  // ← Cor padrão única para todos os serviços
+  background: rgba($accent-blue, 0.12);
+  color: $accent-blue;
+  border: 1px solid rgba($accent-blue, 0.2);
+
   &__name {
     line-height: 1;
   }
@@ -430,85 +435,6 @@ $radius-lg:       16px;
     &:hover {
       opacity: 1;
     }
-  }
-
-  // Cores por serviço
-  &--netflix {
-    background: rgba(229, 9, 20, 0.2);
-    color: #FF4D58;
-    border: 1px solid rgba(229, 9, 20, 0.3);
-  }
-
-  &--hbo-max {
-    background: rgba(89, 60, 196, 0.2);
-    color: #A78BFA;
-    border: 1px solid rgba(89, 60, 196, 0.3);
-  }
-
-  &--disney {
-    background: rgba(255, 255, 255, 0.08);
-    color: $text-light;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-  }
-
-  &--amazon-prime {
-    background: rgba(26, 152, 255, 0.15);
-    color: #60B5FF;
-    border: 1px solid rgba(26, 152, 255, 0.25);
-  }
-
-  &--apple-tv {
-    background: rgba(255, 255, 255, 0.06);
-    color: $text-light;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-  }
-
-  &--crunchyroll {
-    background: rgba(245, 131, 31, 0.15);
-    color: #FFB060;
-    border: 1px solid rgba(245, 131, 31, 0.25);
-  }
-
-  &--paramount {
-    background: rgba(0, 100, 255, 0.15);
-    color: #5FA0FF;
-    border: 1px solid rgba(0, 100, 255, 0.25);
-  }
-
-  &--star {
-    background: rgba(195, 30, 80, 0.15);
-    color: #FF6B8A;
-    border: 1px solid rgba(195, 30, 80, 0.25);
-  }
-
-  &--globoplay {
-    background: rgba(255, 50, 20, 0.15);
-    color: #FF7060;
-    border: 1px solid rgba(255, 50, 20, 0.25);
-  }
-
-  &--mubi {
-    background: rgba(0, 200, 180, 0.12);
-    color: #5DE8D4;
-    border: 1px solid rgba(0, 200, 180, 0.2);
-  }
-
-  // Fallback
-  &--default {
-    background: rgba($accent-blue, 0.12);
-    color: $accent-blue;
-    border: 1px solid rgba($accent-blue, 0.2);
-  }
-}
-
-@keyframes tagIn {
-  from {
-    opacity: 0;
-    transform: scale(0.85);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
   }
 }
 
@@ -596,7 +522,7 @@ $radius-lg:       16px;
   }
 }
 
-// ─── Responsive ───────────────────────────────────────────────
+// ─── Responsive alterar para responsive depois ───────────────────────────────────────────────
 @media (max-width: 600px) {
   .account-page {
     padding: 2rem 1rem 4rem;

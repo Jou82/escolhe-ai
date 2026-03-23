@@ -176,10 +176,12 @@ $border-color:  rgba(255, 255, 255, 0.08);
   letter-spacing: 0.06em;
   cursor: pointer;
   transition: background 0.2s, transform 0.15s;
+  text-decoration: none;
 
   &:hover {
     background: lighten($accent-blue, 8%);
     transform: translateY(-1px);
+    text-decoration: none;
   }
   &--outline {
     background: transparent;

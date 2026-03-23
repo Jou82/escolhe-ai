@@ -46,7 +46,7 @@
                             class="avatar-option <%= 'avatar-option--active' if current_user.avatar == av %>"
                             data-action="click->avatar-picker#select"
                             data-avatar="<%= av %>">
-                      <img src="https://res.cloudinary.com/dyplenk9j/image/upload/avatares_2/<%= av %>.png" alt="<%= av %>">
+                      <img src="https://res.cloudinary.com/dyplenk9j/image/upload/<%= av %>.png" alt="<%= av %>">
                     </button>
                   <% end %>
                 </div>

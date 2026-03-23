@@ -14,10 +14,10 @@ class User < ApplicationRecord
   ].freeze
 
   AVATARS = [
-  "avatar_1",
-  "avatar_2",
-  "avatar_3",
-  "avatar_4"
+  "avatar_1_l9q2gs",
+  "avatar_2_fgbof8",
+  "avatar_3_m3psu0",
+  "avatar_4_xteife"
 ].freeze
 
   def self.from_omniauth(auth)
@@ -30,6 +30,6 @@ class User < ApplicationRecord
   def avatar_url
     return unless avatar.present?
 
-    "https://res.cloudinary.com/dyplenk9j/image/upload/avatares_2/#{avatar}.png"
+    "https://res.cloudinary.com/dyplenk9j/image/upload/#{avatar}.png"
   end
 end

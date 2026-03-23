@@ -15,7 +15,7 @@
   </div>
 
   <%# Back + Badge + Title %>
-  <div class="movie-header container">x
+  <div class="movie-header container">
     <%= link_to session_path(@session_record), class: "movie-header__back" do %>
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
         <path d="M10 3L5 8L10 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -41,21 +41,35 @@
       <span><%= @rec_data&.dig("genres")&.join(" • ") %></span>
     </div>
 
-   <div class="movie-header__actions">
+
+    <div class="movie-header__actions">
+      <% trailer_url = @rec_data&.dig("tmdb", "trailer_url") %>
       <% streaming = @rec_data&.dig("tmdb", "streaming") || [] %>
       <% rent = @rec_data&.dig("tmdb", "rent") || [] %>
       <% buy = @rec_data&.dig("tmdb", "buy") || [] %>
       <% watch_option = streaming.first || rent.first || buy.first %>
-      <% if watch_option %>
-        <%= link_to watch_option["link"], class: "btn-watch", target: "_blank" do %>
+
+      <% if trailer_url %>
+        <%= link_to trailer_url, class: "btn-watch", target: "_blank" do %>
           <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
             <circle cx="9" cy="9" r="8" stroke="white" stroke-width="1.2"/>
             <path d="M7 6l5 3-5 3V6z" fill="white"/>
           </svg>
-          ASSISTIR AGORA
+          ASSISTIR TRAILER
+        <% end %>
+      <% end %>
+
+      <% if watch_option %>
+        <%= link_to watch_option["link"], class: "btn-watch btn-watch--outline", target: "_blank" do %>
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <rect x="2" y="4" width="14" height="10" rx="2" stroke="white" stroke-width="1.2"/>
+            <path d="M7 7l4 2-4 2V7z" fill="white"/>
+          </svg>
+          ONDE ASSISTIR
         <% end %>
       <% end %>
     </div>
+  </div>
 
   <%# Main content grid %>
     <div class="movie-content container">
@@ -98,13 +112,43 @@
           </div>
         </div>
 
-        <%# Synopsis %>
-        <div class="section-synopsis">
-          <h2 class="section-title">Sinopse</h2>
-          <p class="synopsis-text">
-            <%= @rec_data&.dig("tmdb", "overview") || @movie.synopsis %>
-          </p>
+      <%# Synopsis %>
+      <div class="section-synopsis">
+        <h2 class="section-title">Sinopse</h2>
+        <p class="synopsis-text">
+          <%= @rec_data&.dig("tmdb", "overview") || @movie.synopsis %>
+        </p>
+      </div>
+
+      <%# Top Cast — dentro da coluna esquerda, depois da Sinopse %>
+      <% cast = @rec_data&.dig("tmdb", "cast") || [] %>
+      <% if cast.any? %>
+        <div class="section-cast">
+          <h2 class="section-title">Top Cast</h2>
+          <div class="cast-grid">
+            <% cast.each do |member| %>
+              <div class="cast-card">
+                <div class="cast-card__photo">
+                  <% if member["photo_url"] %>
+                    <%= image_tag member["photo_url"], alt: member["name"], class: "cast-card__img" %>
+                  <% else %>
+                    <div class="cast-card__placeholder">
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <circle cx="12" cy="8" r="4"/>
+                        <path d="M20 21a8 8 0 1 0-16 0"/>
+                      </svg>
+                    </div>
+                  <% end %>
+                </div>
+                <p class="cast-card__name"><%= member["name"] %></p>
+                <p class="cast-card__character"><%= member["character"] %></p>
+              </div>
+            <% end %>
+          </div>
         </div>
+      <% end %>
+
+    </div><%# fim movie-content__left %>
 
       </div>
 
@@ -130,17 +174,28 @@
           </div>
         <% end %>
 
-        <%# Where to watch %>
-          <%# Where to watch %>
-        <div class="card card--watch">
-          <h3 class="card__label">Onde assistir</h3>
-          <div class="watch-list">
+      <%# Where to watch %>
+      <div class="card card--watch">
+        <h3 class="card__label">Onde assistir</h3>
+        <div class="watch-list">
           <% all_streaming = @rec_data&.dig("tmdb", "streaming") || [] %>
-            <% user_platforms = current_user.streaming_platforms || [] %>
-            <% if user_platforms.any? %>
-              <% streaming = all_streaming.select { |s| user_platforms.include?(s["name"]) } %>
-            <% else %>
-              <% streaming = all_streaming %>
+          <% user_platforms = current_user.streaming_platforms || [] %>
+          <% if user_platforms.any? %>
+            <% streaming = all_streaming.select { |s| user_platforms.include?(s["name"]) } %>
+          <% else %>
+            <% streaming = all_streaming %>
+          <% end %>
+          <% rent = @rec_data&.dig("tmdb", "rent") || [] %>
+          <% buy = @rec_data&.dig("tmdb", "buy") || [] %>
+          <% if streaming.any? %>
+            <p class="card__label">Assinatura</p>
+            <% streaming.each do |s| %>
+              <div class="watch-item">
+                <% if s["logo_url"] %>
+                  <%= image_tag s["logo_url"], class: "watch-item__logo", alt: s["name"] %>
+                <% end %>
+                <span><%= s["name"] %></span>
+              </div>
             <% end %>
             <% rent = @rec_data&.dig("tmdb", "rent") || [] %>
             <% buy = @rec_data&.dig("tmdb", "buy") || [] %>
@@ -183,7 +238,8 @@
           </div>
         </div>
 
-      </div>
-    </div>
-  </div>
-</div>
+    </div><%# fim movie-content__right %>
+
+  </div><%# fim movie-content %>
+
+</div><%# fim movie-detail %>

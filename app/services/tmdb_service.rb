@@ -2,8 +2,8 @@
 class TmdbService
   BASE_URL = "https://api.themoviedb.org/3"
 
-  # 🔥 NOVAS CONSTANTES (já estão no seu código)
-  TIMEOUT = 4
+  # 🔥 OTIMIZADO: Reduzido para 2s e sem retry
+  TIMEOUT = 5
   MAX_RETRIES = 1
 
   def initialize(title, year = nil)
@@ -34,7 +34,7 @@ class TmdbService
     "Looke" => 47
   }.freeze
 
-  # 🔥 NOVO: Método para testar conexão (usado na detecção de rede)
+  # 🔥 Método para testar conexão
   def self.test_connection
     response = Faraday.get(
       "#{BASE_URL}/movie/550",
@@ -45,7 +45,7 @@ class TmdbService
     false
   end
 
-  # 🔥 NOVO: Busca filmes em uma plataforma específica
+  # 🔥 Busca filmes em uma plataforma específica
   def self.discover_by_single_platform(platform_name, exclude_titles = [], limit: 20)
     provider_id = PROVIDER_IDS[platform_name]
     return [] unless provider_id
@@ -85,27 +85,27 @@ class TmdbService
     end
   end
 
-  def self.find_candidates(movies, top_n: 15)
+  # 🔥 MÉTODO PRINCIPAL - VERSÃO CORRIGIDA (SEM DUPLICAÇÃO)
+  def self.find_candidates(movies, top_n: 10)
     # 1. Buscar os 3 filmes em paralelo
     user_movies = movies.map { |title| Thread.new { new(title).send(:search_movie) } }
                         .filter_map do |t|
                           movie = t.value
                           next unless movie
-
                           { tmdb_id: movie["id"], title: movie["title"] }
                         end
 
     return [] if user_movies.empty?
 
-    # 2. Buscar relacionados + filmografia do diretor em paralelo (2 threads por filme)
+    # 🔥 USANDO VERSÃO COM CACHE
     threads = user_movies.flat_map do |um|
       [
-        Thread.new { [:related, um[:tmdb_id], fetch_related(um[:tmdb_id])] },
-        Thread.new { [:director, um[:tmdb_id], fetch_director_filmography(um[:tmdb_id])] }
+        Thread.new { [:related, um[:tmdb_id], fetch_related_cached(um[:tmdb_id])] },
+        Thread.new { [:director, um[:tmdb_id], fetch_director_filmography_cached(um[:tmdb_id])] }
       ]
     end
 
-    # 3. Coletar resultados
+    # 2. Coletar resultados
     user_director_ids = Set.new
     similar_by_source = {}
     director_film_ids = Set.new
@@ -131,18 +131,18 @@ class TmdbService
 
     scored = score_candidates(similar_by_source, user_movies)
 
-    # Remover filmes dos mesmos diretores APÓS o scoring (sem chamadas extras!)
+    # Remover filmes dos mesmos diretores APÓS o scoring
     scored.reject { |c| director_film_ids.include?(c[:tmdb_id]) }
           .first(top_n)
   end
 
-  # 🔥 MÉTODO COM TIMEOUT E RETRY (já está no seu código)
+  # 🔥 MÉTODO COM TIMEOUT E RETRY
   def self.fetch_related(movie_id)
     retries = 0
 
     begin
       Timeout.timeout(TIMEOUT) do
-        threads = [1, 2].flat_map do |page|
+        threads = [1].flat_map do |page|
           [
             Thread.new do
               response = Faraday.get(
@@ -177,7 +177,7 @@ class TmdbService
     end
   end
 
-  # 🔥 MÉTODO COM TIMEOUT E RETRY (já está no seu código)
+  # 🔥 MÉTODO COM TIMEOUT E RETRY
   def self.fetch_director_filmography(movie_id)
     retries = 0
 
@@ -276,7 +276,6 @@ class TmdbService
 
   def self.frequency_score(frequency, total_sources)
     return 0 if total_sources.zero?
-
     (frequency.to_f / total_sources * 100).clamp(0, 100)
   end
 
@@ -310,7 +309,7 @@ class TmdbService
     end
   end
 
-  # 🔥 MÉTODO COM TIMEOUT E RETRY (já está no seu código)
+  # 🔥 MÉTODO COM TIMEOUT E RETRY
   def self.discover_by_platform(platform_names, genre_ids, exclude_titles = [], limit: 10)
     provider_ids = platform_names.filter_map { |name| PROVIDER_IDS[name] }
     return [] if provider_ids.empty? || genre_ids.empty?
@@ -391,7 +390,7 @@ class TmdbService
     }
   end
 
-  # 🔥 MÉTODO COM TIMEOUT E RETRY (já está no seu código)
+  # 🔥 MÉTODO COM TIMEOUT E RETRY
   def self.enrich_recommendations(recommendations)
     recommendations.map do |rec|
       retries = 0
@@ -418,6 +417,66 @@ class TmdbService
       end
 
       rec.merge("tmdb" => tmdb_data)
+    end
+  end
+
+  # 🔥 MÉTODOS DE CACHE
+  def self.cache(key, expires_in: 7.days)
+    Rails.cache.fetch(key, expires_in: expires_in) do
+      yield if block_given?
+    end
+  end
+
+  def self.fetch_related_cached(movie_id)
+    cache_key = "tmdb:related:#{movie_id}"
+    cache(cache_key, expires_in: 7.days) do
+      fetch_related(movie_id)
+    end
+  end
+
+  def self.fetch_director_filmography_cached(movie_id)
+    cache_key = "tmdb:director_films:#{movie_id}"
+    cache(cache_key, expires_in: 7.days) do
+      fetch_director_filmography(movie_id)
+    end
+  end
+
+  def self.movie_available_on_streaming?(tmdb_id, platform_name, country = "BR")
+    provider_id = PROVIDER_IDS[platform_name]
+    return false unless provider_id
+
+    retries = 0
+    begin
+      Timeout.timeout(TIMEOUT) do
+        response = Faraday.get(
+          "#{BASE_URL}/movie/#{tmdb_id}/watch/providers",
+          { api_key: ENV.fetch("TMDB_API_KEY", nil) }
+        )
+
+        return false unless response.status == 200
+
+        data = JSON.parse(response.body)
+        providers = data.dig("results", country, "flatrate") || []
+
+        providers.any? { |p| p["provider_id"] == provider_id }
+      end
+    rescue Timeout::Error, Faraday::ConnectionFailed, Faraday::TimeoutError => e
+      retries += 1
+      if retries <= MAX_RETRIES
+        Rails.logger.warn "TMDB availability check timeout (tentativa #{retries}) para filme #{tmdb_id}"
+        sleep(2)
+        retry
+      else
+        Rails.logger.error "TMDB availability check falhou: #{e.message}"
+        false
+      end
+    end
+  end
+
+  def self.movie_available_on_streaming_cached?(tmdb_id, platform_name, country = "BR")
+    cache_key = "tmdb:availability:#{tmdb_id}:#{platform_name}:#{country}"
+    cache(cache_key, expires_in: 1.day) do
+      movie_available_on_streaming?(tmdb_id, platform_name, country)
     end
   end
 
@@ -470,7 +529,6 @@ class TmdbService
 
   def poster_url(path, size = "w500")
     return nil unless path
-
     "https://image.tmdb.org/t/p/#{size}#{path}"
   end
 end

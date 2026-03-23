@@ -1,10 +1,11 @@
 class AnthropicService
   class RecommendationError < StandardError; end
 
-  def initialize(movies, candidates = [], user_platforms = [])
+  def initialize(movies, candidates = [], user_platforms = [], exclude_titles = [])
     @movies = movies
     @candidates = candidates
     @user_platforms = user_platforms
+    @exclude_titles = exclude_titles
   end
 
   def call
@@ -40,6 +41,14 @@ class AnthropicService
     end
   end
 
+  def format_exclude_titles
+    if @exclude_titles.any?
+      "\n\n**FILMES PROIBIDOS (NÃO RECOMENDAR SOB NENHUMA HIPÓTESE):** #{@exclude_titles.join(', ')}"
+    else
+      ""
+    end
+  end
+
   def client
     @client ||= Anthropic::Client.new(api_key: ENV.fetch("ANTHROPIC_API_KEY", nil))
   end
@@ -52,6 +61,7 @@ class AnthropicService
        estilo visual e abordagem de direção.
 
        #{platform_instruction}
+       #{format_exclude_titles}
 
        Responda APENAS com JSON válido, sem nenhum texto antes ou depois.
        Use exatamente esta estrutura:
@@ -85,6 +95,7 @@ class AnthropicService
        Regras:
        - Recomende exatamente 3 filmes
        - NUNCA recomende filmes que o usuário já listou
+       - NUNCA recomende filmes listados em "FILMES PROIBIDOS"
        - Somente filmes disponíveis em streaming no Brasil
        - O motivo deve referenciar padrões específicos encontrados nos 3 filmes
        - Inclua o título original quando for filme estrangeiro

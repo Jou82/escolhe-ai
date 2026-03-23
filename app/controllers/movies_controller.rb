@@ -15,53 +15,54 @@ class MoviesController < ApplicationController
   end
 
   def create
-    @movies = params[:movies].split(/,|(?:\se\s)/).map(&:strip).reject(&:blank?)
+  @movies = params[:movies].split(/,|(?:\se\s)/).map(&:strip).reject(&:blank?)
 
-    if @movies.length != 3
-      flash[:alert] = "Por favor, digite exatamente 3 filmes separados por vírgula."
-      return redirect_to root_path
+  if @movies.length != 3
+    flash[:alert] = "Por favor, digite exatamente 3 filmes separados por vírgula."
+    return redirect_to root_path
+  end
+
+  # ALTERAÇÃO: Busca recomendações anteriores para evitar repetição
+  previous_recommendations = current_user.sessions
+    .where(status: 1)
+    .where.not(recommendations_data: nil)
+    .flat_map { |s| JSON.parse(s.recommendations_data) rescue [] }
+    .map { |rec| rec["title"] }
+    .uniq
+
+  Rails.logger.info "📚 Filmes já recomendados: #{previous_recommendations.join(', ')}"
+
+  # Cria a sessão com status "processing" (0)
+  session_record = current_user.sessions.create!(
+    input_movies: @movies,
+    status: 0,
+    analysis: nil,
+    recommendations_data: nil
+  )
+
+  # Enfileira o job com os filmes a serem excluídos
+  GenerateRecommendationsJob.perform_later(
+    current_user.id,
+    @movies,
+    previous_recommendations,  # ALTERAÇÃO: passa filmes já recomendados
+    session_record.id
+  )
+
+  redirect_to processing_movies_path(id: session_record.id)
+end
+
+  def processing
+    @session = current_user.sessions.find(params[:id])
+
+    # Se já estiver completo (status = 1), redireciona para os resultados
+    if @session.status == 1
+      redirect_to session_path(@session)
     end
+    # Se não, mostra a página de processing
+  end
 
-    if params[:exclude].present?
-      exclude = params[:exclude].split(",").map(&:strip)
-      result = RecommendationPipeline.new(@movies, current_user, exclude).call
-    else
-      cache_key = "recommendations/#{@movies.sort.join('|')}"
-      result = Rails.cache.fetch(cache_key, expires_in: 30.days) do
-        RecommendationPipeline.new(@movies, current_user).call
-      end
-    end
-
-    session_record = current_user.sessions.create!(
-      analysis: result[:analysis],
-      recommendations_data: result[:recommendations].to_json
-    )
-
-    @movies.each do |title|
-      movie = Movie.find_or_create_by!(title: title)
-      session_record.likes.create!(movie: movie, suggestion: false)
-    end
-
-    result[:recommendations].each do |rec|
-      movie = Movie.find_or_create_by!(title: rec["title"]) do |m|
-        m.release_year = rec["year"] || rec.dig("tmdb", :release_date)&.slice(0, 4)&.to_i
-        m.synopsis = rec.dig("tmdb", :overview) || rec["reason"]
-      end
-
-      if rec["genres"].present?
-        rec["genres"].each do |genre_name|
-          genre = Genre.find_or_create_by!(name: genre_name)
-          MovieGenre.find_or_create_by!(movie: movie, genre: genre)
-        end
-      end
-
-      session_record.likes.create!(movie: movie, suggestion: true)
-    end
-
-    redirect_to session_path(session_record)
-
-  rescue AnthropicService::RecommendationError => e
-    flash[:alert] = "Erro ao gerar recomendações: #{e.message}"
-    redirect_to root_path
+  def check_status
+    session = current_user.sessions.find(params[:id])
+    render json: { status: session.status, completed: session.status == 1 }
   end
 end

@@ -141,7 +141,7 @@ class TmdbService
   def self.fetch_related(movie_id)
     with_retry("fetch_related") do
       Timeout.timeout(TIMEOUT) do
-        threads = [1, 2].flat_map do |page|
+        threads = [1].flat_map do |page|
           [
             Thread.new do
               r = Faraday.get("#{BASE_URL}/movie/#{movie_id}/recommendations",
@@ -316,6 +316,66 @@ class TmdbService
   # ─────────────────────────────────────────
   # PRIVATE
   # ─────────────────────────────────────────
+
+  # 🔥 MÉTODOS DE CACHE
+  def self.cache(key, expires_in: 7.days)
+    Rails.cache.fetch(key, expires_in: expires_in) do
+      yield if block_given?
+    end
+  end
+
+  def self.fetch_related_cached(movie_id)
+    cache_key = "tmdb:related:#{movie_id}"
+    cache(cache_key, expires_in: 7.days) do
+      fetch_related(movie_id)
+    end
+  end
+
+  def self.fetch_director_filmography_cached(movie_id)
+    cache_key = "tmdb:director_films:#{movie_id}"
+    cache(cache_key, expires_in: 7.days) do
+      fetch_director_filmography(movie_id)
+    end
+  end
+
+  def self.movie_available_on_streaming?(tmdb_id, platform_name, country = "BR")
+    provider_id = PROVIDER_IDS[platform_name]
+    return false unless provider_id
+
+    retries = 0
+    begin
+      Timeout.timeout(TIMEOUT) do
+        response = Faraday.get(
+          "#{BASE_URL}/movie/#{tmdb_id}/watch/providers",
+          { api_key: ENV.fetch("TMDB_API_KEY", nil) }
+        )
+
+        return false unless response.status == 200
+
+        data = JSON.parse(response.body)
+        providers = data.dig("results", country, "flatrate") || []
+
+        providers.any? { |p| p["provider_id"] == provider_id }
+      end
+    rescue Timeout::Error, Faraday::ConnectionFailed, Faraday::TimeoutError => e
+      retries += 1
+      if retries <= MAX_RETRIES
+        Rails.logger.warn "TMDB availability check timeout (tentativa #{retries}) para filme #{tmdb_id}"
+        sleep(2)
+        retry
+      else
+        Rails.logger.error "TMDB availability check falhou: #{e.message}"
+        false
+      end
+    end
+  end
+
+  def self.movie_available_on_streaming_cached?(tmdb_id, platform_name, country = "BR")
+    cache_key = "tmdb:availability:#{tmdb_id}:#{platform_name}:#{country}"
+    cache(cache_key, expires_in: 1.day) do
+      movie_available_on_streaming?(tmdb_id, platform_name, country)
+    end
+  end
 
   private
 

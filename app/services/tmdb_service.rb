@@ -2,6 +2,10 @@
 class TmdbService
   BASE_URL = "https://api.themoviedb.org/3"
 
+  # 🔥 NOVAS CONSTANTES (já estão no seu código)
+  TIMEOUT = 4
+  MAX_RETRIES = 1
+
   def initialize(title, year = nil)
     @title = title
     @year = year
@@ -29,6 +33,57 @@ class TmdbService
     "Star+" => 619,
     "Looke" => 47
   }.freeze
+
+  # 🔥 NOVO: Método para testar conexão (usado na detecção de rede)
+  def self.test_connection
+    response = Faraday.get(
+      "#{BASE_URL}/movie/550",
+      { api_key: ENV.fetch("TMDB_API_KEY", nil) }
+    )
+    response.status == 200
+  rescue
+    false
+  end
+
+  # 🔥 NOVO: Busca filmes em uma plataforma específica
+  def self.discover_by_single_platform(platform_name, exclude_titles = [], limit: 20)
+    provider_id = PROVIDER_IDS[platform_name]
+    return [] unless provider_id
+
+    response = Faraday.get(
+      "#{BASE_URL}/discover/movie",
+      {
+        api_key: ENV.fetch("TMDB_API_KEY", nil),
+        language: "pt-BR",
+        watch_region: "BR",
+        with_watch_providers: provider_id,
+        sort_by: "popularity.desc",
+        page: 1,
+        "vote_count.gte" => 50
+      }
+    )
+
+    movies = JSON.parse(response.body)["results"] || []
+
+    movies.reject { |m| exclude_titles.include?(m["title"]) }
+          .first(limit)
+          .map do |movie|
+      {
+        tmdb_id: movie["id"],
+        title: movie["title"],
+        original_title: movie["original_title"],
+        overview: movie["overview"],
+        poster_path: movie["poster_path"],
+        vote_average: movie["vote_average"] || 0,
+        vote_count: movie["vote_count"] || 0,
+        popularity: movie["popularity"] || 0,
+        release_date: movie["release_date"],
+        genre_ids: movie["genre_ids"] || [],
+        frequency: 1,
+        score: 50
+      }
+    end
+  end
 
   def self.find_candidates(movies, top_n: 15)
     # 1. Buscar os 3 filmes em paralelo
@@ -81,67 +136,101 @@ class TmdbService
           .first(top_n)
   end
 
-  # Combina /recommendations + /similar (2 páginas cada) pra maximizar overlap
-  # Combina /recommendations + /similar (2 páginas cada) em paralelo
+  # 🔥 MÉTODO COM TIMEOUT E RETRY (já está no seu código)
   def self.fetch_related(movie_id)
-    threads = [1, 2].flat_map do |page|
-      [
-        Thread.new do
-          response = Faraday.get(
-            "#{BASE_URL}/movie/#{movie_id}/recommendations",
-            { api_key: ENV.fetch("TMDB_API_KEY", nil), language: "pt-BR", page: page }
-          )
-          JSON.parse(response.body)["results"] || []
-        end,
-        Thread.new do
-          response = Faraday.get(
-            "#{BASE_URL}/movie/#{movie_id}/similar",
-            { api_key: ENV.fetch("TMDB_API_KEY", nil), language: "pt-BR", page: page }
-          )
-          JSON.parse(response.body)["results"] || []
+    retries = 0
+
+    begin
+      Timeout.timeout(TIMEOUT) do
+        threads = [1, 2].flat_map do |page|
+          [
+            Thread.new do
+              response = Faraday.get(
+                "#{BASE_URL}/movie/#{movie_id}/recommendations",
+                { api_key: ENV.fetch("TMDB_API_KEY", nil), language: "pt-BR", page: page }
+              )
+              JSON.parse(response.body)["results"] || []
+            end,
+            Thread.new do
+              response = Faraday.get(
+                "#{BASE_URL}/movie/#{movie_id}/similar",
+                { api_key: ENV.fetch("TMDB_API_KEY", nil), language: "pt-BR", page: page }
+              )
+              JSON.parse(response.body)["results"] || []
+            end
+          ]
         end
-      ]
-    end
 
-    all = threads.flat_map(&:value)
-    all.uniq { |m| m["id"] }
+        all = threads.flat_map(&:value)
+        all.uniq { |m| m["id"] }
+      end
+    rescue Timeout::Error, Faraday::ConnectionFailed, Faraday::TimeoutError => e
+      retries += 1
+      if retries <= MAX_RETRIES
+        Rails.logger.warn "TMDB fetch_related timeout (tentativa #{retries}), tentando novamente..."
+        sleep(2)
+        retry
+      else
+        Rails.logger.error "TMDB fetch_related falhou: #{e.message}"
+        []
+      end
+    end
   end
 
-  # Busca filmografia do diretor — retorna [director_ids, filmes]
+  # 🔥 MÉTODO COM TIMEOUT E RETRY (já está no seu código)
   def self.fetch_director_filmography(movie_id)
-    # 1. Pegar credits do filme pra encontrar o diretor
-    credits_response = Faraday.get(
-      "#{BASE_URL}/movie/#{movie_id}/credits",
-      { api_key: ENV.fetch("TMDB_API_KEY", nil) }
-    )
-    credits = JSON.parse(credits_response.body)
-    directors = credits["crew"]&.select { |c| c["job"] == "Director" } || []
-    return [[], []] if directors.empty?
+    retries = 0
 
-    director_ids = directors.map { |d| d["id"] }
-    all_films = []
+    begin
+      Timeout.timeout(TIMEOUT) do
+        credits_response = Faraday.get(
+          "#{BASE_URL}/movie/#{movie_id}/credits",
+          { api_key: ENV.fetch("TMDB_API_KEY", nil) }
+        )
+        credits = JSON.parse(credits_response.body)
+        directors = credits["crew"]&.select { |c| c["job"] == "Director" } || []
+        return [[], []] if directors.empty?
 
-    # 2. Buscar filmes de cada diretor
-    directors.each do |director|
-      person_response = Faraday.get(
-        "#{BASE_URL}/person/#{director['id']}/movie_credits",
-        { api_key: ENV.fetch("TMDB_API_KEY", nil), language: "pt-BR" }
-      )
-      person_credits = JSON.parse(person_response.body)
+        director_ids = directors.map { |d| d["id"] }
+        all_films = []
 
-      films = person_credits["crew"]
-              &.select { |c| c["job"] == "Director" }
-              &.reject { |c| c["id"] == movie_id } || []
-      all_films.concat(films)
+        directors.each do |director|
+          begin
+            Timeout.timeout(TIMEOUT) do
+              person_response = Faraday.get(
+                "#{BASE_URL}/person/#{director['id']}/movie_credits",
+                { api_key: ENV.fetch("TMDB_API_KEY", nil), language: "pt-BR" }
+              )
+              person_credits = JSON.parse(person_response.body)
+              films = person_credits["crew"]
+                      &.select { |c| c["job"] == "Director" }
+                      &.reject { |c| c["id"] == movie_id } || []
+              all_films.concat(films)
+            end
+          rescue Timeout::Error, Faraday::ConnectionFailed, Faraday::TimeoutError => e
+            Rails.logger.warn "TMDB timeout for director #{director['id']}: #{e.message}"
+            next
+          end
+        end
+
+        [director_ids, all_films]
+      end
+    rescue Timeout::Error, Faraday::ConnectionFailed, Faraday::TimeoutError => e
+      retries += 1
+      if retries <= MAX_RETRIES
+        Rails.logger.warn "TMDB fetch_director_filmography timeout (tentativa #{retries}), tentando novamente..."
+        sleep(2)
+        retry
+      else
+        Rails.logger.error "TMDB fetch_director_filmography falhou: #{e.message}"
+        [[], []]
+      end
     end
-
-    [director_ids, all_films]
   end
 
-  # ← fix: def self.score_candidates (era def score.score_candidates)
   def self.score_candidates(similar_by_source, user_movies)
-    user_ids = user_movies.map { |m| m[:tmdb_id] } # ← fix: user_movies (era user.movies)
-    total_sources = similar_by_source.keys.size # ← fix: .keys (era .key)
+    user_ids = user_movies.map { |m| m[:tmdb_id] }
+    total_sources = similar_by_source.keys.size
     candidate_map = {}
 
     similar_by_source.each_value do |similar_movies|
@@ -188,7 +277,7 @@ class TmdbService
   def self.frequency_score(frequency, total_sources)
     return 0 if total_sources.zero?
 
-    (frequency.to_f / total_sources * 100).clamp(0, 100) # ← fix: .to_f (era .to.f)
+    (frequency.to_f / total_sources * 100).clamp(0, 100)
   end
 
   def self.rating_score(vote_average)
@@ -221,28 +310,44 @@ class TmdbService
     end
   end
 
+  # 🔥 MÉTODO COM TIMEOUT E RETRY (já está no seu código)
   def self.discover_by_platform(platform_names, genre_ids, exclude_titles = [], limit: 10)
     provider_ids = platform_names.filter_map { |name| PROVIDER_IDS[name] }
     return [] if provider_ids.empty? || genre_ids.empty?
 
     results = []
+    retries = 0
 
-    provider_ids.each do |provider_id|
-      response = Faraday.get(
-        "#{BASE_URL}/discover/movie",
-        {
-          api_key: ENV.fetch("TMDB_API_KEY", nil),
-          language: "pt-BR",
-          watch_region: "BR",
-          with_watch_providers: provider_id,
-          with_genres: genre_ids.first(3).join(","),
-          sort_by: "vote_average.desc",
-          "vote_count.gte" => 50,
-          page: 1
-        }
-      )
-      movies = JSON.parse(response.body)["results"] || []
-      results.concat(movies)
+    begin
+      Timeout.timeout(TIMEOUT) do
+        provider_ids.each do |provider_id|
+          response = Faraday.get(
+            "#{BASE_URL}/discover/movie",
+            {
+              api_key: ENV.fetch("TMDB_API_KEY", nil),
+              language: "pt-BR",
+              watch_region: "BR",
+              with_watch_providers: provider_id,
+              with_genres: genre_ids.first(3).join(","),
+              sort_by: "vote_average.desc",
+              "vote_count.gte" => 50,
+              page: 1
+            }
+          )
+          movies = JSON.parse(response.body)["results"] || []
+          results.concat(movies)
+        end
+      end
+    rescue Timeout::Error, Faraday::ConnectionFailed, Faraday::TimeoutError => e
+      retries += 1
+      if retries <= MAX_RETRIES
+        Rails.logger.warn "TMDB discover_by_platform timeout (tentativa #{retries}), tentando novamente..."
+        sleep(2)
+        retry
+      else
+        Rails.logger.error "TMDB discover_by_platform falhou: #{e.message}"
+        return []
+      end
     end
 
     results.uniq { |m| m["id"] }
@@ -265,7 +370,7 @@ class TmdbService
       }
     end
   end
-  
+
   def call
     movie = search_movie
     return nil unless movie
@@ -286,11 +391,31 @@ class TmdbService
     }
   end
 
+  # 🔥 MÉTODO COM TIMEOUT E RETRY (já está no seu código)
   def self.enrich_recommendations(recommendations)
     recommendations.map do |rec|
-      tmdb_data = new(rec["title"], rec["year"]).call
+      retries = 0
+      tmdb_data = nil
 
-      tmdb_data = new(rec["original_title"], rec["year"]).call if tmdb_data.nil? && rec["original_title"]
+      begin
+        Timeout.timeout(TIMEOUT) do
+          tmdb_data = new(rec["title"], rec["year"]).call
+
+          if tmdb_data.nil? && rec["original_title"]
+            tmdb_data = new(rec["original_title"], rec["year"]).call
+          end
+        end
+      rescue Timeout::Error, Faraday::ConnectionFailed, Faraday::TimeoutError => e
+        retries += 1
+        if retries <= MAX_RETRIES
+          Rails.logger.warn "TMDB enrich timeout (tentativa #{retries}) para '#{rec["title"]}', tentando novamente..."
+          sleep(2)
+          retry
+        else
+          Rails.logger.warn "TMDB timeout enriching '#{rec["title"]}': #{e.message}"
+          tmdb_data = nil
+        end
+      end
 
       rec.merge("tmdb" => tmdb_data)
     end
@@ -308,8 +433,16 @@ class TmdbService
     params[:year] = @year if @year
 
     response = Faraday.get("#{BASE_URL}/search/movie", params)
-    results = JSON.parse(response.body)["results"]
+    return nil unless response.status == 200
+
+    body = response.body
+    return nil if body.nil? || body.start_with?("<")
+
+    results = JSON.parse(body)["results"]
     results&.first
+  rescue JSON::ParserError, Faraday::Error => e
+    Rails.logger.warn("TMDB error searching '#{@title}': #{e.message}")
+    nil
   end
 
   def fetch_providers(movie_id)

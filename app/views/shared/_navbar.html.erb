@@ -41,7 +41,7 @@
           </div>
         </div>
       <% else %>
-        <%= link_to "Entrar", new_user_session_path, class: "btn-enter" %>
+        <button class="btn-enter" data-action="click->login-modal#open">Entrar</button>
       <% end %>
     </div>
   </div>

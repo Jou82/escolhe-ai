@@ -186,6 +186,9 @@ class TmdbService
           rescue Timeout::Error, Faraday::ConnectionFailed, Faraday::TimeoutError => e
             Rails.logger.warn "TMDB timeout for director #{director['id']}: #{e.message}"
           end
+        rescue Timeout::Error, Faraday::ConnectionFailed, Faraday::TimeoutError => e
+          Rails.logger.warn "TMDB timeout for director #{director['id']}: #{e.message}"
+          next
         end
 
         [director_ids, all_films]

@@ -103,7 +103,7 @@ class AnthropicService
   def platform_instruction
     if @user_platforms.any?
       "O usuário possui APENAS estas plataformas: #{@user_platforms.join(', ')}. " \
-      "Recomende SOMENTE filmes disponíveis nessas plataformas. Isso é OBRIGATÓRIO."
+        "Recomende SOMENTE filmes disponíveis nessas plataformas. Isso é OBRIGATÓRIO."
     else
       "Recomende filmes disponíveis em qualquer plataforma de streaming no Brasil."
     end

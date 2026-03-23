@@ -40,7 +40,7 @@ body {
 .hero-content {
   position: relative;
   z-index: 1;
-  max-width: 680px;
+  max-width: 850px;
   margin: 0 auto;
 }
 
@@ -68,11 +68,11 @@ body {
   letter-spacing: -0.03em;
 
   .highlight {
-  background: linear-gradient(180deg, #60a5fa 0%, #2563eb 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  display: block;
+    background: linear-gradient(180deg, #60a5fa 0%, #2563eb 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: block;
   }
 }
 
@@ -85,56 +85,143 @@ body {
   font-weight: 400;
 }
 
-// ===== SEARCH BOX =====
-.search-box {
+// ===== CONTAINER DE BUSCA (Douglas & Colegas) =====
+.search-container-wrapper {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto 1rem;
+  overflow: visible !important;
+}
+
+.search-box-flex {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+  width: 100%;
+}
+
+.input-group-glass {
+  position: relative;
+  flex: 1;
   display: flex;
   align-items: center;
-  max-width: 520px;
-  margin: 0 auto 1rem;
-  background: $bg-input;
-  border: 1px solid $border-input;
-  border-radius: 14px;
-  padding: 0.4rem 0.4rem 0.4rem 1.2rem;
-  transition: border-color 0.3s;
+}
 
-  &:focus-within {
-    border-color: rgba(59, 130, 246, 0.3);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.06);
+// ===== TOM SELECT (Interface Inteligente) =====
+// ===== TOM SELECT (Interface Inteligente Corrigida) =====
+.ts-wrapper.tom-select-custom {
+  width: 100% !important;
+  background: transparent !important;
+
+  // Garante que a barra cresça se necessário, mas mantenha o alinhamento
+  .ts-control {
+    background: $bg-input !important;
+    border: 1px solid $border-input !important;
+    border-radius: 14px !important;
+    padding: 8px 12px 8px 3rem !important; // Aumentamos o padding lateral
+    min-height: 58px !important; // Um pouco mais alta para caber as tags confortavelmente
+    display: flex !important;
+    flex-wrap: wrap !important; // Permite que as tags quebrem linha se houver muitas
+    gap: 6px !important;
+    color: $text-light !important;
+    transition: all 0.3s ease;
+    cursor: text !important;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+
+    &:focus-within {
+      border-color: rgba(59, 130, 246, 0.5) !important;
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1), inset 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+    }
+
+    // Estilização das Tags (Os filmes selecionados)
+    .item {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.1)) !important;
+      border: 1px solid rgba(59, 130, 246, 0.3) !important;
+      color: #fff !important;
+      border-radius: 8px !important;
+      padding: 4px 10px !important;
+      font-size: 0.85rem !important;
+      font-weight: 500 !important;
+      display: flex !important;
+      align-items: center !important;
+      backdrop-filter: blur(4px);
+      margin: 2px 0 !important;
+
+      // O botão de remover (X)
+      .remove {
+        border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
+        margin-left: 8px !important;
+        padding-left: 6px !important;
+        font-size: 14px !important;
+        opacity: 0.6;
+        &:hover {
+          opacity: 1;
+          color: #ff4b4b !important;
+        }
+      }
+    }
+
+    // O campo de texto onde você digita
+    input {
+      color: white !important;
+      font-family: 'Inter', sans-serif !important;
+      font-size: 0.95rem !important;
+      flex: 1 !important; // Faz a barra de digitação ocupar todo o espaço restante
+      min-width: 120px !important; // Garante que nunca fique "minúscula"
+      padding: 0 !important;
+      margin: 0 !important;
+
+      &::placeholder {
+        color: rgba(255, 255, 255, 0.3) !important;
+      }
+    }
   }
 }
 
-.search-icon {
-  color: $text-dim;
-  flex-shrink: 0;
-  margin-right: 0.8rem;
-}
+// Dropdown de sugestões combinando com o tema escuro
+.ts-dropdown.tom-select-custom {
+  background: #0d1226 !important;
+  border: 1px solid rgba(59, 130, 246, 0.2) !important;
+  border-radius: 12px !important;
+  margin-top: 10px !important;
+  overflow: hidden !important;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6) !important;
 
-.search-input {
-  flex: 1;
-  background: transparent;
-  border: none;
-  color: $text-light;
-  font-family: 'Inter', sans-serif;
-  font-size: 0.9rem;
-  outline: none;
+  .optgroup-header {
+    background: rgba(255, 255, 255, 0.03) !important;
+    color: $text-dim !important;
+    font-size: 0.7rem !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
 
-  &::placeholder {
-    color: $text-dim;
+  .option {
+    padding: 12px 16px !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+    cursor: pointer;
+
+    &.active {
+      background: rgba(59, 130, 246, 0.25) !important;
+      color: #fff !important;
+    }
   }
 }
 
+// ===== BOTÃO =====
 .btn-suggest {
-  padding: 0.65rem 1.4rem;
+  padding: 0 1.8rem;
   background: $accent-blue;
   color: #ffffff;
   font-family: 'Inter', sans-serif;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-weight: 600;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
 
   &:hover {
     background: lighten($accent-blue, 6%);
@@ -207,14 +294,12 @@ body {
   font-weight: 700;
   color: $text-white;
   margin-bottom: 0.6rem;
-  letter-spacing: -0.01em;
 }
 
 .step-card p {
   font-size: 0.85rem;
   color: $text-muted;
   line-height: 1.6;
-  font-weight: 400;
 }
 
 // ===== SHOWCASE =====
@@ -229,16 +314,4 @@ body {
   position: absolute;
   inset: 0;
   background: radial-gradient(ellipse at 50% 80%, rgba(59, 130, 246, 0.06) 0%, transparent 60%);
-}
-
-// ===== ANIMATIONS =====
-.fade-in {
-  opacity: 0;
-  transform: translateY(20px);
-  transition: all 0.7s ease-out;
-
-  &.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }

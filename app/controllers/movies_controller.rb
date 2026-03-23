@@ -1,7 +1,41 @@
+require 'net/http'
+
 class MoviesController < ApplicationController
   skip_before_action :verify_authenticity_token, only: [:create]
 
   def index
+  end
+
+  def search
+    query = params[:q].to_s.strip
+    api_key = ENV.fetch('TMDB_API_KEY', nil) # Certifique-se que o nome no .env é este
+
+    if query.present?
+      # 1. Buscamos na API externa (TMDB como exemplo)
+      url = URI("https://api.themoviedb.org/3/search/movie?api_key=#{api_key}&query=#{ERB::Util.url_encode(query)}&language=pt-BR")
+
+      begin
+        response = Net::HTTP.get(url)
+        data = JSON.parse(response)
+
+        # 2. Mapeamos os resultados para o formato que o TomSelect espera
+        # Note que enviamos o 'title' como valor principal
+        @results = data["results"].map do |movie|
+          {
+            title: movie["title"],
+            id: movie["id"],
+            year: movie["release_date"]&.slice(0, 4)
+          }
+        end
+      rescue StandardError => e
+        Rails.logger.error "Erro na busca da API: #{e.message}"
+        @results = []
+      end
+    else
+      @results = []
+    end
+
+    render json: @results
   end
 
   def show
@@ -15,10 +49,15 @@ class MoviesController < ApplicationController
   end
 
   def create
-    @movies = params[:movies].split(/,|(?:\se\s)/).map(&:strip).reject(&:blank?)
+    # O TomSelect envia os títulos dos filmes no array params[:movies]
+    if params[:movies].is_a?(Array)
+      @movie_titles = params[:movies].reject(&:blank?)
+    else
+      @movie_titles = params[:movies].to_s.split(/,|(?:\se\s)/).map(&:strip).reject(&:blank?)
+    end
 
-    if @movies.length != 3
-      flash[:alert] = "Por favor, digite exatamente 3 filmes separados por vírgula."
+    if @movie_titles.length != 3
+      flash[:alert] = "Por favor, selecione 3 filmes válidos."
       return redirect_to root_path
     end
 

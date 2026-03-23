@@ -1,22 +1,36 @@
-<!-- HERO -->
 <section class="hero">
   <div class="hero-glow"></div>
   <div class="hero-content">
     <span class="hero-badge">PARE DE PERDER TEMPO ESCOLHENDO O QUE QUER ASSISTIR</span>
     <h1>Encontre seu próximo<span class="highlight">filme favorito</span></h1>
-    <p class="hero-subtitle">Digite um filme que você ama e descubra recomendações personalizadas instantaneamente</p>
+    <p class="hero-subtitle">Selecione 3 filmes que você ama e descubra recomendações personalizadas instantaneamente</p>
 
-    <form action="/movies" method="post" class="search-box" data-turbo="false">
+    <form action="/movies" method="post" class="search-container-wrapper" data-turbo="false">
       <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
-      <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-      <input type="text" name="movies" class="search-input" placeholder="Digite 3 filmes separados por vírgula">
-      <button type="submit" class="btn-suggest">Descobrir Filmes</button>
-    </form>
 
+      <div class="search-box-flex">
+        <div class="input-group-glass">
+          <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+
+          <select
+            name="movies[]"
+            id="movie-search"
+            class="tom-select-custom"
+            multiple
+            data-controller="autocomplete"
+            placeholder="Selecione 3 filmes que você ama...">
+          </select>
+        </div>
+
+        <button type="submit" class="btn-suggest">Descobrir Filmes</button>
+      </div>
+    </form>
   </div>
 </section>
 
-<!-- HOW IT WORKS -->
 <section class="how-it-works" id="how">
   <div class="section-header">
     <h2>Como funciona</h2>
@@ -28,8 +42,8 @@
       <div class="step-icon-box">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
       </div>
-      <h3>Digite o filme</h3>
-      <p>Insira o nome de 3 filmes que você adora.</p>
+      <h3>Selecione os filmes</h3>
+      <p>Escolha 3 títulos da nossa base de dados através da busca inteligente.</p>
     </div>
 
     <div class="step-card">
@@ -50,7 +64,6 @@
   </div>
 </section>
 
-<!-- MOVIE SHOWCASE (background section) -->
 <section class="showcase">
   <div class="showcase-overlay"></div>
 </section>

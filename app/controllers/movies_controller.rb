@@ -22,11 +22,14 @@ class MoviesController < ApplicationController
       return redirect_to root_path
     end
 
-    # 🔥 CACHE: mesma combinação de filmes retorna do cache
-    cache_key = "recommendations/#{@movies.sort.join('|')}"
-
-    result = Rails.cache.fetch(cache_key, expires_in: 30.days) do
-      RecommendationPipeline.new(@movies, current_user).call
+    if params[:exclude].present?
+      exclude = params[:exclude].split(",").map(&:strip)
+      result = RecommendationPipeline.new(@movies, current_user, exclude).call
+    else
+      cache_key = "recommendations/#{@movies.sort.join('|')}"
+      result = Rails.cache.fetch(cache_key, expires_in: 30.days) do
+        RecommendationPipeline.new(@movies, current_user).call
+      end
     end
 
     session_record = current_user.sessions.create!(

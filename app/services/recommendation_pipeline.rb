@@ -4,9 +4,10 @@ class RecommendationPipeline
   TMDB_TIMEOUT = 12
   ANTHROPIC_TIMEOUT = 20
 
-  def initialize(movies, user = nil)
+  def initialize(movies, user = nil, exclude = [])
     @movies = movies
     @user = user
+    @exclude = exclude
   end
 
   def call
@@ -20,7 +21,7 @@ class RecommendationPipeline
 
     platform_movies = []
     rent_buy_movies = []
-    already_recommended = []
+    already_recommended = @exclude.dup
     retries = 0
 
     # Prioridade: tentar obter 3 filmes da plataforma

@@ -443,7 +443,7 @@ $radius-lg:       16px;
   background: $bg-card;
   border: 1px solid $border-card;
   border-radius: $radius-lg;
-  padding: 1.8rem;
+  padding: 1.56rem;
 
   &__icon {
     width: 40px;
@@ -565,7 +565,7 @@ $radius-lg:       16px;
     border-radius: $radius-lg;
     padding: 2rem;
     width: 100%;
-    max-width: 420px;
+    max-width: 560px;
     z-index: 1;
   }
 
@@ -579,9 +579,32 @@ $radius-lg:       16px;
 
   &__grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.75rem;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
     margin-bottom: 1.5rem;
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+    padding-bottom: 0.25rem;
+
+    // Scrollbar estilizada
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: $bg-input;
+      border-radius: 10px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: $accent-blue;
+      border-radius: 10px;
+
+      &:hover {
+        background: $accent-blue-hover;
+      }
+    }
   }
 
   &__actions {
@@ -589,6 +612,7 @@ $radius-lg:       16px;
     gap: 0.75rem;
     justify-content: flex-end;
   }
+
 }
 
 .avatar-option {
@@ -600,6 +624,8 @@ $radius-lg:       16px;
   padding: 0;
   transition: border-color 0.2s, transform 0.15s;
   aspect-ratio: 1;
+  margin-bottom: 0.5rem;
+  min-height: 100px;
 
   img {
     width: 100%;
@@ -617,4 +643,63 @@ $radius-lg:       16px;
     border-color: $accent-blue;
     box-shadow: 0 0 0 3px rgba($accent-blue, 0.2);
   }
+}
+
+.email-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  align-items: center;
+  justify-content: center;
+
+  &--open {
+    display: flex;
+  }
+
+  &__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+  }
+
+  &__box {
+    position: relative;
+    background: $bg-card;
+    border: 1px solid $border-card;
+    border-radius: $radius-lg;
+    padding: 2rem;
+    width: 100%;
+    max-width: 400px;
+    z-index: 1;
+  }
+
+  &__title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: $text-white;
+    margin: 0 0 0.4rem;
+  }
+
+  &__subtitle {
+    font-size: 0.82rem;
+    color: $text-muted;
+    margin: 0 0 1.2rem;
+    line-height: 1.5;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    margin-top: 1.2rem;
+  }
+}
+
+.btn--disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
 }

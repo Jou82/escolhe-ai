@@ -1,6 +1,5 @@
-cat > app/views/movies/processing.html.erb << 'EOF'
 <%# app/views/movies/processing.html.erb %>
-<div class="container mx-auto px-4 py-8">
+<div class="container mx-auto px-4 min-h-screen flex items-center justify-center">
   <div class="max-w-2xl mx-auto">
     <div class="text-center">
       <div class="inline-block animate-spin rounded-full h-16 w-16 border-b-4 border-indigo-600 mb-4"></div>
@@ -27,7 +26,7 @@ cat > app/views/movies/processing.html.erb << 'EOF'
 </div>
 
 <%= turbo_stream_from "user_#{current_user.id}_recommendations" %>
-<div id="recommendations_container">
+<div id="recommendations_container" class="hidden">
   <%= render "shared/loading", message: "Iniciando análise..." %>
 </div>
 
@@ -37,7 +36,6 @@ cat > app/views/movies/processing.html.erb << 'EOF'
   let completed = false;
   let progressInterval = null;
 
-  // Etapas do processamento
   const steps = [
     { progress: 10, message: "🔍 Buscando filmes similares no TMDB..." },
     { progress: 25, message: "🎬 Analisando padrões de gosto..." },
@@ -80,7 +78,7 @@ cat > app/views/movies/processing.html.erb << 'EOF'
     fetch(`/movies/check_status?id=${sessionId}`)
       .then(response => response.json())
       .then(data => {
-       if (data.status === "completed") {
+        if (data.status === "completed") {
           completeProgress();
           console.log('✅ Sessão completa, redirecionando para /sessions/' + sessionId);
           setTimeout(() => {
@@ -100,4 +98,3 @@ cat > app/views/movies/processing.html.erb << 'EOF'
   setTimeout(updateProgress, 1000);
   setTimeout(checkAndRedirect, 2000);
 </script>
-EOF

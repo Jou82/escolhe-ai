@@ -80,7 +80,7 @@ cat > app/views/movies/processing.html.erb << 'EOF'
     fetch(`/movies/check_status?id=${sessionId}`)
       .then(response => response.json())
       .then(data => {
-        if (data.completed) {
+       if (data.status === "completed") {
           completeProgress();
           console.log('✅ Sessão completa, redirecionando para /sessions/' + sessionId);
           setTimeout(() => {

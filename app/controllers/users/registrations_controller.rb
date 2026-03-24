@@ -1,5 +1,16 @@
 class Users::RegistrationsController < Devise::RegistrationsController
 
+  def create
+    build_resource(sign_up_params)
+    resource.save
+    if resource.persisted?
+      sign_in(resource)
+      redirect_to root_path, notice: "Conta criada com sucesso!"
+    else
+      redirect_to root_path, alert: resource.errors.full_messages.first
+    end
+  end
+
   def update
     if current_user.update_with_password(account_update_params)
       bypass_sign_in(current_user)
@@ -16,5 +27,15 @@ class Users::RegistrationsController < Devise::RegistrationsController
     else
       redirect_to profile_path, alert: current_user.errors.full_messages.first
     end
+  end
+
+  private
+
+  def account_update_params
+    params.require(:user).permit(:email, :current_password, :password, :password_confirmation)
+  end
+
+  def sign_up_params
+    params.require(:user).permit(:email, :password, :password_confirmation)
   end
 end

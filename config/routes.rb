@@ -1,8 +1,19 @@
 # config/routes.rb
 Rails.application.routes.draw do
   devise_for :users, controllers: {
-    omniauth_callbacks: 'users/omniauth_callbacks'
-  }
+    omniauth_callbacks: 'users/omniauth_callbacks',
+    registrations: 'users/registrations',
+    sessions: 'users/sessions'
+  }, skip: [:registrations]
+
+ devise_scope :user do
+    post   '/users',         to: 'users/registrations#create', as: 'user_registration'
+    patch  '/users',         to: 'users/registrations#update'
+    put    '/users',         to: 'users/registrations#update'
+    delete '/users',         to: 'users/registrations#destroy'
+    get    '/users/cancel',  to: 'users/registrations#cancel', as: 'cancel_user_registration'
+    get    '/users/sign_up', to: 'users/registrations#new',  as: 'new_user_registration'
+  end
 
   root to: "pages#home"
 

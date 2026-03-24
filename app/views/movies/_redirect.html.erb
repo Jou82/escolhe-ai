@@ -1,5 +1,2 @@
 <%# app/views/movies/_redirect.html.erb %>
-<script>
-  console.log('Redirecionando para: <%= session_path(session_id) %>');
-  window.location.href = "<%= session_path(session_id) %>";
-</script>
+<turbo-stream action="redirect" url="<%= session_path(session_id) %>"></turbo-stream>

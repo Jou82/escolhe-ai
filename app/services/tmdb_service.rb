@@ -40,10 +40,16 @@ class TmdbService
     movie = search_movie
     return nil unless movie
 
-    movie_id  = movie["id"]
-    providers = fetch_providers(movie_id)
-    cast      = fetch_cast(movie_id)
-    trailer   = fetch_trailer(movie_id)
+    movie_id = movie["id"]
+
+    # Dispara providers, cast e trailer em paralelo
+    t_providers = Thread.new { fetch_providers(movie_id) }
+    t_cast      = Thread.new { fetch_cast(movie_id) }
+    t_trailer   = Thread.new { fetch_trailer(movie_id) }
+
+    providers = t_providers.value
+    cast      = t_cast.value
+    trailer   = t_trailer.value
 
     {
       tmdb_id:        movie_id,
@@ -113,29 +119,34 @@ class TmdbService
     scored.reject { |c| director_film_ids.include?(c[:tmdb_id]) }.first(top_n)
   end
 
+  # Enriquece os 3 filmes recomendados em paralelo
   def self.enrich_recommendations(recommendations)
-    recommendations.map do |rec|
-      tmdb_data = nil
-      retries   = 0
+    threads = recommendations.map do |rec|
+      Thread.new do
+        tmdb_data = nil
+        retries   = 0
 
-      begin
-        Timeout.timeout(TIMEOUT) do
-          tmdb_data = new(rec["title"], rec["year"]).call
-          tmdb_data ||= new(rec["original_title"], rec["year"]).call if rec["original_title"]
+        begin
+          Timeout.timeout(TIMEOUT) do
+            tmdb_data = new(rec["title"], rec["year"]).call
+            tmdb_data ||= new(rec["original_title"], rec["year"]).call if rec["original_title"]
+          end
+        rescue Timeout::Error, Faraday::ConnectionFailed, Faraday::TimeoutError => e
+          retries += 1
+          if retries <= MAX_RETRIES
+            Rails.logger.warn "TMDB enrich timeout (tentativa #{retries}) para '#{rec["title"]}', retrying..."
+            sleep(0.5)
+            retry
+          else
+            Rails.logger.warn "TMDB timeout enriching '#{rec["title"]}': #{e.message}"
+          end
         end
-      rescue Timeout::Error, Faraday::ConnectionFailed, Faraday::TimeoutError => e
-        retries += 1
-        if retries <= MAX_RETRIES
-          Rails.logger.warn "TMDB enrich timeout (tentativa #{retries}) para '#{rec["title"]}', retrying..."
-          sleep(2)
-          retry
-        else
-          Rails.logger.warn "TMDB timeout enriching '#{rec["title"]}': #{e.message}"
-        end
+
+        rec.merge("tmdb" => tmdb_data)
       end
-
-      rec.merge("tmdb" => tmdb_data)
     end
+
+    threads.map(&:value)
   end
 
   def self.fetch_related(movie_id)
@@ -341,24 +352,21 @@ class TmdbService
   end
 
   def fetch_trailer(movie_id)
-    response = Faraday.get(
-      "#{BASE_URL}/movie/#{movie_id}/videos",
-      { api_key: ENV.fetch("TMDB_API_KEY", nil), language: "pt-BR" }
-    )
-    videos = JSON.parse(response.body)["results"] || []
-
-    # Tenta trailer PT-BR primeiro, depois fallback para EN
-    trailer = videos.find { |v| v["type"] == "Trailer" && v["site"] == "YouTube" }
-
-    if trailer.nil?
-      response_en = Faraday.get(
-        "#{BASE_URL}/movie/#{movie_id}/videos",
-        { api_key: ENV.fetch("TMDB_API_KEY", nil), language: "en-US" }
-      )
-      videos_en = JSON.parse(response_en.body)["results"] || []
-      trailer = videos_en.find { |v| v["type"] == "Trailer" && v["site"] == "YouTube" }
+    # Dispara PT-BR e EN em paralelo — usa o melhor disponível
+    t_ptbr = Thread.new do
+      r = Faraday.get("#{BASE_URL}/movie/#{movie_id}/videos",
+                      { api_key: ENV.fetch("TMDB_API_KEY", nil), language: "pt-BR" })
+      JSON.parse(r.body)["results"] || []
     end
 
+    t_en = Thread.new do
+      r = Faraday.get("#{BASE_URL}/movie/#{movie_id}/videos",
+                      { api_key: ENV.fetch("TMDB_API_KEY", nil), language: "en-US" })
+      JSON.parse(r.body)["results"] || []
+    end
+
+    trailer = t_ptbr.value.find { |v| v["type"] == "Trailer" && v["site"] == "YouTube" }
+    trailer ||= t_en.value.find { |v| v["type"] == "Trailer" && v["site"] == "YouTube" }
     trailer ? "https://www.youtube.com/watch?v=#{trailer["key"]}" : nil
   rescue StandardError => e
     Rails.logger.warn "TMDB error fetching trailer for #{movie_id}: #{e.message}"
@@ -421,7 +429,7 @@ class TmdbService
       retries += 1
       if retries <= MAX_RETRIES
         Rails.logger.warn "TMDB #{method_name} timeout (tentativa #{retries}), retrying..."
-        sleep(2)
+        sleep(0.5)
         retry
       else
         Rails.logger.error "TMDB #{method_name} falhou: #{e.message}"

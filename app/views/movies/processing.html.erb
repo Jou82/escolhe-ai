@@ -1,39 +1,100 @@
 <%# app/views/movies/processing.html.erb %>
-<div style="display: flex; align-items: center; justify-content: center; min-height: 100vh;">
-  <div style="text-align: center;">
-    <div>
-      <p style="font-size: 20px; font-weight: 600; color: #3B82F6; margin-bottom: 8px;">Analisando seus filmes...</p>
-      <p style="font-size: 14px; color: #3B7CF0;">Isso pode levar alguns segundos</p>
+<div class="container mx-auto px-4 min-h-screen flex items-center justify-center">
+  <div class="max-w-2xl mx-auto">
+    <div class="text-center">
+      <div class="inline-block animate-spin rounded-full h-16 w-16 border-b-4 border-indigo-600 mb-4"></div>
+      <p class="text-gray-600 mb-6">Estamos analisando seus filmes favoritos e buscando as melhores recomendações para você.</p>
+
+      <!-- Barra de progresso -->
+      <div class="mt-6 mb-4">
+        <div class="bg-gray-200 rounded-full h-2.5">
+          <div id="progress-bar" class="bg-indigo-600 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+        </div>
+        <p id="progress-text" class="text-sm text-gray-500 font-medium mt-2">0%</p>
+      </div>
+
+      <p id="status-message" class="text-sm text-gray-600 mt-2">Iniciando análise...</p>
+
+      <div class="mt-8 bg-gray-50 rounded-lg p-4">
+        <p class="text-sm text-gray-600">Você será redirecionado automaticamente quando estiver pronto.</p>
+        <a href="/" class="inline-block mt-3 text-indigo-600 hover:text-indigo-800 text-sm">
+          ← Voltar para o início
+        </a>
+      </div>
     </div>
   </div>
 </div>
 
-<%= content_tag :div, nil,
-    id: "status-checker",
-    data: {
-      session_id: @session_record.id,
-      url: check_status_movies_path
-    } %>
+<%= turbo_stream_from "user_#{current_user.id}_recommendations" %>
+<div id="recommendations_container" class="hidden">
+  <%= render "shared/loading", message: "Iniciando análise..." %>
+</div>
 
 <script>
-  const sessionId = document.getElementById('status-checker').dataset.sessionId;
-  const checkUrl = document.getElementById('status-checker').dataset.url;
+  const sessionId = "<%= params[:id] %>";
+  let stepIndex = 0;
+  let completed = false;
+  let progressInterval = null;
 
-  function checkStatus() {
-    fetch(`${checkUrl}?id=${sessionId}`)
-      .then(response => response.json())
-      .then(data => {
-        if (data.status === 'completed') {
-          window.location.href = data.url;
-        } else if (data.status === 'failed') {
-          alert('Erro: ' + data.error);
-          window.location.href = '/';
-        } else {
-          setTimeout(checkStatus, 2000);
-        }
-      })
-      .catch(() => setTimeout(checkStatus, 3000));
+  const steps = [
+    { progress: 10, message: "🔍 Buscando filmes similares no TMDB..." },
+    { progress: 25, message: "🎬 Analisando padrões de gosto..." },
+    { progress: 40, message: "🤖 Consultando inteligência artificial (Claude)..." },
+    { progress: 60, message: "📊 Selecionando melhores recomendações..." },
+    { progress: 80, message: "💾 Salvando suas recomendações..." },
+    { progress: 95, message: "✨ Finalizando..." }
+  ];
+
+  const progressBar = document.getElementById('progress-bar');
+  const progressText = document.getElementById('progress-text');
+  const statusMessage = document.getElementById('status-message');
+
+  function updateProgress() {
+    if (completed) return;
+
+    if (stepIndex < steps.length) {
+      const step = steps[stepIndex];
+      progressBar.style.width = step.progress + '%';
+      progressText.textContent = step.progress + '%';
+      statusMessage.textContent = step.message;
+      stepIndex++;
+
+      const delay = Math.random() * 2000 + 2000;
+      progressInterval = setTimeout(updateProgress, delay);
+    }
   }
 
-  setTimeout(checkStatus, 1000);
+  function completeProgress() {
+    if (progressInterval) {
+      clearTimeout(progressInterval);
+    }
+    completed = true;
+    progressBar.style.width = '100%';
+    progressText.textContent = '100%';
+    statusMessage.textContent = '🎉 Pronto! Redirecionando...';
+  }
+
+  function checkAndRedirect() {
+    fetch(`/movies/check_status?id=${sessionId}`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === "completed") {
+          completeProgress();
+          console.log('✅ Sessão completa, redirecionando para /sessions/' + sessionId);
+          setTimeout(() => {
+            window.location.href = `/sessions/${sessionId}`;
+          }, 500);
+        } else {
+          console.log('⏳ Aguardando conclusão... Status:', data.status);
+          setTimeout(checkAndRedirect, 2000);
+        }
+      })
+      .catch(error => {
+        console.error('❌ Erro ao verificar status:', error);
+        setTimeout(checkAndRedirect, 3000);
+      });
+  }
+
+  setTimeout(updateProgress, 1000);
+  setTimeout(checkAndRedirect, 2000);
 </script>

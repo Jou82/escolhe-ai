@@ -1,7 +1,38 @@
+require 'net/http'
+
 class MoviesController < ApplicationController
   skip_before_action :verify_authenticity_token, only: [:create]
 
   def index
+  end
+
+  def search
+    query = params[:q].to_s.strip
+    api_key = ENV.fetch('TMDB_API_KEY', nil)
+
+    if query.present?
+      url = URI("https://api.themoviedb.org/3/search/movie?api_key=#{api_key}&query=#{ERB::Util.url_encode(query)}&language=pt-BR")
+
+      begin
+        response = Net::HTTP.get(url)
+        data = JSON.parse(response)
+
+        @results = data["results"].map do |movie|
+          {
+            title: movie["title"],
+            id: movie["id"],
+            year: movie["release_date"]&.slice(0, 4)
+          }
+        end
+      rescue StandardError => e
+        Rails.logger.error "Erro na busca da API: #{e.message}"
+        @results = []
+      end
+    else
+      @results = []
+    end
+
+    render json: @results
   end
 
   def show
@@ -15,14 +46,17 @@ class MoviesController < ApplicationController
   end
 
   def create
-    @movies = params[:movies].split(/,|(?:\se\s)/).map(&:strip).reject(&:blank?)
+    if params[:movies].is_a?(Array)
+      @movie_titles = params[:movies].reject(&:blank?)
+    else
+      @movie_titles = params[:movies].to_s.split(/,|(?:\se\s)/).map(&:strip).reject(&:blank?)
+    end
 
-    if @movies.length != 3
-      flash[:alert] = "Por favor, digite exatamente 3 filmes separados por vírgula."
+    if @movie_titles.length != 3
+      flash[:alert] = "Por favor, selecione 3 filmes válidos."
       return redirect_to root_path
     end
 
-    # Busca recomendações anteriores para evitar repetição
     previous_recommendations = current_user.sessions
       .where(status: 1)
       .where.not(recommendations_data: nil)
@@ -32,18 +66,14 @@ class MoviesController < ApplicationController
 
     Rails.logger.info "📚 Filmes já recomendados: #{previous_recommendations.join(', ')}"
 
-    # Cria a sessão com status "processing" (0)
     session_record = current_user.sessions.create!(
-      input_movies: @movies,
-      status: 0,
-      analysis: nil,
-      recommendations_data: nil
+      input_movies: @movie_titles,
+      status: 0
     )
 
-    # Enfileira o job com os filmes a serem excluídos
     GenerateRecommendationsJob.perform_later(
       current_user.id,
-      @movies,
+      @movie_titles,
       previous_recommendations,
       session_record.id
     )
@@ -52,15 +82,22 @@ class MoviesController < ApplicationController
   end
 
   def processing
-    @session = current_user.sessions.find(params[:id])
+    @session_record = current_user.sessions.find(params[:id])
 
-    if @session.status == 1
-      redirect_to session_path(@session)
+    if @session_record.completed?
+      redirect_to session_path(@session_record) and return
     end
   end
 
   def check_status
-    session = current_user.sessions.find(params[:id])
-    render json: { status: session.status, completed: session.status == 1 }
+    session_record = current_user.sessions.find(params[:id])
+
+    if session_record.completed?
+      render json: { status: "completed", url: session_path(session_record) }
+    elsif session_record.failed?
+      render json: { status: "failed", error: session_record.error_message }
+    else
+      render json: { status: "processing" }
+    end
   end
 end

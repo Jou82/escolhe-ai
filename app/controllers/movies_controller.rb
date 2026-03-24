@@ -100,4 +100,24 @@ class MoviesController < ApplicationController
       render json: { status: "processing" }
     end
   end
+
+  def processing
+    @session_record = current_user.sessions.find(params[:id])
+
+    if @session_record.completed?
+      redirect_to session_path(@session_record) and return
+    end
+  end
+
+  def check_status
+    session_record = current_user.sessions.find(params[:id])
+
+    if session_record.completed?
+      render json: { status: "completed", url: session_path(session_record) }
+    elsif session_record.failed?
+      render json: { status: "failed", error: session_record.error_message }
+    else
+      render json: { status: "processing" }
+    end
+  end
 end

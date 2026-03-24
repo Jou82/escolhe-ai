@@ -1,7 +1,38 @@
+require 'net/http'
+
 class MoviesController < ApplicationController
   skip_before_action :verify_authenticity_token, only: [:create]
 
   def index
+  end
+
+  def search
+    query = params[:q].to_s.strip
+    api_key = ENV.fetch('TMDB_API_KEY', nil)
+
+    if query.present?
+      url = URI("https://api.themoviedb.org/3/search/movie?api_key=#{api_key}&query=#{ERB::Util.url_encode(query)}&language=pt-BR")
+
+      begin
+        response = Net::HTTP.get(url)
+        data = JSON.parse(response)
+
+        @results = data["results"].map do |movie|
+          {
+            title: movie["title"],
+            id: movie["id"],
+            year: movie["release_date"]&.slice(0, 4)
+          }
+        end
+      rescue StandardError => e
+        Rails.logger.error "Erro na busca da API: #{e.message}"
+        @results = []
+      end
+    else
+      @results = []
+    end
+
+    render json: @results
   end
 
   def show
@@ -15,53 +46,60 @@ class MoviesController < ApplicationController
   end
 
   def create
-    @movies = params[:movies].split(/,|(?:\se\s)/).map(&:strip).reject(&:blank?)
+    if params[:movies].is_a?(Array)
+      @movie_titles = params[:movies].reject(&:blank?)
+    else
+      @movie_titles = params[:movies].to_s.split(/,|(?:\se\s)/).map(&:strip).reject(&:blank?)
+    end
 
-    if @movies.length != 3
-      flash[:alert] = "Por favor, digite exatamente 3 filmes separados por vírgula."
+    if @movie_titles.length != 3
+      flash[:alert] = "Por favor, selecione 3 filmes válidos."
       return redirect_to root_path
     end
 
-    if params[:exclude].present?
-      exclude = params[:exclude].split(",").map(&:strip)
-      result = RecommendationPipeline.new(@movies, current_user, exclude).call
-    else
-      cache_key = "recommendations/#{@movies.sort.join('|')}"
-      result = Rails.cache.fetch(cache_key, expires_in: 30.days) do
-        RecommendationPipeline.new(@movies, current_user).call
-      end
-    end
+    previous_recommendations = current_user.sessions
+      .where(status: 1)
+      .where.not(recommendations_data: nil)
+      .flat_map { |s| JSON.parse(s.recommendations_data) rescue [] }
+      .map { |rec| rec["title"] }
+      .uniq
+
+    Rails.logger.info "📚 Filmes já recomendados: #{previous_recommendations.join(', ')}"
 
     session_record = current_user.sessions.create!(
-      analysis: result[:analysis],
-      recommendations_data: result[:recommendations].to_json
+      input_movies: @movie_titles,
+      status: 0
     )
 
-    @movies.each do |title|
-      movie = Movie.find_or_create_by!(title: title)
-      session_record.likes.create!(movie: movie, suggestion: false)
+    GenerateRecommendationsJob.perform_later(
+      current_user.id,
+      @movie_titles,
+      previous_recommendations,
+      session_record.id
+    )
+
+    redirect_to processing_movies_path(id: session_record.id)
+  end
+
+  def processing
+    @session_record = current_user.sessions.find(params[:id])
+
+    if @session_record.completed?
+      redirect_to session_path(@session_record) and return
     end
+  end
 
-    result[:recommendations].each do |rec|
-      movie = Movie.find_or_create_by!(title: rec["title"]) do |m|
-        m.release_year = rec["year"] || rec.dig("tmdb", :release_date)&.slice(0, 4)&.to_i
-        m.synopsis = rec.dig("tmdb", :overview) || rec["reason"]
-      end
+  def check_status
+    session_record = current_user.sessions.select(:id, :status, :error_message).find_by(id: params[:id])
 
-      if rec["genres"].present?
-        rec["genres"].each do |genre_name|
-          genre = Genre.find_or_create_by!(name: genre_name)
-          MovieGenre.find_or_create_by!(movie: movie, genre: genre)
-        end
-      end
+    return render json: { status: "not_found" }, status: :not_found unless session_record
 
-      session_record.likes.create!(movie: movie, suggestion: true)
+    if session_record.completed?
+      render json: { status: "completed", url: session_path(session_record) }
+    elsif session_record.failed?
+      render json: { status: "failed", error: session_record.error_message }
+    else
+      render json: { status: "processing" }
     end
-
-    redirect_to session_path(session_record)
-
-  rescue AnthropicService::RecommendationError => e
-    flash[:alert] = "Erro ao gerar recomendações: #{e.message}"
-    redirect_to root_path
   end
 end

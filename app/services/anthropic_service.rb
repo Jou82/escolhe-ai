@@ -1,16 +1,17 @@
 class AnthropicService
   class RecommendationError < StandardError; end
 
-  def initialize(movies, candidates = [], user_platforms = [])
+  def initialize(movies, candidates = [], user_platforms = [], exclude_titles = [])
     @movies = movies
     @candidates = candidates
     @user_platforms = user_platforms
+    @exclude_titles = exclude_titles
   end
 
   def call
     response = client.messages.create(
       model: "claude-haiku-4-5-20251001",
-      max_tokens: 600,
+      max_tokens: 800,
       system: system_prompt,
       messages: [
         { role: "user", content: user_prompt }
@@ -40,51 +41,32 @@ class AnthropicService
     end
   end
 
+  def format_exclude_titles
+    if @exclude_titles.any?
+      "\n\n**FILMES PROIBIDOS (NÃO RECOMENDAR SOB NENHUMA HIPÓTESE):** #{@exclude_titles.join(', ')}"
+    else
+      ""
+    end
+  end
+
   def client
     @client ||= Anthropic::Client.new(api_key: ENV.fetch("ANTHROPIC_API_KEY", nil))
   end
 
   def system_prompt
     <<~PROMPT
-      Você é um especialista em cinema com conhecimento profundo de filmes
-       brasileiros e internacionais. Analise os 3 filmes favoritos do usuário
-       para identificar padrões de gosto: gênero, tom, temas, ritmo,
-       estilo visual e abordagem de direção.
+    Especialista em cinema. Analise os filmes favoritos e recomende exatamente 3 filmes.
 
-       #{platform_instruction}
+    #{platform_instruction}
+    #{format_exclude_titles}
 
-       Responda APENAS com JSON válido, sem nenhum texto antes ou depois.
-       Use exatamente esta estrutura:
-       {
-         "analysis": "Descrição breve do perfil de gosto do usuário (1 frase em português BR)",
-         "recommendations": [
-           {
-             "title": "Título do Filme",
-             "original_title": "Original Title (se diferente)",
-             "year": 2020,
-             "reason": "Por que esse filme combina com o gosto do usuário (1 frase)",
-             "genres": ["Drama", "Thriller"]
-           },
-           {
-             "title": "Título do Filme 2",
-             "original_title": "Original Title 2",
-             "year": 2019,
-             "reason": "Motivo da recomendação",
-             "genres": ["Comédia", "Drama"]
-           },
-           {
-             "title": "Título do Filme 3",
-             "original_title": "Original Title 3",
-             "year": 2021,
-             "reason": "Motivo da recomendação",
-             "genres": ["Ação", "Ficção Científica"]
-           }
-         ]
-       }
+    Responda APENAS com JSON válido:
+    {"analysis":"perfil em 1 frase pt-BR","recommendations":[{"title":"Título PT","original_title":"Title EN","year":2020,"reason":"motivo em 1 frase","genres":["Gênero"]}]}
 
-       Regras:
+    Regras:
        - Recomende exatamente 3 filmes
        - NUNCA recomende filmes que o usuário já listou
+       - NUNCA recomende filmes listados em "FILMES PROIBIDOS"
        - Somente filmes disponíveis em streaming no Brasil
        - O motivo deve referenciar padrões específicos encontrados nos 3 filmes
        - Inclua o título original quando for filme estrangeiro

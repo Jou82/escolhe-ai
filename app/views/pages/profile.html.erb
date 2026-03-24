@@ -71,12 +71,7 @@
                 <input type="email" id="user_email" class="form-input" value="<%= current_user.email %>" placeholder="seu@email.com" readonly>
               </div>
             </div>
-
-            <div class="form-group">
-              <label class="form-label" for="user_bio">Bio</label>
-              <textarea id="user_bio" class="form-textarea" rows="3" placeholder="Conte um pouco sobre você..."></textarea>
-            </div>
-
+            
             <div class="profile-card__actions">
               <button type="button" class="btn btn--primary">Salvar alterações</button>
             </div>
@@ -156,20 +151,6 @@
         </div>
       </div>
 
-      <%# Card: Zona de Perigo (visual — sem backend por enquanto) %>
-      <div class="danger-card">
-        <div class="danger-card__icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/>
-          </svg>
-        </div>
-        <h2 class="danger-card__title">Zona de perigo</h2>
-        <p class="danger-card__subtitle">A eliminação da sua conta é permanente. Todas as suas listas e pontuações serão apagadas.</p>
-
-        <button type="button" class="btn btn--danger btn--full">
-          Deletar Conta
-        </button>
-      </div>
 
     </div>
   </div>

@@ -30,7 +30,11 @@ class Session < ApplicationRecord
   end
 
   def recommendations
-    return [] unless recommendations_data.is_a?(Array)
-    recommendations_data
+    data = recommendations_data
+    return data if data.is_a?(Array)
+    return JSON.parse(data) if data.is_a?(String)
+    []
+  rescue JSON::ParserError
+    []
   end
 end

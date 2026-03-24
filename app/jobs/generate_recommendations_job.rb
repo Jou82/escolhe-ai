@@ -21,7 +21,7 @@ class GenerateRecommendationsJob < ApplicationJob
         end
 
         session_record.analysis = result[:analysis]
-        session_record.recommendations_data = result[:recommendations].to_json 
+        session_record.recommendations_data = result[:recommendations]
         session_record.input_movies = movies_input
         session_record.status = 1  # ← CORRIGIDO: 1 = completed
         session_record.error_message = nil

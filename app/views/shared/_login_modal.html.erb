@@ -64,7 +64,7 @@
 
       <div class="login-modal-divider"><span>OU CRIE COM EMAIL</span></div>
 
-      <%= simple_form_for(User.new, as: :user, url: user_registration_path, data: { turbo: false }, html: { class: "login-modal-form" }) do |f| %>
+      <%= simple_form_for(User.new, as: :user, url: users_path, data: { turbo: false }, html: { class: "login-modal-form" }) do |f| %>
         <div class="login-field">
           <label>EMAIL</label>
           <%= f.input :email, required: false, label: false, placeholder: "nome@exemplo.com",

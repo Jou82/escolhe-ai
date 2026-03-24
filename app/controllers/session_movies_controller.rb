@@ -7,7 +7,7 @@ class SessionMoviesController < ApplicationController
     @genres = @movie.genres
     @like = Like.find_by(session: @session_record, movie: @movie)
 
-    recommendations = JSON.parse(@session_record.recommendations_data || "[]")
+    recommendations = @session_record.recommendations
     @rec_data = recommendations.find { |r| r["title"] == @movie.title }
   end
 end

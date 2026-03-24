@@ -1,7 +1,2 @@
-<div id="recommendations_container" data-redirect-url="/sessions/<%= session_id %>">
-  <script>
-    setTimeout(() => {
-      window.location.href = document.getElementById('recommendations_container').dataset.redirectUrl;
-    }, 1000);
-  </script>
-</div>
+<%# app/views/movies/_redirect.html.erb %>
+<turbo-stream action="redirect" url="<%= session_path(session_id) %>"></turbo-stream>

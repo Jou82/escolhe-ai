@@ -90,7 +90,9 @@ class MoviesController < ApplicationController
   end
 
   def check_status
-    session_record = current_user.sessions.find(params[:id])
+    session_record = current_user.sessions.select(:id, :status, :error_message).find_by(id: params[:id])
+
+    return render json: { status: "not_found" }, status: :not_found unless session_record
 
     if session_record.completed?
       render json: { status: "completed", url: session_path(session_record) }

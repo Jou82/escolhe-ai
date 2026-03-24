@@ -50,26 +50,41 @@ class GenerateRecommendationsJob < ApplicationJob
         session_record.error_message = nil
         session_record.save!
 
-        movies_input.each do |title|
-          movie = Movie.find_or_create_by!(title: title.strip)
-          session_record.likes.find_or_create_by!(movie: movie, suggestion: false)
+        # Bulk insert: filmes de input → likes com suggestion: false
+        input_movie_ids = movies_input.map do |title|
+          Movie.find_or_create_by!(title: title.strip).id
         end
+        existing_input_likes = session_record.likes.where(suggestion: false, movie_id: input_movie_ids).pluck(:movie_id)
+        new_input_likes = (input_movie_ids - existing_input_likes).map do |mid|
+          { session_id: session_record.id, movie_id: mid, suggestion: false, created_at: Time.current, updated_at: Time.current }
+        end
+        Like.insert_all(new_input_likes) if new_input_likes.any?
 
-        result[:recommendations].each do |rec|
+        # Bulk insert: filmes recomendados → likes com suggestion: true
+        rec_movie_ids = result[:recommendations].map do |rec|
           movie = Movie.find_or_create_by!(title: rec["title"]) do |m|
             m.release_year = rec["year"] || rec.dig("tmdb", "release_date")&.slice(0, 4)&.to_i
             m.synopsis = rec.dig("tmdb", "overview") || rec["reason"]
           end
 
+          # Bulk insert de gêneros
           if rec["genres"].present?
-            rec["genres"].each do |genre_name|
-              genre = Genre.find_or_create_by!(name: genre_name)
-              MovieGenre.find_or_create_by!(movie: movie, genre: genre)
+            genre_ids = rec["genres"].map { |name| Genre.find_or_create_by!(name: name).id }
+            existing_mg = MovieGenre.where(movie_id: movie.id, genre_id: genre_ids).pluck(:genre_id)
+            new_mg = (genre_ids - existing_mg).map do |gid|
+              { movie_id: movie.id, genre_id: gid, created_at: Time.current, updated_at: Time.current }
             end
+            MovieGenre.insert_all(new_mg) if new_mg.any?
           end
 
-          session_record.likes.find_or_create_by!(movie: movie, suggestion: true)
+          movie.id
         end
+
+        existing_rec_likes = session_record.likes.where(suggestion: true, movie_id: rec_movie_ids).pluck(:movie_id)
+        new_rec_likes = (rec_movie_ids - existing_rec_likes).map do |mid|
+          { session_id: session_record.id, movie_id: mid, suggestion: true, created_at: Time.current, updated_at: Time.current }
+        end
+        Like.insert_all(new_rec_likes) if new_rec_likes.any?
 
         save_duration = (Time.current - save_start).round(2)
         total_duration = (Time.current - start_time).round(2)

@@ -1,103 +1,142 @@
-cat > app/views/movies/processing.html.erb << 'EOF'
 <%# app/views/movies/processing.html.erb %>
-<div class="container mx-auto px-4 py-8">
-  <div class="max-w-2xl mx-auto">
-    <div class="text-center">
-      <div class="inline-block animate-spin rounded-full h-16 w-16 border-b-4 border-indigo-600 mb-4"></div>
-      <p class="text-gray-600 mb-6">Estamos analisando seus filmes favoritos e buscando as melhores recomendações para você.</p>
+<style>
+  .progress-container {
+    width: 80%;
+    max-width: 400px;
+    margin: 20px auto;
+    background-color: #f3f3f3;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
 
-      <!-- Barra de progresso -->
-      <div class="mt-6 mb-4">
-        <div class="bg-gray-200 rounded-full h-2.5">
-          <div id="progress-bar" class="bg-indigo-600 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
-        </div>
-        <p id="progress-text" class="text-sm text-gray-500 font-medium mt-2">0%</p>
-      </div>
+  .progress-bar {
+    width: 0%;
+    height: 8px;
+    background: linear-gradient(90deg, #3b82f6, #60a5fa);
+    transition: width 0.3s ease;
+    border-radius: 10px;
+  }
 
-      <p id="status-message" class="text-sm text-gray-600 mt-2">Iniciando análise...</p>
+  .percentage {
+    font-size: 24px;
+    font-weight: bold;
+    color: #3b82f6;
+    margin-top: 10px;
+  }
 
-      <div class="mt-8 bg-gray-50 rounded-lg p-4">
-        <p class="text-sm text-gray-600">Você será redirecionado automaticamente quando estiver pronto.</p>
-        <a href="/" class="inline-block mt-3 text-indigo-600 hover:text-indigo-800 text-sm">
-          ← Voltar para o início
-        </a>
-      </div>
+  .loading-text {
+    font-size: 14px;
+    color: #666;
+    margin-top: 10px;
+  }
+
+  .spinner {
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #3b82f6;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+</style>
+
+<div style="display: flex; align-items: center; justify-content: center; min-height: 100vh;">
+  <div style="text-align: center; padding: 20px;">
+    <div class="spinner"></div>
+
+    <p style="font-size: 20px; font-weight: bold; color: #333; margin-bottom: 20px;">
+      Analisando seus filmes...
+    </p>
+
+    <div class="progress-container">
+      <div class="progress-bar" id="progressBar"></div>
     </div>
+
+    <div class="percentage" id="percentage">0%</div>
+    <div class="loading-text" id="statusText">Iniciando análise...</div>
   </div>
 </div>
 
-<%= turbo_stream_from "user_#{current_user.id}_recommendations" %>
-<div id="recommendations_container">
-  <%= render "shared/loading", message: "Iniciando análise..." %>
-</div>
+<%= content_tag :div, nil,
+    id: "status-checker",
+    data: {
+      session_id: @session_record.id,
+      url: check_status_movies_path
+    } %>
 
 <script>
-  const sessionId = "<%= params[:id] %>";
-  let stepIndex = 0;
-  let completed = false;
-  let progressInterval = null;
+  let progress = 0;
+  let interval;
 
-  // Etapas do processamento
-  const steps = [
-    { progress: 10, message: "🔍 Buscando filmes similares no TMDB..." },
-    { progress: 25, message: "🎬 Analisando padrões de gosto..." },
-    { progress: 40, message: "🤖 Consultando inteligência artificial (Claude)..." },
-    { progress: 60, message: "📊 Selecionando melhores recomendações..." },
-    { progress: 80, message: "💾 Salvando suas recomendações..." },
-    { progress: 95, message: "✨ Finalizando..." }
-  ];
+  // Função para atualizar a barra de progresso
+  function updateProgress(percentage, status) {
+    const progressBar = document.getElementById('progressBar');
+    const percentageEl = document.getElementById('percentage');
+    const statusText = document.getElementById('statusText');
 
-  const progressBar = document.getElementById('progress-bar');
-  const progressText = document.getElementById('progress-text');
-  const statusMessage = document.getElementById('status-message');
-
-  function updateProgress() {
-    if (completed) return;
-
-    if (stepIndex < steps.length) {
-      const step = steps[stepIndex];
-      progressBar.style.width = step.progress + '%';
-      progressText.textContent = step.progress + '%';
-      statusMessage.textContent = step.message;
-      stepIndex++;
-
-      const delay = Math.random() * 2000 + 2000;
-      progressInterval = setTimeout(updateProgress, delay);
-    }
+    progressBar.style.width = percentage + '%';
+    percentageEl.textContent = Math.floor(percentage) + '%';
+    statusText.textContent = status;
   }
 
-  function completeProgress() {
-    if (progressInterval) {
-      clearTimeout(progressInterval);
-    }
-    completed = true;
-    progressBar.style.width = '100%';
-    progressText.textContent = '100%';
-    statusMessage.textContent = '🎉 Pronto! Redirecionando...';
+  // Simular progresso enquanto espera
+  function simulateProgress() {
+    interval = setInterval(() => {
+      if (progress < 90) {
+        // Aumenta progresso mais devagar conforme chega perto de 90%
+        const increment = progress < 50 ? 5 : (progress < 80 ? 2 : 1);
+        progress = Math.min(progress + increment, 90);
+        updateProgress(progress, 'Processando filmes...');
+      }
+    }, 500);
   }
 
-  function checkAndRedirect() {
-    fetch(`/movies/check_status?id=${sessionId}`)
+  // Iniciar simulação de progresso
+  simulateProgress();
+
+  // Verificar status real do job
+  const sessionId = document.getElementById('status-checker').dataset.sessionId;
+  const checkUrl = document.getElementById('status-checker').dataset.url;
+
+  function checkStatus() {
+    fetch(`${checkUrl}?id=${sessionId}`)
       .then(response => response.json())
       .then(data => {
-        if (data.completed) {
-          completeProgress();
-          console.log('✅ Sessão completa, redirecionando para /sessions/' + sessionId);
+        if (data.status === 'completed') {
+          // Job concluído - completar barra
+          clearInterval(interval);
+          updateProgress(100, 'Concluído! Redirecionando...');
           setTimeout(() => {
-            window.location.href = `/sessions/${sessionId}`;
+            window.location.href = data.url;
           }, 500);
+        } else if (data.status === 'failed') {
+          clearInterval(interval);
+          updateProgress(0, 'Erro: ' + data.error);
+          alert('Erro: ' + data.error);
+          setTimeout(() => {
+            window.location.href = '/';
+          }, 2000);
         } else {
-          console.log('⏳ Aguardando conclusão... Status:', data.status);
-          setTimeout(checkAndRedirect, 2000);
+          // Atualizar progresso baseado no tempo real se disponível
+          if (data.progress) {
+            progress = data.progress;
+            updateProgress(progress, data.status_message || 'Processando...');
+          }
+          setTimeout(checkStatus, 2000);
         }
       })
-      .catch(error => {
-        console.error('❌ Erro ao verificar status:', error);
-        setTimeout(checkAndRedirect, 3000);
+      .catch(() => {
+        setTimeout(checkStatus, 3000);
       });
   }
 
-  setTimeout(updateProgress, 1000);
-  setTimeout(checkAndRedirect, 2000);
+  // Iniciar verificação
+  setTimeout(checkStatus, 1000);
 </script>
-EOF

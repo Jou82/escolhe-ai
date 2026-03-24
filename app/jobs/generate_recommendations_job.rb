@@ -38,15 +38,15 @@ class GenerateRecommendationsJob < ApplicationJob
 
       if result[:recommendations].any?
         session_record = if session_id
-                           user.sessions.find(session_id)
-                         else
-                           user.sessions.new
-                         end
+          user.sessions.find(session_id)
+        else
+          user.sessions.new
+        end
 
         session_record.analysis = result[:analysis]
         session_record.recommendations_data = result[:recommendations].to_json
         session_record.input_movies = movies_input
-        session_record.status = 1 # 1 = completed
+        session_record.status = 1  # 1 = completed
         session_record.error_message = nil
         session_record.save!
 
@@ -81,7 +81,8 @@ class GenerateRecommendationsJob < ApplicationJob
       else
         handle_failure(session_id, user, "Não foi possível gerar recomendações no momento")
       end
-    rescue StandardError => e
+
+    rescue => e
       Rails.logger.error "❌ [ERRO] #{e.message}"
       Rails.logger.error e.backtrace.first(5).join("\n")
       handle_failure(session_id, user, e.message)
@@ -95,7 +96,7 @@ class GenerateRecommendationsJob < ApplicationJob
     if session_id
       session = user.sessions.find_by(id: session_id)
       if session
-        session.status = 2 # 2 = failed
+        session.status = 2  # 2 = failed
         session.error_message = message
         session.save!
         broadcast_error(user, message, session)

@@ -1,2 +1,84 @@
-<h1>Sessions#index</h1>
-<p>Find me in app/views/sessions/index.html.erb</p>
+<!-- app/views/sessions/index.html.erb -->
+<div class="history-page">
+
+  <!-- HEADER -->
+  <div class="history-header">
+    <h1>Histórico de recomendações</h1>
+    <p>Recorde as suas viagens cinematográficas passadas. Uma linha do tempo selecionada de todas as nossas sessões.</p>
+  </div>
+
+  <!-- SESSIONS LIST -->
+  <div class="history-list">
+    <% if @sessions.any? %>
+      <% @sessions.each do |session| %>
+        <% next unless session.completed? %>
+
+        <div class="history-entry">
+          <!-- DATE -->
+          <div class="history-date">
+            <%= session.created_at.strftime("%b %-d, %Y") %>
+          </div>
+
+          <!-- CARDS ROW -->
+          <div class="history-cards">
+            <% recommendations = session.recommendations %>
+            <% recommendations.first(3).each do |rec| %>
+              <% poster = rec.dig("tmdb", "poster_url") %>
+              <% match_score = rec["match_score"] || rec["score"] %>
+
+              <%= link_to session_path(session), class: "history-movie-card" do %>
+                <!-- POSTER -->
+                <div class="history-poster">
+                  <% if poster %>
+                    <%= image_tag poster, alt: rec["title"] %>
+                  <% else %>
+                    <div class="history-poster-placeholder">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                    </div>
+                  <% end %>
+                </div>
+
+                <!-- INFO -->
+                <div class="history-movie-info">
+                  <% if match_score %>
+                    <span class="history-match-badge"><%= match_score %>% MATCH</span>
+                  <% end %>
+                  <h3 class="history-movie-title"><%= rec["title"] %></h3>
+                  <p class="history-movie-meta">
+                    <%= rec["genres"]&.first&.upcase %>
+                    <% if rec["year"] %>
+                      / <%= rec["year"] %>
+                    <% end %>
+                  </p>
+                </div>
+              <% end %>
+            <% end %>
+
+            <!-- Empty slots se tiver menos de 3 -->
+            <% (3 - recommendations.first(3).size).times do %>
+              <div class="history-movie-card history-movie-card--empty"></div>
+            <% end %>
+          </div>
+        </div>
+
+      <% end %>
+
+      <!-- LOAD MORE -->
+      <% if @sessions.count > 5 %>
+        <div class="history-load-more">
+          <button class="btn-load-more">CARREGAR MAIS SESSÕES</button>
+        </div>
+      <% end %>
+
+    <% else %>
+      <!-- EMPTY STATE -->
+      <div class="history-empty">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        <h3>Ainda sem sessões</h3>
+        <p>Começa por descobrir filmes e o teu histórico aparecerá aqui.</p>
+        <%= link_to "Descobrir filmes", root_path, class: "btn-discover" %>
+      </div>
+    <% end %>
+  </div>
+
+</div>

@@ -1,13 +1,5 @@
 <%# app/views/pages/profile.html.erb %>
 <%# Página de Conta & Perfil — sem sidebar nem footer %>
-
-<% if notice %>
-  <div class="flash flash--success"><%= notice %></div>
-<% end %>
-<% if alert %>
-  <div class="flash flash--error"><%= alert %></div>
-<% end %>
-
 <div class="account-page" data-controller="profile">
 
   <%# ── Page Header ─────────────────────────────────────── %>
@@ -68,20 +60,51 @@
           <%# ───────────────────────────────────── %>
           <%# INFOS %>
           <div class="profile-card__fields">
-            <div class="profile-card__row">
-              <div class="form-group">
-                <label class="form-label" for="user_display_name">Display Name</label>
-                <input type="text" id="user_display_name" class="form-input" placeholder="Seu nome" value="<%= current_user.email.split('@').first.capitalize %>">
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="user_email">Email Address</label>
-                <input type="email" id="user_email" class="form-input" value="<%= current_user.email %>" placeholder="seu@email.com" readonly>
-              </div>
-            </div>
 
-            <div class="profile-card__actions">
-              <button type="button" class="btn btn--primary">Salvar alterações</button>
-            </div>
+            <%= simple_form_for current_user, url: users_path, method: :patch do |f| %>
+              <div class="profile-card__row">
+                <div class="form-group">
+                  <label class="form-label" for="user_display_name">Display Name</label>
+                  <input type="text" id="user_display_name" class="form-input" placeholder="Seu nome" value="<%= current_user.email.split('@').first.capitalize %>">
+                </div>
+                <div class="form-group">
+                  <%= f.label :email, "Email Address", class: "form-label" %>
+                  <%= f.email_field :email,
+                      class: "form-input",
+                      placeholder: "seu@email.com",
+                      data: {
+                        profile_target: "emailInput",
+                        action: "input->profile#checkEmail"
+                      } %>
+                </div>
+              </div>
+
+              <div class="profile-card__actions">
+                  <button type="button"
+                          class="btn btn--primary"
+                          data-profile-target="saveBtn"
+                          data-action="click->profile#openEmailModal">
+                    Salvar alterações
+                  </button>
+              </div>
+
+              <%# Modal confirmação de senha %>
+              <div class="email-modal" data-profile-target="emailModal">
+                <div class="email-modal__backdrop" data-action="click->profile#closeEmailModal"></div>
+                <div class="email-modal__box">
+                  <h3 class="email-modal__title">Confirme sua senha</h3>
+                  <p class="email-modal__subtitle">Digite sua senha atual para alterar o e-mail.</p>
+                  <div class="form-group">
+                    <%= f.label :current_password, "Senha atual", class: "form-label" %>
+                    <%= f.password_field :current_password, class: "form-input", placeholder: "••••••••" %>
+                  </div>
+                  <div class="email-modal__actions">
+                    <button type="button" class="btn btn--outline" data-action="click->profile#closeEmailModal">Cancelar</button>
+                    <%= f.submit "Confirmar", class: "btn btn--primary" %>
+                  </div>
+                </div>
+              </div>
+            <% end %>
           </div>
         </div>
       </div>
@@ -135,30 +158,39 @@
     <%# ── RIGHT COLUMN ────────────────────────────────── %>
     <div class="account-page__right">
 
-      <%# Card: Segurança (visual — sem backend por enquanto) %>
+      <%# Card: Segurança %>
       <div class="security-card">
-        <%= simple_form_for current_user, url: users_path, method: :patch do |f| %>
+        <div class="security-card__icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+        </div>
+        <h2 class="security-card__title">Segurança</h2>
+        <p class="security-card__subtitle">Use uma palavra-passe forte para manter sua conta segura.</p>
 
-          <div class="form-group">
-            <%= f.label :current_password, "Senha Atual", class: "form-label" %>
-            <%= f.password_field :current_password, class: "form-input", placeholder: "••••••••" %>
-          </div>
+        <div class="security-card__form">
+          <%= simple_form_for current_user, url: users_path, method: :patch do |f| %>
 
-          <div class="form-group">
-            <%= f.label :password, "Nova Senha", class: "form-label" %>
-            <%= f.password_field :password, class: "form-input", placeholder: "••••••••" %>
-          </div>
+            <div class="form-group">
+              <%= f.label :current_password, "Senha Atual", class: "form-label" %>
+              <%= f.password_field :current_password, class: "form-input", placeholder: "••••••••" %>
+            </div>
 
-          <div class="form-group">
-            <%= f.label :password_confirmation, "Confirmar Nova Senha", class: "form-label" %>
-            <%= f.password_field :password_confirmation, class: "form-input", placeholder: "••••••••" %>
-          </div>
+            <div class="form-group">
+              <%= f.label :password, "Nova Senha", class: "form-label" %>
+              <%= f.password_field :password, class: "form-input", placeholder: "••••••••" %>
+            </div>
 
-          <%= f.submit "Atualizar senha", class: "btn btn--outline btn--full" %>
+            <div class="form-group">
+              <%= f.label :password_confirmation, "Confirmar Nova Senha", class: "form-label" %>
+              <%= f.password_field :password_confirmation, class: "form-input", placeholder: "••••••••" %>
+            </div>
 
-        <% end %>
+            <%= f.submit "Atualizar senha", class: "btn btn--outline btn--full" %>
+
+          <% end %>
+        </div>
       </div>
-
     </div>
   </div>
 </div>

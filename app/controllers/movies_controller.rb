@@ -17,8 +17,7 @@ class MoviesController < ApplicationController
         response = Net::HTTP.get(url)
         data = JSON.parse(response)
 
-        # Garantimos que @results seja um array mesmo se a API falhar
-        @results = (data["results"] || []).map do |movie|
+        @results = data["results"].map do |movie|
           {
             title: movie["title"],
             id: movie["id"],
@@ -47,10 +46,8 @@ class MoviesController < ApplicationController
   end
 
   def create
-    raw_movies = params[:movies]
-
-    if raw_movies.is_a?(Array)
-      @movies = raw_movies.reject(&:blank?)
+    if params[:movies].is_a?(Array)
+      @movie_titles = params[:movies].reject(&:blank?)
     else
       @movies = raw_movies.to_s.split(/,|(?:\se\s)/).map(&:strip).reject(&:blank?)
     end
@@ -60,59 +57,28 @@ class MoviesController < ApplicationController
       return redirect_to root_path
     end
 
-    exclude = params[:exclude].present? ? params[:exclude].split(",").map(&:strip) : []
+    previous_recommendations = current_user.sessions
+      .where(status: 1)
+      .where.not(recommendations_data: nil)
+      .flat_map { |s| JSON.parse(s.recommendations_data) rescue [] }
+      .map { |rec| rec["title"] }
+      .uniq
 
-    cache_key = "recommendations/#{@movies.sort.join('|')}"
-    cached_result = Rails.cache.read(cache_key)
+    Rails.logger.info "📚 Filmes já recomendados: #{previous_recommendations.join(', ')}"
 
-    if cached_result
-      session_record = current_user.sessions.create!(
-        analysis: cached_result[:analysis],
-        recommendations_data: cached_result[:recommendations].to_json,
-        input_movies: @movies,
-        status: 1
-      )
+    session_record = current_user.sessions.create!(
+      input_movies: @movie_titles,
+      status: 0
+    )
 
-      @movies.each do |title|
-        movie = Movie.find_or_create_by!(title: title)
-        session_record.likes.create!(movie: movie, suggestion: false)
-      end
+    GenerateRecommendationsJob.perform_later(
+      current_user.id,
+      @movie_titles,
+      previous_recommendations,
+      session_record.id
+    )
 
-      cached_result[:recommendations].each do |rec|
-        movie = Movie.find_or_create_by!(title: rec["title"]) do |m|
-          m.release_year = rec["year"] || rec.dig("tmdb", :release_date)&.slice(0, 4)&.to_i
-          m.synopsis = rec.dig("tmdb", :overview) || rec["reason"]
-        end
-
-        if rec["genres"].present?
-          rec["genres"].each do |genre_name|
-            genre = Genre.find_or_create_by!(name: genre_name)
-            MovieGenre.find_or_create_by!(movie: movie, genre: genre)
-          end
-        end
-
-        session_record.likes.create!(movie: movie, suggestion: true)
-      end
-
-      redirect_to session_path(session_record)
-    else
-      session_record = current_user.sessions.create!(
-        input_movies: @movies,
-        status: 0
-      )
-
-      GenerateRecommendationsJob.perform_later(
-        current_user.id,
-        @movies,
-        exclude,
-        session_record.id
-      )
-
-      redirect_to processing_movies_path(id: session_record.id)
-    end
-  rescue AnthropicService::RecommendationError => e
-    flash[:alert] = "Erro ao gerar recomendações: #{e.message}"
-    redirect_to root_path
+    redirect_to processing_movies_path(id: session_record.id)
   end
 
   def processing

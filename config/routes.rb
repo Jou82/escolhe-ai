@@ -12,6 +12,7 @@ Rails.application.routes.draw do
 
   resources :movies, only: [:index, :show, :create] do  # CORRIGIDO: faltava o 'do'
     collection do
+      get :search
       get :processing
       get :check_status
     end

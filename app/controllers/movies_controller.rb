@@ -8,19 +8,17 @@ class MoviesController < ApplicationController
 
   def search
     query = params[:q].to_s.strip
-    api_key = ENV.fetch('TMDB_API_KEY', nil) # Certifique-se que o nome no .env é este
+    api_key = ENV.fetch('TMDB_API_KEY', nil)
 
     if query.present?
-      # 1. Buscamos na API externa (TMDB como exemplo)
       url = URI("https://api.themoviedb.org/3/search/movie?api_key=#{api_key}&query=#{ERB::Util.url_encode(query)}&language=pt-BR")
 
       begin
         response = Net::HTTP.get(url)
         data = JSON.parse(response)
 
-        # 2. Mapeamos os resultados para o formato que o TomSelect espera
-        # Note que enviamos o 'title' como valor principal
-        @results = data["results"].map do |movie|
+        # Garantimos que @results seja um array mesmo se a API falhar
+        @results = (data["results"] || []).map do |movie|
           {
             title: movie["title"],
             id: movie["id"],
@@ -49,15 +47,16 @@ class MoviesController < ApplicationController
   end
 
   def create
-    # O TomSelect envia os títulos dos filmes no array params[:movies]
-    if params[:movies].is_a?(Array)
-      @movie_titles = params[:movies].reject(&:blank?)
+    raw_movies = params[:movies]
+
+    if raw_movies.is_a?(Array)
+      @movies = raw_movies.reject(&:blank?)
     else
-      @movie_titles = params[:movies].to_s.split(/,|(?:\se\s)/).map(&:strip).reject(&:blank?)
+      @movies = raw_movies.to_s.split(/,|(?:\se\s)/).map(&:strip).reject(&:blank?)
     end
 
-    if @movie_titles.length != 3
-      flash[:alert] = "Por favor, selecione 3 filmes válidos."
+    if @movies.length != 3
+      flash[:alert] = "Por favor, selecione exatamente 3 filmes."
       return redirect_to root_path
     end
 
@@ -109,21 +108,19 @@ class MoviesController < ApplicationController
         session_record.id
       )
 
-      # ÚNICA LINHA CORRIGIDA
       redirect_to processing_movies_path(id: session_record.id)
     end
-
-  def check_status
-    session = current_user.sessions.find(params[:id])
-    render json: { status: session.status, completed: session.status == 1 }
+  rescue AnthropicService::RecommendationError => e
+    flash[:alert] = "Erro ao gerar recomendações: #{e.message}"
+    redirect_to root_path
   end
 
   def processing
     @session_record = current_user.sessions.find(params[:id])
 
-    if @session_record.completed?
-      redirect_to session_path(@session_record) and return
-    end
+    return unless @session_record.completed?
+
+    redirect_to session_path(@session_record) and return
   end
 
   def check_status

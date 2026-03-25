@@ -13,12 +13,12 @@
 
         <div class="user-menu" data-controller="dropdown">
           <button class="user-menu-toggle" data-action="click->dropdown#toggle">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M20 21a8 8 0 1 0-16 0"></path></svg>
+            <img src="<%= current_user.avatar_url %>" class="nav-avatar" alt="User Avatar">
           </button>
 
           <div class="user-menu-panel" data-dropdown-target="menu">
             <%= link_to profile_path, class: "user-menu-item" do %>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M20 21a8 8 0 1 0-16 0"></path></svg>
+              <img src="<%= current_user.avatar_url %>" class="nav-avatar-mini">
               Perfil
             <% end %>
 

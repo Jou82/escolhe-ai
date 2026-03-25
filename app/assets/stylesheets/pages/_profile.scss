@@ -1,23 +1,24 @@
-// app/assets/stylesheets/pages/_profile.scss
 
-// ─── Variables (reutiliza do design system existente) ─────────
-$bg-page:         #0B0D14;
-$bg-card:         #111827;
-$bg-card-hover:   #151D2E;
-$bg-input:        #151D2E;
-$border-card:     rgba(255, 255, 255, 0.08);
-$border-input:    rgba(255, 255, 255, 0.10);
-$text-white:      #FFFFFF;
-$text-light:      #E2E8F0;
-$text-muted:      #9CA3AF;
-$text-dim:        #6B7280;
-$accent-blue:     #4F8EF7;
+
+// ─── Variables (Vinculadas ao colors.scss) ─────────────────
+$bg-card:           $bg-card;
+$bg-card-hover:     $bg-card-hover;
+$bg-input:          $bg-input;
+$border-card:       $border-card;
+$border-input:      $border-input;
+$text-white:        $text-white;
+$text-light:        $text-light;
+$text-muted:        $text-muted;
+$text-dim:          $text-dim;           // Agora usa a global do colors
+$accent-blue:       $accent-blue;        // Agora usa a global do colors
+
+// Variáveis únicas (não encontradas no colors.scss)
 $accent-blue-hover: #6BA1FF;
-$accent-red:      #DC2626;
-$accent-red-soft: #E05B7F;
-$radius-sm:       8px;
-$radius-md:       12px;
-$radius-lg:       16px;
+$accent-red:        #DC2626;
+$accent-red-soft:   #E05B7F;
+$radius-sm:         8px;
+$radius-md:         12px;
+$radius-lg:         16px;
 
 // ─── Page Layout ──────────────────────────────────────────────
 .account-page {
@@ -198,6 +199,11 @@ $radius-lg:       16px;
   border: 1px solid $border-card;
   border-radius: $radius-lg;
   padding: 1.8rem;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: $bg-card-hover; // ← aplicado $bg-card-hover
+  }
 
   &__body {
     display: flex;
@@ -291,6 +297,11 @@ $radius-lg:       16px;
   border: 1px solid $border-card;
   border-radius: $radius-lg;
   padding: 1.8rem;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: $bg-card-hover; // ← aplicado $bg-card-hover
+  }
 
   &__header {
     margin-bottom: 1.2rem;
@@ -411,7 +422,6 @@ $radius-lg:       16px;
   text-transform: uppercase;
   animation: tagIn 0.25s ease-out;
 
-  // ← Cor padrão única para todos os serviços
   background: rgba($accent-blue, 0.12);
   color: $accent-blue;
   border: 1px solid rgba($accent-blue, 0.2);
@@ -444,6 +454,11 @@ $radius-lg:       16px;
   border: 1px solid $border-card;
   border-radius: $radius-lg;
   padding: 1.56rem;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: $bg-card-hover; // ← aplicado $bg-card-hover
+  }
 
   &__icon {
     width: 40px;
@@ -502,7 +517,7 @@ $radius-lg:       16px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #FF6B6B;
+    color: $accent-red-soft; // ← aplicado $accent-red-soft
     margin-bottom: 1rem;
   }
 
@@ -522,7 +537,7 @@ $radius-lg:       16px;
   }
 }
 
-// ─── Responsive alterar para responsive depois ───────────────────────────────────────────────
+// ─── Responsive ───────────────────────────────────────────────
 @media (max-width: 600px) {
   .account-page {
     padding: 2rem 1rem 4rem;
@@ -587,7 +602,6 @@ $radius-lg:       16px;
     padding-right: 0.5rem;
     padding-bottom: 0.25rem;
 
-    // Scrollbar estilizada
     &::-webkit-scrollbar {
       width: 6px;
     }

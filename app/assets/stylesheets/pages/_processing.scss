@@ -1,0 +1,117 @@
+/* app/assets/stylesheets/pages/_processing.scss */
+
+.processing-page {
+  min-height: 100vh;
+  background: linear-gradient(to bottom, #0f172a, #1e293b);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.processing-container {
+  text-align: center;
+  padding: 0 1rem;
+}
+
+.processing-badge-wrapper {
+  margin-bottom: 2rem;
+}
+
+.processing-badge {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background-color: rgba(59, 130, 246, 0.1);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.processing-spinner-wrapper {
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+.processing-spinner-container {
+  position: relative;
+}
+
+.processing-circle {
+  width: 10rem;
+  height: 10rem;
+  transform: rotate(-90deg);
+}
+
+.progress-bg {
+  stroke: rgba(100, 116, 139, 0.2);
+  stroke-width: 6;
+  fill: none;
+}
+
+.progress-fill {
+  stroke: #3b82f6;
+  stroke-width: 6;
+  fill: none;
+  stroke-dasharray: 339.292;
+  stroke-dashoffset: 339.292;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.5s ease;
+  filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.5));
+}
+
+.progress-text-wrapper {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.progress-percentage {
+  font-size: 2.25rem;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.processing-title {
+  font-size: 2.25rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: #ffffff;
+}
+
+@media (min-width: 768px) {
+  .processing-title {
+    font-size: 3rem;
+  }
+}
+
+.text-highlight {
+  color: #3b82f6;
+}
+
+.processing-status {
+  font-size: 1.125rem;
+  margin-bottom: 3rem;
+  color: #94a3b8;
+}
+
+.processing-back {
+  margin-top: 2rem;
+}
+
+.back-link {
+  font-size: 0.875rem;
+  color: #64748b;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+  color: #64748b;
+}

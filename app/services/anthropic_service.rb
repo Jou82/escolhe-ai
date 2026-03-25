@@ -20,6 +20,8 @@ class AnthropicService
 
     text = response.content.first.text
     text = text.gsub(/```json\n?/, "").gsub(/```\n?/, "").strip
+    json_match = text.match(/\{.*\}/m)
+    text = json_match[0] if json_match
     parsed = JSON.parse(text)
 
     validate!(parsed)
@@ -42,11 +44,12 @@ class AnthropicService
   end
 
   def format_exclude_titles
-    if @exclude_titles.any?
-      "\n\n**FILMES PROIBIDOS (NÃO RECOMENDAR SOB NENHUMA HIPÓTESE):** #{@exclude_titles.join(', ')}"
-    else
-      ""
-    end
+  titles = @exclude_titles.last(30)
+  if titles.any?
+    "\n\n**FILMES PROIBIDOS (NÃO RECOMENDAR SOB NENHUMA HIPÓTESE):** #{titles.join(', ')}"
+  else
+    ""
+  end
   end
 
   def client
@@ -56,6 +59,7 @@ class AnthropicService
   def system_prompt
     <<~PROMPT
     Especialista em cinema. Analise os filmes favoritos e recomende exatamente 3 filmes.
+    IMPORTANTE: Responda SOMENTE com o JSON. Não escreva nada antes ou depois. Comece diretamente com {.
 
     #{platform_instruction}
     #{format_exclude_titles}
@@ -64,6 +68,7 @@ class AnthropicService
     {"analysis":"perfil em 1 frase pt-BR","recommendations":[{"title":"Título PT","original_title":"Title EN","year":2020,"reason":"motivo em 1 frase","genres":["Gênero"]}]}
 
     Regras:
+       - NUNCA recomende sequências, prequelas ou filmes da mesma franquia dos filmes favoritos do usuário
        - Recomende exatamente 3 filmes
        - NUNCA recomende filmes que o usuário já listou
        - NUNCA recomende filmes listados em "FILMES PROIBIDOS"
@@ -87,7 +92,7 @@ class AnthropicService
     movies_text = @movies.map { |m| "- #{m}" }.join("\n")
 
     candidates_text = @candidates.map.with_index(1) do |c, i|
-      overview = c[:overview].to_s.truncate(300)
+      overview = c[:overview].to_s.truncate(150)
 
       <<~CANDIDATE
         #{i}. #{c[:title]} (#{c[:release_date]&.slice(0, 4) || '?'}) — TMDB ID: #{c[:tmdb_id]}

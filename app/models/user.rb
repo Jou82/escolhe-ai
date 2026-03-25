@@ -37,8 +37,11 @@ class User < ApplicationRecord
   end
 
   def avatar_url
-    return unless avatar.present?
-
-    Cloudinary::Utils.cloudinary_url(avatar, width: 200, height: 200, crop: :fill)
+    @avatar_url ||= Cloudinary::Utils.cloudinary_url(
+      avatar.presence || AVATARS.first,
+      width: 200,
+      height: 200,
+      crop: :fill
+    )
   end
 end

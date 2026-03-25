@@ -1,56 +1,149 @@
-<!-- HERO -->
-<section class="hero">
-  <div class="hero-glow"></div>
-  <div class="hero-content">
-    <span class="hero-badge">PARE DE PERDER TEMPO ESCOLHENDO O QUE QUER ASSISTIR</span>
-    <h1>Encontre seu próximo<span class="highlight">filme favorito</span></h1>
-    <p class="hero-subtitle">Digite um filme que você ama e descubra recomendações personalizadas instantaneamente</p>
+<div data-controller="home">
 
-    <form action="/movies" method="post" class="search-box" data-turbo="false">
-      <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
-      <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-      <input type="text" name="movies" class="search-input" placeholder="Digite 3 filmes separados por vírgula">
-      <button type="submit" class="btn-suggest">Descobrir Filmes</button>
-    </form>
-
-  </div>
-</section>
-
-<!-- HOW IT WORKS -->
-<section class="how-it-works" id="how">
-  <div class="section-header">
-    <h2>Como funciona</h2>
-    <p>O nosso algoritmo encontra o match perfeito para a sua noite de cinema.</p>
-  </div>
-
-  <div class="steps-grid">
-    <div class="step-card">
-      <div class="step-icon-box">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-      </div>
-      <h3>Digite o filme</h3>
-      <p>Insira o nome de 3 filmes que você adora.</p>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+      <div class="grid-overlay"></div>
     </div>
 
-    <div class="step-card">
-      <div class="step-icon-box">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-      </div>
-      <h3>Análise inteligente</h3>
-      <p>Nosso algoritmo encontra padrões de gênero, estilo e tema.</p>
-    </div>
+    <div class="hero-content">
 
-    <div class="step-card">
-      <div class="step-icon-box">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-      </div>
-      <h3>Receba recomendações</h3>
-      <p>Descubra 3 filmes selecionados especialmente para você.</p>
-    </div>
-  </div>
-</section>
+      <h1 class="hero-title fade-in">
+        Fala o que você ama
+        <br>
+        <em>A gente escolhe pra você</em>
+      </h1>
 
-<!-- MOVIE SHOWCASE (background section) -->
-<section class="showcase">
-  <div class="showcase-overlay"></div>
-</section>
+      <p class="hero-sub fade-in">
+        Digite 3 filmes. Nosso algoritmo analisa o seu gosto e devolve 3 recomendações perfeitas em segundos
+      </p>
+
+      <div class="search-wrapper fade-in">
+        <div class="search-glow"></div>
+        <%= form_with url: movies_path, method: :post, class: "search-box", data: { turbo: false } do %>
+          <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <%= text_field_tag :movies, nil, class: "search-input", placeholder: "Digite 3 filmes separados por virgula", autocomplete: "off" %>
+          <button type="submit" class="btn-suggest">
+            Descobrir
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </button>
+        <% end %>
+      </div>
+
+      <div class="trending fade-in" data-home-target="chips">
+        <span class="trending-label">Trending:</span>
+        <% @popular_movies.each do |movie| %>
+          <span class="trending-link" data-action="click->home#insertChip" data-genre="<%= movie %>"><%= movie %></span>
+        <% end %>
+      </div>
+
+      <div class="cards-float fade-in">
+        <div class="poster">
+          <div class="poster-inner">
+            <svg class="poster-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect>
+              <polyline points="17 2 12 7 7 2"></polyline>
+            </svg>
+          </div>
+          <div class="poster-shimmer"></div>
+        </div>
+        <div class="poster">
+          <div class="poster-inner">
+            <svg class="poster-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+          </div>
+          <div class="poster-shimmer" style="animation-delay: 0.5s;"></div>
+        </div>
+        <div class="poster">
+          <div class="poster-inner">
+            <svg class="poster-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polygon points="10 8 16 12 10 16 10 8"></polygon>
+            </svg>
+          </div>
+          <div class="poster-shimmer" style="animation-delay: 1s;"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="section-how" id="how">
+    <div class="section-line"></div>
+    <div class="sec-label fade-in">Como funciona</div>
+    <div class="sec-title fade-in">Três passos. Zero complicação.</div>
+
+    <div class="timeline">
+      <div class="tl-item fade-in">
+        <div class="tl-dot-wrap">
+          <div class="tl-dot tl-dot-1">1</div>
+        </div>
+        <div class="tl-content">
+          <h3>Digite 3 filmes</h3>
+          <p>Escolha filmes que você ama — de qualquer gênero, época ou estilo. Separe por vírgula e pronto</p>
+        </div>
+      </div>
+
+      <div class="tl-item fade-in">
+        <div class="tl-dot-wrap">
+          <div class="tl-dot tl-dot-2">2</div>
+        </div>
+        <div class="tl-content">
+          <h3>Analisamos o seu gosto</h3>
+          <p>O nosso algoritmo cruza gêneros, temas, diretores e atmosfera para encontrar padrões no seu gosto</p>
+        </div>
+      </div>
+
+      <div class="tl-item fade-in">
+        <div class="tl-dot-wrap">
+          <div class="tl-dot tl-dot-3">3</div>
+        </div>
+        <div class="tl-content">
+          <h3>Receba 3 filmes perfeitos</h3>
+          <p>Recomendações com pôster, sinopse e nota. Prontas para a sua noite de cinema</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="showcase-stats">
+    <div class="show-card">
+      <div class="show-num show-num-1">500+</div>
+      <div class="show-label">Filmes recomendados</div>
+    </div>
+    <div class="show-card">
+      <div class="show-num show-num-2">3s</div>
+      <div class="show-label">Tempo médio</div>
+    </div>
+    <div class="show-card">
+      <div class="show-num show-num-3">98%</div>
+      <div class="show-label">Satisfação</div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-final">
+    <div class="cta-glow"></div>
+    <h2>Pronto para o próximo filme?</h2>
+    <p>Pare de rolar catálogos infinitos. Deixa a IA decidir por você</p>
+    <a href="#" class="btn-cta" data-action="click->home#scrollToSearch">
+      Começar agora
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+        <polyline points="12 5 19 12 12 19"></polyline>
+      </svg>
+    </a>
+  </section>
+
+</div>

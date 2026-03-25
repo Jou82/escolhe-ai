@@ -13,6 +13,13 @@ class SessionsController < ApplicationController
     @suggested_movies = @session_record.likes.where(suggestion: true).includes(:movie).map(&:movie)
   end
 
+  # No controller
+  def random_movie
+  @session_record = current_user.sessions.find(params[:id])
+  @movie = @session_record.random_recommendation  # Sorteia 1 filme
+
+  redirect_to session_movie_path(@session_record, @movie)  # Vai para a página do filme
+  end
   def new
   end
 end

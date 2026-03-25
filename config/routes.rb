@@ -19,9 +19,14 @@ Rails.application.routes.draw do
 
   resources :sessions, only: [:new, :create, :show, :index] do
     resources :movies, only: [:show], controller: "session_movies"
+
+    # NOVA ROTA ADICIONADA AQUI
+    member do
+      get :random_movie
+    end
   end
 
-  resources :movies, only: [:index, :show, :create] do  # CORRIGIDO: faltava o 'do'
+  resources :movies, only: [:index, :show, :create] do
     collection do
       get :processing
       get :check_status

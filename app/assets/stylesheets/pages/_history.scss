@@ -3,8 +3,13 @@
 .history-page {
   max-width: 1120px;
   margin: 0 auto;
-  padding: 5rem 2rem 6rem;
+  padding: 2rem 2rem 6rem;
   min-height: 100vh;
+
+  .back-link {
+    margin-bottom: 2rem;
+    display: inline-flex;
+  }
 }
 
 // ===== HEADER =====

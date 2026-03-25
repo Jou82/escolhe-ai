@@ -9,8 +9,8 @@
 
   <!-- HEADER -->
   <div class="history-header">
-    <h1>Histórico de recomendações</h1>
-    <p>Recorde as suas viagens cinematográficas passadas. Uma linha do tempo selecionada de todas as nossas sessões.</p>
+    <h1>Histórico de Recomendações</h1>
+    <p>Sua linha do tempo com cada recomendação feita sob medida.</p>
   </div>
 
   <!-- SESSIONS LIST -->
@@ -23,7 +23,7 @@
 
         <div class="history-entry">
           <div class="history-date">
-            <%= session.created_at.strftime("%b %-d, %Y") %>
+            <%= session.created_at.in_time_zone('Brasilia').strftime("%d %b %Y às %H:%M") %>
           </div>
 
           <div class="history-cards">
@@ -85,7 +85,7 @@
 
             <div class="history-entry">
               <div class="history-date">
-                <%= session.created_at.strftime("%b %-d, %Y") %>
+                <%= session.created_at.in_time_zone('Brasilia').strftime("%d %b %Y às %H:%M") %>
               </div>
 
               <div class="history-cards">

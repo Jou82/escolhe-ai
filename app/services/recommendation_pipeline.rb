@@ -1,4 +1,6 @@
 # app/services/recommendation_pipeline.rb
+require 'parallel'
+
 class RecommendationPipeline
   MAX_RETRIES = 2
   TMDB_TIMEOUT = 12
@@ -71,11 +73,13 @@ class RecommendationPipeline
       retries += 1
     end
 
-    # FASE 2: se ainda não temos 3 filmes da plataforma, busca diretamente
+    # ========== FASE 2: PARALELIZADA ==========
     if user_has_platforms? && platform_movies.size < 3
-      Rails.logger.info "🎯 Buscando filmes nas plataformas: #{user_platforms.join(', ')}"
+      Rails.logger.info "🎯 Buscando filmes nas plataformas: #{user_platforms.join(', ')} em paralelo..."
 
-      user_platforms.each do |platform|
+      # 🔥 Busca em paralelo em todas as plataformas
+      platform_results = Parallel.map(user_platforms, in_threads: user_platforms.size) do |platform|
+        results = []
         platform_candidates = TmdbService.discover_by_single_platform(platform, already_recommended, limit: 20)
 
         platform_candidates.each do |candidate|
@@ -88,7 +92,7 @@ class RecommendationPipeline
 
           if streaming_match || rent_match || buy_match
             genres = tmdb_data[:genres] || []
-            movie = {
+            results << {
               "title" => candidate[:title],
               "original_title" => candidate[:original_title] || candidate[:title],
               "year" => candidate[:release_date]&.slice(0, 4)&.to_i || 2024,
@@ -97,27 +101,31 @@ class RecommendationPipeline
               "tmdb" => tmdb_data,
               "_type" => "platform"
             }
-            platform_movies << movie unless platform_movies.any? { |m| m["title"] == movie["title"] }
-            break if platform_movies.size >= 3
           end
+          break if results.size >= 3
         end
-        break if platform_movies.size >= 3
+        results
       end
+
+      # Combina os resultados de todas as plataformas
+      platform_movies = platform_results.flatten.uniq { |m| m["title"] }
+      platform_movies = platform_movies.first(3)
     end
 
-    # FASE 3: se ainda não temos 1 filme para alugar/comprar
+    # ========== FASE 3: PARALELIZADA ==========
     if user_has_platforms? && rent_buy_movies.size < 1
-      Rails.logger.info "🎯 Buscando filmes para alugar/comprar"
+      Rails.logger.info "🎯 Buscando filmes para alugar/comprar em paralelo..."
 
       rent_buy_candidates = fetch_rent_buy_candidates(already_recommended + platform_movies.map { |m| m["title"] })
 
-      rent_buy_candidates.each do |candidate|
+      # 🔥 Busca dados de todos os candidatos em paralelo
+      rent_buy_results = Parallel.map(rent_buy_candidates, in_threads: 3) do |candidate|
         tmdb_data = TmdbService.new(candidate[:title], candidate[:release_date]&.slice(0, 4)).call
         next unless tmdb_data
 
         if tmdb_data[:rent].any? || tmdb_data[:buy].any?
           genres = tmdb_data[:genres] || []
-          movie = {
+          {
             "title" => candidate[:title],
             "original_title" => candidate[:original_title] || candidate[:title],
             "year" => candidate[:release_date]&.slice(0, 4)&.to_i || 2024,
@@ -126,10 +134,11 @@ class RecommendationPipeline
             "tmdb" => tmdb_data,
             "_type" => "rent_buy"
           }
-          rent_buy_movies << movie unless rent_buy_movies.any? { |m| m["title"] == movie["title"] }
-          break if rent_buy_movies.size >= 1
         end
-      end
+      end.compact
+
+      rent_buy_movies = rent_buy_results.uniq { |m| m["title"] }
+      rent_buy_movies = rent_buy_movies.first(1) if rent_buy_movies.any?
     end
 
     # ========== COMBINAÇÃO FINAL ==========
@@ -165,7 +174,7 @@ class RecommendationPipeline
     end
 
     # ========== FILTRO FINAL PARA EVITAR REPETIÇÃO ==========
-    final_recs = filter_recommendations(final_recs, limited_exclude)  # ALTERADO: usa limited_exclude
+    final_recs = filter_recommendations(final_recs, limited_exclude)
 
     {
       analysis: @analysis,
@@ -318,12 +327,12 @@ class RecommendationPipeline
     end
   end
 
-  def fetch_ai_guaranteed(candidates, limited_exclude)  # ALTERADO: adiciona parâmetro limited_exclude
+  def fetch_ai_guaranteed(candidates, limited_exclude)
     retries = 0
     loop do
       begin
         Timeout.timeout(ANTHROPIC_TIMEOUT) do
-          return AnthropicService.new(@movies, candidates, user_platforms, limited_exclude).call  # ALTERADO: usa limited_exclude
+          return AnthropicService.new(@movies, candidates, user_platforms, limited_exclude).call
         end
       rescue Timeout::Error => e
         retries += 1

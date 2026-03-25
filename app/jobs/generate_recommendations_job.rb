@@ -12,6 +12,7 @@ class GenerateRecommendationsJob < ApplicationJob
 
     Rails.logger.info "🎬 [JOB] Iniciado em #{start_time}"
     Rails.logger.info "📽️  [INPUT] Filmes: #{movies_input.join(', ')}"
+    Rails.logger.info "📊 Exclude limitado: #{exclude_titles.size} → #{exclude_titles.size} filmes"
 
     begin
       # Avisar que começou
@@ -32,6 +33,17 @@ class GenerateRecommendationsJob < ApplicationJob
         original_size = result[:candidates].size
         result[:candidates] = result[:candidates].first(15)
         Rails.logger.info "🔍 Limitando candidatos: #{original_size} → #{result[:candidates].size}"
+      end
+
+      # ⚡ OTIMIZAÇÃO: Buscar dados do TMDB com cache
+      if result[:recommendations].any?
+        broadcast_status(user, "📡 Buscando detalhes dos filmes...")
+
+        enrich_start = Time.current
+        # Usando o novo método com cache (mais rápido!)
+        result[:recommendations] = TmdbService.enrich_recommendations_with_cache(result[:recommendations])
+        enrich_duration = (Time.current - enrich_start).round(2)
+        Rails.logger.info "⏱️  [ENRICH] Demorou: #{enrich_duration}s"
       end
 
       save_start = Time.current
@@ -91,6 +103,11 @@ class GenerateRecommendationsJob < ApplicationJob
 
         Rails.logger.info "💾 [SAVE] Demorou: #{save_duration}s"
         Rails.logger.info "✅ [JOB] Completou em: #{total_duration}s"
+
+        # Alerta se demorar mais que 15 segundos
+        if total_duration > 15
+          Rails.logger.warn "⚠️  Job lento: #{total_duration}s - Verificar otimizações"
+        end
 
         broadcast_completion(user, session_record)
       else

@@ -7,7 +7,7 @@
     <div class="movie-hero__backdrop">
       <% backdrop = @rec_data&.dig("tmdb", "poster_url")&.gsub("w500", "original") %>
       <% if backdrop %>
-        <%= image_tag backdrop, alt: @movie.title %>
+        <%= image_tag backdrop, alt: @rec_data["title"] %>
       <% end %>
       <div class="movie-hero__backdrop-placeholder"></div>
     </div>
@@ -16,12 +16,12 @@
 
   <%# Back + Badge + Title %>
   <div class="movie-header container">
-    <%= link_to session_path(@session_record), class: "movie-header__back" do %>
+    <a href="#" onclick="history.back(); return false;" class="movie-header__back">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
         <path d="M10 3L5 8L10 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
       VOLTAR
-    <% end %>
+    </a>
 
     <div class="movie-header__meta">
       <% vote = @rec_data&.dig("tmdb", "vote_average") %>
@@ -33,10 +33,12 @@
       <% end %>
     </div>
 
-    <h1 class="movie-header__title"><%= @movie.title %></h1>
+    <%# CORRIGIDO: era @movie.title %>
+    <h1 class="movie-header__title"><%= @rec_data["title"] %></h1>
 
     <div class="movie-header__info">
-      <span><%= @movie.release_year %></span>
+      <%# CORRIGIDO: era @movie.release_year %>
+      <span><%= @rec_data["year"] %></span>
       <span class="dot">•</span>
       <span><%= @rec_data&.dig("genres")&.join(" • ") %></span>
     </div>
@@ -115,7 +117,8 @@
       <div class="section-synopsis">
         <h2 class="section-title">Sinopse</h2>
         <p class="synopsis-text">
-          <%= @rec_data&.dig("tmdb", "overview") || @movie.synopsis %>
+          <%# CORRIGIDO: era @movie.synopsis como fallback %>
+          <%= @rec_data&.dig("tmdb", "overview") %>
         </p>
       </div>
 

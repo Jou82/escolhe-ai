@@ -32,7 +32,8 @@
               <% poster = rec.dig("tmdb", "poster_url") %>
               <% match_score = rec["match_score"] || rec["score"] %>
 
-              <%= link_to session_path(session), class: "history-movie-card" do %>
+              <% tmdb_id = rec.dig("tmdb", "tmdb_id") %>
+                <%= link_to session_movie_path(session, tmdb_id), class: "history-movie-card" do %>
                 <div class="history-poster">
                   <% if poster %>
                     <%= image_tag poster, alt: rec["title"] %>
@@ -93,7 +94,8 @@
                   <% poster = rec.dig("tmdb", "poster_url") %>
                   <% match_score = rec["match_score"] || rec["score"] %>
 
-                  <%= link_to session_path(session), class: "history-movie-card" do %>
+                  <% tmdb_id = rec.dig("tmdb", "tmdb_id") %>
+                    <%= link_to session_movie_path(session, tmdb_id), class: "history-movie-card" do %>
                     <div class="history-poster">
                       <% if poster %>
                         <%= image_tag poster, alt: rec["title"] %>

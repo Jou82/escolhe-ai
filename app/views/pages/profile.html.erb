@@ -5,7 +5,7 @@
   <%# ── Page Header ─────────────────────────────────────── %>
   <header class="account-page__header">
     <span class="account-page__eyebrow">Gerencie suas preferências de perfil</span>
-    <h1 class="account-page__title">Conta & Perfil</h1>
+    <h1 class="account-page__title">Meu Perfil</h1>
   </header>
 
   <%# ── Main Grid ───────────────────────────────────────── %>
@@ -66,11 +66,11 @@
             <%= simple_form_for current_user, url: users_path, method: :patch do |f| %>
               <div class="profile-card__row">
                 <div class="form-group">
-                  <label class="form-label" for="user_display_name">Display Name</label>
+                  <label class="form-label" for="user_display_name">Como quer ser chamado?</label>
                   <input type="text" id="user_display_name" class="form-input" placeholder="Seu nome" value="<%= current_user.email.split('@').first.capitalize %>">
                 </div>
                 <div class="form-group">
-                  <%= f.label :email, "Email Address", class: "form-label" %>
+                  <%= f.label :email, "E-mail", class: "form-label" %>
                   <%= f.email_field :email,
                       class: "form-input",
                       placeholder: "seu@email.com",
@@ -115,8 +115,8 @@
       <div class="streaming-card" data-controller="streaming-search"
            data-streaming-search-update-url-value="<%= update_profile_path %>">
         <div class="streaming-card__header">
-          <h2 class="streaming-card__title">Serviços de Streaming</h2>
-          <p class="streaming-card__subtitle">Selecione as plataformas que utiliza para recomendações personalizadas.</p>
+          <h2 class="streaming-card__title">Onde você dá o play?</h2>
+          <p class="streaming-card__subtitle">Informe suas plataformas de streaming para uma curadoria sob medida.</p>
         </div>
 
         <div class="streaming-card__search">
@@ -168,7 +168,7 @@
           </svg>
         </div>
         <h2 class="security-card__title">Segurança</h2>
-        <p class="security-card__subtitle">Use uma palavra-passe forte para manter sua conta segura.</p>
+        <p class="security-card__subtitle">Reforce a integridade do seu acesso com uma senha robusta.</p>
 
         <div class="security-card__form">
           <%= simple_form_for current_user, url: users_path, method: :patch do |f| %>

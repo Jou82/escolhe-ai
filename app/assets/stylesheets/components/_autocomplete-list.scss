@@ -1,5 +1,6 @@
 .search-wrapper {
   position: relative; // Essencial para o dropdown posicionar corretamente
+  z-index: 100;
 }
 
 .autocomplete-list {
@@ -13,7 +14,7 @@
   margin-top: 10px;
   padding: 8px;
   list-style: none;
-  z-index: 999;
+  z-index: 1000;
   display: none; // Escondido por padrão
   box-shadow: 0 15px 50px rgba(0,0,0,0.6);
 

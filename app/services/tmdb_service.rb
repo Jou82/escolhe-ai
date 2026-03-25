@@ -1,3 +1,4 @@
+# app/services/tmdb_service.rb
 class TmdbService
   BASE_URL    = "https://api.themoviedb.org/3"
   TIMEOUT     = 4
@@ -119,34 +120,117 @@ class TmdbService
     scored.reject { |c| director_film_ids.include?(c[:tmdb_id]) }.first(top_n)
   end
 
-  # Enriquece os 3 filmes recomendados em paralelo
+  # ⚡ MÉTODO OTIMIZADO COM PARALLEL
   def self.enrich_recommendations(recommendations)
-    threads = recommendations.map do |rec|
-      Thread.new do
-        tmdb_data = nil
-        retries   = 0
+    return [] if recommendations.blank?
 
-        begin
-          Timeout.timeout(TIMEOUT) do
-            tmdb_data = new(rec["title"], rec["year"]).call
-            tmdb_data ||= new(rec["original_title"], rec["year"]).call if rec["original_title"]
-          end
-        rescue Timeout::Error, Faraday::ConnectionFailed, Faraday::TimeoutError => e
-          retries += 1
-          if retries <= MAX_RETRIES
-            Rails.logger.warn "TMDB enrich timeout (tentativa #{retries}) para '#{rec["title"]}', retrying..."
-            sleep(0.5)
-            retry
-          else
-            Rails.logger.warn "TMDB timeout enriching '#{rec["title"]}': #{e.message}"
+    Rails.logger.info "🚀 Enriquecendo #{recommendations.size} recomendações em paralelo..."
+
+    Parallel.map(recommendations, in_threads: 3) do |rec|
+      tmdb_data = nil
+      retries = 0
+
+      begin
+        Timeout.timeout(TIMEOUT) do
+          tmdb_data = new(rec["title"], rec["year"]).call
+          tmdb_data ||= new(rec["original_title"], rec["year"]).call if rec["original_title"]
+        end
+      rescue Timeout::Error, Faraday::ConnectionFailed, Faraday::TimeoutError => e
+        retries += 1
+        if retries <= MAX_RETRIES
+          Rails.logger.warn "TMDB enrich timeout (tentativa #{retries}) para '#{rec["title"]}', retrying..."
+          sleep(0.5)
+          retry
+        else
+          Rails.logger.warn "TMDB timeout enriching '#{rec["title"]}': #{e.message}"
+        end
+      end
+
+      rec.merge("tmdb" => tmdb_data)
+    end
+  end
+
+  # 💾 MÉTODO COM CACHE
+  def self.enrich_recommendations_with_cache(recommendations)
+    return [] if recommendations.blank?
+
+    Rails.logger.info "🚀 Enriquecendo #{recommendations.size} recomendações com CACHE em paralelo..."
+
+    Parallel.map(recommendations, in_threads: 3) do |rec|
+      # Tenta buscar do cache primeiro
+      cache_key = "tmdb:movie:enriched:#{rec['tmdb_id'] || rec['title']}"
+
+      cached_data = Rails.cache.read(cache_key)
+
+      if cached_data
+        Rails.logger.info "💾 Cache hit para '#{rec['title']}'"
+        next rec.merge("tmdb" => cached_data)
+      end
+
+      tmdb_data = nil
+      retries = 0
+
+      begin
+        Timeout.timeout(TIMEOUT) do
+          tmdb_data = new(rec["title"], rec["year"]).call
+          tmdb_data ||= new(rec["original_title"], rec["year"]).call if rec["original_title"]
+
+          # Salva no cache se conseguiu buscar
+          if tmdb_data
+            Rails.cache.write(cache_key, tmdb_data, expires_in: 24.hours)
           end
         end
+      rescue Timeout::Error, Faraday::ConnectionFailed, Faraday::TimeoutError => e
+        retries += 1
+        if retries <= MAX_RETRIES
+          Rails.logger.warn "TMDB enrich timeout (tentativa #{retries}) para '#{rec["title"]}', retrying..."
+          sleep(0.5)
+          retry
+        else
+          Rails.logger.warn "TMDB timeout enriching '#{rec["title"]}': #{e.message}"
+        end
+      end
 
-        rec.merge("tmdb" => tmdb_data)
+      rec.merge("tmdb" => tmdb_data)
+    end
+  end
+
+  # 🎬 BUSCA MÚLTIPLOS FILMES POR ID EM PARALELO COM CACHE
+  def self.fetch_movies_by_ids(tmdb_ids)
+    return [] if tmdb_ids.blank?
+
+    Rails.logger.info "🚀 Buscando #{tmdb_ids.size} filmes por ID em paralelo..."
+
+    Parallel.map(tmdb_ids, in_threads: 3) do |tmdb_id|
+      cache_key = "tmdb:movie:#{tmdb_id}"
+
+      Rails.cache.fetch(cache_key, expires_in: 24.hours) do
+        with_retry("fetch_movie_#{tmdb_id}") do
+          Timeout.timeout(TIMEOUT) do
+            response = Faraday.get(
+              "#{BASE_URL}/movie/#{tmdb_id}",
+              { api_key: ENV.fetch("TMDB_API_KEY", nil), language: "pt-BR" }
+            )
+
+            if response.status == 200
+              movie = JSON.parse(response.body)
+              {
+                tmdb_id: movie["id"],
+                title: movie["title"],
+                original_title: movie["original_title"],
+                overview: movie["overview"],
+                poster_url: poster_url_from_path(movie["poster_path"]),
+                vote_average: movie["vote_average"],
+                release_date: movie["release_date"],
+                genres: movie["genres"]&.map { |g| g["name"] }
+              }
+            else
+              nil
+            end
+          end
+        end
       end
     end
-
-    threads.map(&:value)
   end
 
   def self.fetch_related(movie_id)
@@ -365,7 +449,6 @@ class TmdbService
   end
 
   def fetch_trailer(movie_id)
-    # Dispara PT-BR e EN em paralelo — usa o melhor disponível
     t_ptbr = Thread.new do
       r = Faraday.get("#{BASE_URL}/movie/#{movie_id}/videos",
                       { api_key: ENV.fetch("TMDB_API_KEY", nil), language: "pt-BR" })
@@ -433,7 +516,12 @@ class TmdbService
     "https://image.tmdb.org/t/p/#{size}#{path}"
   end
 
-  # Helper partilhado de retry para class methods
+  # Helper para gerar URL do poster (class method)
+  def self.poster_url_from_path(path, size = "w500")
+    return nil unless path
+    "https://image.tmdb.org/t/p/#{size}#{path}"
+  end
+
   def self.with_retry(method_name, &block)
     retries = 0
     begin
@@ -452,7 +540,6 @@ class TmdbService
   end
   private_class_method :with_retry
 
-  # Normaliza um hash de filme da API para o formato interno
   def self.normalize_candidate(movie, score: nil)
     candidate = {
       tmdb_id:        movie["id"],

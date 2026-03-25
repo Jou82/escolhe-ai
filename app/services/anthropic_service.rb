@@ -44,12 +44,12 @@ class AnthropicService
   end
 
   def format_exclude_titles
-  titles = @exclude_titles.last(30)
-  if titles.any?
-    "\n\n**FILMES PROIBIDOS (NÃO RECOMENDAR SOB NENHUMA HIPÓTESE):** #{titles.join(', ')}"
-  else
-    ""
-  end
+    titles = @exclude_titles.last(30)
+    if titles.any?
+      "\n\n**FILMES PROIBIDOS (NÃO RECOMENDAR SOB NENHUMA HIPÓTESE):** #{titles.join(', ')}"
+    else
+      ""
+    end
   end
 
   def client
@@ -58,25 +58,25 @@ class AnthropicService
 
   def system_prompt
     <<~PROMPT
-    Especialista em cinema. Analise os filmes favoritos e recomende exatamente 3 filmes.
-    IMPORTANTE: Responda SOMENTE com o JSON. Não escreva nada antes ou depois. Comece diretamente com {.
+      Especialista em cinema. Analise os filmes favoritos e recomende exatamente 3 filmes.
+      IMPORTANTE: Responda SOMENTE com o JSON. Não escreva nada antes ou depois. Comece diretamente com {.
 
-    #{platform_instruction}
-    #{format_exclude_titles}
+      #{platform_instruction}
+      #{format_exclude_titles}
 
-    Responda APENAS com JSON válido:
-    {"analysis":"perfil em 1 frase pt-BR","recommendations":[{"title":"Título PT","original_title":"Title EN","year":2020,"reason":"motivo em 1 frase","genres":["Gênero"]}]}
+      Responda APENAS com JSON válido:
+      {"analysis":"perfil em 1 frase pt-BR","recommendations":[{"title":"Título PT","original_title":"Title EN","year":2020,"reason":"motivo em 1 frase","genres":["Gênero"]}]}
 
-    Regras:
-       - NUNCA recomende sequências, prequelas ou filmes da mesma franquia dos filmes favoritos do usuário
-       - Recomende exatamente 3 filmes
-       - NUNCA recomende filmes que o usuário já listou
-       - NUNCA recomende filmes listados em "FILMES PROIBIDOS"
-       - Somente filmes disponíveis em streaming no Brasil
-       - O motivo deve referenciar padrões específicos encontrados nos 3 filmes
-       - Inclua o título original quando for filme estrangeiro
-       - Responda tudo em português (BR)
-       - NUNCA recomende filmes que não estejam disponíveis em streaming por assinatura no Brasil. Isso é uma regra absoluta.
+      Regras:
+         - NUNCA recomende sequências, prequelas ou filmes da mesma franquia dos filmes favoritos do usuário
+         - Recomende exatamente 3 filmes
+         - NUNCA recomende filmes que o usuário já listou
+         - NUNCA recomende filmes listados em "FILMES PROIBIDOS"
+         - Somente filmes disponíveis em streaming no Brasil
+         - O motivo deve referenciar padrões específicos encontrados nos 3 filmes
+         - Inclua o título original quando for filme estrangeiro
+         - Responda tudo em português (BR)
+         - NUNCA recomende filmes que não estejam disponíveis em streaming por assinatura no Brasil. Isso é uma regra absoluta.
     PROMPT
   end
 
@@ -92,13 +92,17 @@ class AnthropicService
     movies_text = @movies.map { |m| "- #{m}" }.join("\n")
 
     candidates_text = @candidates.map.with_index(1) do |c, i|
-      overview = c[:overview].to_s.truncate(150)
+      overview = c[:overview].to_s.truncate(100)
 
-      <<~CANDIDATE
-        #{i}. #{c[:title]} (#{c[:release_date]&.slice(0, 4) || '?'}) — TMDB ID: #{c[:tmdb_id]}
-           Nota: #{c[:vote_average]}/10 (#{c[:vote_count]} votos) | Freq: #{c[:frequency]}/3 | Score: #{c[:score]}
-           Sinopse: #{overview}
-      CANDIDATE
+      if c[:score].to_f >= 40
+        <<~CANDIDATE
+          #{i}. #{c[:title]} (#{c[:release_date]&.slice(0, 4) || '?'}) — TMDB ID: #{c[:tmdb_id]}
+             Nota: #{c[:vote_average]}/10 (#{c[:vote_count]} votos) | Freq: #{c[:frequency]}/3 | Score: #{c[:score]}
+             Sinopse: #{overview}
+        CANDIDATE
+      else
+        "#{i}. #{c[:title]} (#{c[:release_date]&.slice(0, 4) || '?'}) — Score: #{c[:score]}\n"
+      end
     end.join("\n")
 
     <<~USER

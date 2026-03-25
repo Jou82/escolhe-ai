@@ -361,77 +361,21 @@ body {
   margin-bottom: 3rem;
 }
 
-// ===== TIMELINE =====
-.timeline {
+// ===== TIMELINE CENTRADA =====
+.timeline-centered {
   display: flex;
   flex-direction: column;
-  gap: 0;
-  position: relative;
-
-  &::before {
-    content: '';
-    position: absolute;
-    left: 28px;
-    top: 24px;
-    bottom: 24px;
-    width: 1px;
-    background: linear-gradient(to bottom, rgba($accent-blue, 0.3), rgba(139, 92, 246, 0.2), rgba(6, 182, 212, 0.2));
-  }
-}
-
-.tl-item {
-  display: flex;
-  gap: 1.5rem;
-  padding: 1.5rem 0;
-  position: relative;
-}
-
-.tl-dot-wrap {
-  flex-shrink: 0;
-  width: 56px;
-  display: flex;
-  justify-content: center;
-  position: relative;
-  z-index: 1;
-}
-
-.tl-dot {
-  width: 56px;
-  height: 56px;
-  border-radius: 16px;
-  display: flex;
   align-items: center;
-  justify-content: center;
-  font-family: 'Inter', sans-serif;
-  font-size: 1.2rem;
-  font-weight: 800;
-  transition: transform 0.3s ease;
-
-  .tl-item:hover & {
-    transform: scale(1.08);
-  }
+  max-width: 520px;
+  margin: 0 auto;
 }
 
-.tl-dot-1 {
-  background: rgba($accent-blue, 0.12);
-  color: $accent-blue-light;
-  border: 1px solid rgba($accent-blue, 0.2);
-}
-
-.tl-dot-2 {
-  background: rgba(59, 130, 246, 0.2);
-  color: #93c5fd;
-  border: 1px solid rgba(59, 130, 246, 0.35);
-}
-
-.tl-dot-3 {
-  background: rgba(6, 182, 212, 0.12);
-  color: #22d3ee;
-  border: 1px solid rgba(6, 182, 212, 0.2);
-}
-
-.tl-content {
-  padding-top: 6px;
+.tlc-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
 
   h3 {
     font-family: 'Inter', sans-serif;
@@ -446,8 +390,52 @@ body {
     font-size: 0.82rem;
     color: $text-muted;
     line-height: 1.65;
-    max-width: 400px;
+    max-width: 360px;
+    margin: 0 auto;
   }
+}
+
+.tlc-dot {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Inter', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 800;
+  margin-bottom: 14px;
+  transition: transform 0.3s ease;
+
+  .tlc-item:hover & {
+    transform: scale(1.08);
+  }
+}
+
+.tlc-dot-1 {
+  background: rgba($accent-blue, 0.12);
+  color: $accent-blue-light;
+  border: 1px solid rgba($accent-blue, 0.2);
+}
+
+.tlc-dot-2 {
+  background: rgba(59, 130, 246, 0.2);
+  color: #93c5fd;
+  border: 1px solid rgba(59, 130, 246, 0.35);
+}
+
+.tlc-dot-3 {
+  background: rgba(6, 182, 212, 0.12);
+  color: #22d3ee;
+  border: 1px solid rgba(6, 182, 212, 0.2);
+}
+
+.tlc-connector {
+  width: 1px;
+  height: 36px;
+  background: linear-gradient(to bottom, rgba($accent-blue, 0.3), rgba(139, 92, 246, 0.2));
+  margin: 16px auto 16px;
 }
 
 // ===== STATS SHOWCASE =====

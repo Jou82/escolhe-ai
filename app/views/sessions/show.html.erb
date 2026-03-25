@@ -1,22 +1,27 @@
 <!-- HEADER WITH BACK -->
 <div class="results-top">
-  <%= link_to root_path, class: "back-link" do %>
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-    VOLTAR
-  <% end %>
+  <div class="results-top-left">
+    <%= link_to root_path, class: "back-link" do %>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+      VOLTAR
+    <% end %>
+  </div>
 
- <form action="/movies" method="post" data-turbo="false" style="display: inline;">
-    <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
-    <input type="hidden" name="movies" value="<%= @user_movies.map(&:title).join(', ') %>">
-    <input type="hidden" name="exclude" value="<%= @suggested_movies.map(&:title).join(', ') %>">
-    <button type="submit" class="btn-retry">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
-      Tente outra vez
-    </button>
-  </form>
-  <div class="results-header-text">
-    <h1>Recomendações para você</h1>
-    <p class="results-based">Baseado nos seus interesses '<span class="results-highlight"><%= @user_movies.map(&:title).join("', '") %></span>'</p>
+  <div class="results-top-center">
+    <form action="/movies" method="post" data-turbo="false">
+      <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
+      <input type="hidden" name="movies" value="<%= @user_movies.map(&:title).join(', ') %>">
+      <input type="hidden" name="exclude" value="<%= @suggested_movies.map(&:title).join(', ') %>">
+      <button type="submit" class="btn-retry">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+        Tente outra vez
+      </button>
+    </form>
+  </div>
+
+  <div class="results-top-right">
+    <h1>Recomendações exclusivas para você</h1>
+    <p class="results-based">Baseado nas suas escolhas</p>
   </div>
 </div>
 

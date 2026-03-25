@@ -8,8 +8,31 @@
   min-height: 50px;
 }
 
-.back-link {
+.results-top-left {
   flex: 1;
+}
+
+.results-top-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.results-top-right {
+  flex: 1;
+  text-align: right;
+
+  h1 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 800;
+    color: $text-white;
+    margin: 0 0 2px;
+    letter-spacing: -0.02em;
+  }
+}
+
+.back-link {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
@@ -28,35 +51,11 @@
 }
 
 // ===== HEADER =====
-.results-header-text {
-  flex: 1;
-  text-align: right;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: flex-end;
-  margin-top: 21px;
-
-
-  h1 {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 1.2rem;
-    font-weight: 800;
-    color: $text-white;
-    margin-bottom: 0.15rem;
-    letter-spacing: -0.02em;
-  }
-}
-
 .results-based {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: $text-muted;
   font-weight: 400;
-}
-
-.results-highlight {
-  color: $accent-blue;
-  font-weight: 500;
+  margin: 0;
 }
 
 // ===== MOVIE CARDS GRID =====
@@ -173,12 +172,9 @@
 
 // ===== TRY AGAIN =====
 .btn-retry {
-  flex: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  max-width: 200px;
-  margin: 0 auto;
   gap: 0.4rem;
   padding: 0.55rem 1.8rem;
   background: rgba(255, 255, 255, 0.06);
@@ -205,5 +201,11 @@
     align-items: flex-start;
     padding: 4rem 1.5rem 0;
     gap: 0.8rem;
+  }
+
+  .results-top-center,
+  .results-top-right {
+    text-align: left;
+    align-items: flex-start;
   }
 }

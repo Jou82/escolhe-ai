@@ -12,14 +12,13 @@
     <div class="hero-content">
 
       <h1 class="hero-title fade-in">
-        Fala o que você ama
+        Chega de dúvida.
         <br>
-        <em>A gente escolhe pra você</em>
+        <em>O filme certo começa aqui.</em>
       </h1>
 
       <p class="hero-sub fade-in">
-        Digite 3 filmes. Nosso algoritmo analisa o seu gosto e devolve 3 recomendações perfeitas em segundos
-      </p>
+        Cite 3 produções que marcaram você. Em instantes, nosso algoritmo entrega uma curadoria de 3 filmes imperdíveis. Já separou a pipoca? 🍿      </p>
 
       <div class="search-wrapper fade-in">
         <div class="search-glow"></div>
@@ -40,7 +39,7 @@
       </div>
 
       <div class="trending fade-in" data-home-target="chips">
-        <span class="trending-label">Trending:</span>
+        <span class="trending-label">Destaques:</span>
         <% @popular_movies.each do |movie| %>
           <span class="trending-link" data-action="click->home#insertChip" data-genre="<%= movie %>"><%= movie %></span>
         <% end %>
@@ -81,7 +80,7 @@
   <section class="section-how" id="how">
     <div class="section-line"></div>
     <div class="sec-label fade-in">Como funciona</div>
-    <div class="sec-title fade-in">Três passos. Zero complicação.</div>
+    <div class="sec-title fade-in">Conectamos suas referências à sua próxima história.</div>
 
     <div class="timeline">
       <div class="tl-item fade-in">
@@ -89,8 +88,8 @@
           <div class="tl-dot tl-dot-1">1</div>
         </div>
         <div class="tl-content">
-          <h3>Digite 3 filmes</h3>
-          <p>Escolha filmes que você ama — de qualquer gênero, época ou estilo. Separe por vírgula e pronto</p>
+          <h3>Compartilhe seu gosto</h3>
+          <p>Indique 3 produções que marcaram você — valem filmes, séries ou novelas de qualquer época.</p>
         </div>
       </div>
 
@@ -99,8 +98,8 @@
           <div class="tl-dot tl-dot-2">2</div>
         </div>
         <div class="tl-content">
-          <h3>Analisamos o seu gosto</h3>
-          <p>O nosso algoritmo cruza gêneros, temas, diretores e atmosfera para encontrar padrões no seu gosto</p>
+          <h3>Analisamos a essência</h3>
+          <p>O algoritmo mergulha nos temas e estéticas para identificar o que realmente importa para você.</p>
         </div>
       </div>
 
@@ -109,8 +108,8 @@
           <div class="tl-dot tl-dot-3">3</div>
         </div>
         <div class="tl-content">
-          <h3>Receba 3 filmes perfeitos</h3>
-          <p>Recomendações com pôster, sinopse e nota. Prontas para a sua noite de cinema</p>
+          <h3>Sua próxima imersão</h3>
+          <p>Mergulhe em detalhes de elenco, trailers e onde encontrar cada título. Nossa curadoria cuidou de tudo: seu único papel é dar o play. 🍿</p>
         </div>
       </div>
     </div>
@@ -135,10 +134,10 @@
   <!-- CTA -->
   <section class="cta-final">
     <div class="cta-glow"></div>
-    <h2>Pronto para o próximo filme?</h2>
-    <p>Pare de rolar catálogos infinitos. Deixa a IA decidir por você</p>
+    <h2>Sua próxima história começa com um play.</h2>
+    <p>A curadoria sob medida que a sua noite de cinema merece.</p>
     <a href="#" class="btn-cta" data-action="click->home#scrollToSearch">
-      Começar agora
+      Encontrar meu filme
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <line x1="5" y1="12" x2="19" y2="12"></line>
         <polyline points="12 5 19 12 12 19"></polyline>

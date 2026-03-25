@@ -4,8 +4,10 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable, :omniauthable, omniauth_providers: [:google_oauth2]
   has_many :sessions, dependent: :destroy
-
   serialize :streaming_platforms, coder: JSON
+
+  # Callback: Define o avatar antes de criar o registro no banco
+  before_validation :set_random_avatar, on: :create
 
   STREAMING_OPTIONS = [
     "Netflix", "Amazon Prime Video", "Disney Plus", "HBO Max",
@@ -36,6 +38,7 @@ class User < ApplicationRecord
     end
   end
 
+
   def avatar_url
     @avatar_url ||= Cloudinary::Utils.cloudinary_url(
       avatar.presence || AVATARS.first,
@@ -43,5 +46,12 @@ class User < ApplicationRecord
       height: 200,
       crop: :fill
     )
+  end
+
+  private
+
+  def set_random_avatar
+    # Só atribui se o avatar estiver em branco
+    self.avatar = AVATARS.sample if avatar.blank?
   end
 end

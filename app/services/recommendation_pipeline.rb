@@ -3,6 +3,7 @@ class RecommendationPipeline
   MAX_RETRIES = 2
   TMDB_TIMEOUT = 12
   ANTHROPIC_TIMEOUT = 20
+  MAX_EXCLUDE_HISTORY = 30  # ← NOVO: Limita histórico de exclusão
 
   def initialize(movies, user = nil, exclude = [])
     @movies = movies
@@ -12,6 +13,10 @@ class RecommendationPipeline
   end
 
   def call
+    # NOVO: Limita o histórico de exclusão aos últimos 30 filmes
+    limited_exclude = @exclude.last(MAX_EXCLUDE_HISTORY)
+    Rails.logger.info "📊 Exclude limitado: #{@exclude.size} → #{limited_exclude.size} filmes"
+
     @candidates = fetch_candidates_guaranteed
     # Garantir que candidates seja um array
     @candidates ||= []
@@ -22,7 +27,7 @@ class RecommendationPipeline
 
     platform_movies = []
     rent_buy_movies = []
-    already_recommended = @exclude.dup
+    already_recommended = limited_exclude.dup  # ALTERADO: usa limited_exclude
     retries = 0
 
     # Prioridade: tentar obter 3 filmes da plataforma
@@ -30,7 +35,7 @@ class RecommendationPipeline
       current_candidates = remaining_candidates(@candidates, already_recommended)
       break if current_candidates.empty?
 
-      ai_result = fetch_ai_guaranteed(current_candidates)
+      ai_result = fetch_ai_guaranteed(current_candidates, limited_exclude)  # ALTERADO: passa limited_exclude
       @analysis ||= ai_result["analysis"] if ai_result
 
       if ai_result.nil?
@@ -160,7 +165,7 @@ class RecommendationPipeline
     end
 
     # ========== FILTRO FINAL PARA EVITAR REPETIÇÃO ==========
-    final_recs = filter_recommendations(final_recs, @exclude)
+    final_recs = filter_recommendations(final_recs, limited_exclude)  # ALTERADO: usa limited_exclude
 
     {
       analysis: @analysis,
@@ -313,13 +318,12 @@ class RecommendationPipeline
     end
   end
 
-  def fetch_ai_guaranteed(candidates)
+  def fetch_ai_guaranteed(candidates, limited_exclude)  # ALTERADO: adiciona parâmetro limited_exclude
     retries = 0
     loop do
       begin
         Timeout.timeout(ANTHROPIC_TIMEOUT) do
-          # ALTERAÇÃO: passar @exclude para o AnthropicService
-          return AnthropicService.new(@movies, candidates, user_platforms, @exclude).call
+          return AnthropicService.new(@movies, candidates, user_platforms, limited_exclude).call  # ALTERADO: usa limited_exclude
         end
       rescue Timeout::Error => e
         retries += 1

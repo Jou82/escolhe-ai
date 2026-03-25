@@ -29,6 +29,6 @@ class Session < ApplicationRecord
 
   # NOVO MÉTODO - POSICIONADO CORRETAMENTE (fora do rescue)
   def random_recommendation
-    recommended_movies.first(3).sample
+    recommended_movies.first(3).shuffle.first
   end
 end

@@ -67,6 +67,17 @@
 
       <!-- SESSÕES EXTRA (escondidas) -->
       <% if @hidden_sessions.any? %>
+
+        <!-- BOTÃO CARREGAR MAIS -->
+        <div id="load-more-btn" class="history-load-more">
+          <button class="btn-load-more" onclick="
+            document.getElementById('hidden-sessions').style.display = 'block';
+            document.getElementById('load-more-btn').style.display = 'none';
+          ">
+            CARREGAR MAIS SESSÕES
+          </button>
+        </div>
+
         <div id="hidden-sessions" style="display: none;">
           <% @hidden_sessions.each do |session| %>
             <% next unless session.completed? %>
@@ -120,21 +131,13 @@
             <button class="btn-load-more" onclick="
               document.getElementById('hidden-sessions').style.display = 'none';
               document.getElementById('load-more-btn').style.display = 'flex';
+              window.scrollBy({top: -400, behavior: 'smooth'});
             ">
               MOSTRAR MENOS
             </button>
           </div>
         </div>
 
-        <!-- BOTÃO CARREGAR MAIS -->
-        <div id="load-more-btn" class="history-load-more">
-          <button class="btn-load-more" onclick="
-            document.getElementById('hidden-sessions').style.display = 'block';
-            document.getElementById('load-more-btn').style.display = 'none';
-          ">
-            CARREGAR MAIS SESSÕES
-          </button>
-        </div>
       <% end %>
 
     <% else %>

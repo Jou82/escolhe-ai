@@ -9,8 +9,8 @@
 
   <!-- HEADER -->
   <div class="history-header">
-    <h1>Histórico de recomendações</h1>
-    <p>Recorde as suas viagens cinematográficas passadas. Uma linha do tempo selecionada de todas as nossas sessões.</p>
+    <h1>Histórico de Recomendações</h1>
+    <p>Sua linha do tempo com cada recomendação feita sob medida.</p>
   </div>
 
   <!-- SESSIONS LIST -->
@@ -23,7 +23,7 @@
 
         <div class="history-entry">
           <div class="history-date">
-            <%= session.created_at.strftime("%b %-d, %Y") %>
+            <%= session.created_at.strftime("%d %b, %Y") %>
           </div>
 
           <div class="history-cards">
@@ -84,7 +84,7 @@
 
             <div class="history-entry">
               <div class="history-date">
-                <%= session.created_at.strftime("%b %-d, %Y") %>
+                <%= session.created_at.strftime("%d %b, %Y") %>
               </div>
 
               <div class="history-cards">
@@ -144,9 +144,9 @@
       <!-- EMPTY STATE -->
       <div class="history-empty">
         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-        <h3>Ainda sem sessões</h3>
-        <p>Começa por descobrir filmes e o teu histórico aparecerá aqui.</p>
-        <%= link_to "Descobrir filmes", root_path, class: "btn-discover" %>
+        <h3>Sua história começa aqui!</h3>
+        <p>Descubra sua primeira recomendação e daremos início à sua curadoria sob medida.</p>
+        <%= link_to "Primeira Recomendação", root_path, class: "btn-discover" %>
       </div>
     <% end %>
   </div>

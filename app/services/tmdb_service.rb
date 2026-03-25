@@ -1,14 +1,14 @@
-# app/services/tmdb_service.rb
 class TmdbService
   BASE_URL    = "https://api.themoviedb.org/3"
   TIMEOUT     = 4
   MAX_RETRIES = 1
 
   WEIGHTS = {
-    frequency: 0.35,
-    rating:    0.25,
-    popularity: 0.25,
-    votes:     0.15
+    frequency:  0.30,
+    rating:     0.25,
+    popularity: 0.15,
+    votes:      0.15,
+    cult:       0.15
   }.freeze
 
   PROVIDER_IDS = {
@@ -214,14 +214,14 @@ class TmdbService
           r = Faraday.get(
             "#{BASE_URL}/discover/movie",
             {
-              api_key:            ENV.fetch("TMDB_API_KEY", nil),
-              language:           "pt-BR",
-              watch_region:       "BR",
+              api_key:              ENV.fetch("TMDB_API_KEY", nil),
+              language:             "pt-BR",
+              watch_region:         "BR",
               with_watch_providers: provider_id,
-              with_genres:        genre_ids.first(3).join(","),
-              sort_by:            "vote_average.desc",
-              "vote_count.gte" => 50,
-              page:               1
+              with_genres:          genre_ids.first(3).join(","),
+              sort_by:              "vote_average.desc",
+              "vote_count.gte"   => 50,
+              page:                 1
             }
           )
           JSON.parse(r.body)["results"] || []
@@ -290,7 +290,8 @@ class TmdbService
       frequency_score(candidate[:frequency], total_sources) * WEIGHTS[:frequency] +
       rating_score(candidate[:vote_average])                * WEIGHTS[:rating]    +
       popularity_score(candidate[:popularity])              * WEIGHTS[:popularity] +
-      votes_score(candidate[:vote_count])                   * WEIGHTS[:votes]
+      votes_score(candidate[:vote_count])                   * WEIGHTS[:votes]     +
+      cult_score(candidate[:vote_average], candidate[:popularity]) * WEIGHTS[:cult]
     ).round(1)
   end
 
@@ -321,6 +322,18 @@ class TmdbService
     when 500..    then 40
     when 100..    then 20
     else               0
+    end
+  end
+
+  def self.cult_score(vote_average, popularity)
+    return 0 unless vote_average.to_f >= 7.0
+
+    case popularity.to_f
+    when 0...10    then 100
+    when 10...30   then 80
+    when 30...100  then 50
+    when 100...300 then 20
+    else                0
     end
   end
 

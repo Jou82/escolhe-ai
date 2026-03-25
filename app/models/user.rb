@@ -14,21 +14,19 @@ class User < ApplicationRecord
   ].freeze
 
   AVATARS = [
-  "avatar_1",
-  "avatar_2",
-  "avatar_3",
-  "avatar_4",
-  "avatar_5",
-  "avatar_6",
-  "avatar_7",
-  "avatar_8",
-  "avatar_9",
-  "avatar_10",
-  "avatar_11",
-  "avatar_12",
-  "avatar_13"
-
-
+  "avatar_1_l9q2gs",
+  "avatar_2_fgbof8",
+  "avatar_3_m3psu0",
+  "avatar_4_xteife",
+  "avatar_5_ywu3lw",
+  "avatar_6_nmanz1",
+  "avatar_7_ctjwgt",
+  "avatar_8_uxfd5e",
+  "avatar_9_twwfas",
+  "avatar_10_pf75ri",
+  "avatar_11_wekxdv",
+  "avatar_12_d6yrgb",
+  "avatar_13_gdjhwo"
 ].freeze
 
   def self.from_omniauth(auth)
@@ -41,6 +39,6 @@ class User < ApplicationRecord
   def avatar_url
     return unless avatar.present?
 
-    "https://res.cloudinary.com/dyplenk9j/image/upload/avatares_2/#{avatar}.png"
+    Cloudinary::Utils.cloudinary_url(avatar, width: 200, height: 200, crop: :fill)
   end
 end

@@ -3,11 +3,13 @@ class SessionMoviesController < ApplicationController
 
   def show
     @session_record = current_user.sessions.find(params[:session_id])
-    @movie = Movie.find(params[:id])
-    @genres = @movie.genres
-    @like = Like.find_by(session: @session_record, movie: @movie)
+    @recommendations = @session_record.recommendations || []
 
-    recommendations = @session_record.recommendations
-    @rec_data = recommendations.find { |r| r["title"] == @movie.title }
+    # CORRIGIDO: "tmdb_id" em vez de "id"
+    @rec_data = @recommendations.find { |rec| rec.dig("tmdb", "tmdb_id").to_s == params[:id].to_s }
+
+    if @rec_data.nil?
+      redirect_to session_path(@session_record), alert: "Filme não encontrado." and return
+    end
   end
 end

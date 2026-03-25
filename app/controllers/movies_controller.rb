@@ -49,7 +49,7 @@ class MoviesController < ApplicationController
     if params[:movies].is_a?(Array)
       @movie_titles = params[:movies].reject(&:blank?)
     else
-      @movie_titles = params[:movies].to_s.split(/,|(?:\se\s)/).map(&:strip).reject(&:blank?)
+      @movie_titles = params[:movies].to_s.split(',').map(&:strip).reject(&:blank?)
     end
 
     if @movie_titles.length != 3

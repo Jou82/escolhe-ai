@@ -1,100 +1,59 @@
 <%# app/views/movies/processing.html.erb %>
-<div class="container mx-auto px-4 min-h-screen flex items-center justify-center">
-  <div class="max-w-2xl mx-auto">
-    <div class="text-center">
-      <div class="inline-block animate-spin rounded-full h-16 w-16 border-b-4 border-indigo-600 mb-4"></div>
-      <p class="text-gray-600 mb-6">Estamos analisando seus filmes favoritos e buscando as melhores recomendações para você.</p>
+<div class="processing-page"
+     data-controller="processing"
+     data-processing-session-id-value="<%= params[:id] %>">
+  <div class="processing-container">
+    <!-- Badge no topo -->
+    <div class="processing-badge-wrapper">
+      <span class="processing-badge">
+        Processando suas preferências
+      </span>
+    </div>
 
-      <!-- Barra de progresso -->
-      <div class="mt-6 mb-4">
-        <div class="bg-gray-200 rounded-full h-2.5">
-          <div id="progress-bar" class="bg-indigo-600 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+    <!-- Spinner animado com círculo de progresso -->
+    <div class="processing-spinner-wrapper">
+      <div class="processing-spinner-container">
+        <!-- Círculo de fundo -->
+        <svg class="processing-circle" viewBox="0 0 120 120">
+          <circle
+            cx="60"
+            cy="60"
+            r="54"
+            class="progress-bg"
+          />
+          <!-- Círculo de progresso -->
+          <circle
+            data-processing-target="progressCircle"
+            cx="60"
+            cy="60"
+            r="54"
+            class="progress-fill"
+          />
+        </svg>
+
+        <!-- Porcentagem no centro do círculo -->
+        <div class="progress-text-wrapper">
+          <span data-processing-target="progressText" class="progress-percentage">0%</span>
         </div>
-        <p id="progress-text" class="text-sm text-gray-500 font-medium mt-2">0%</p>
       </div>
+    </div>
 
-      <p id="status-message" class="text-sm text-gray-600 mt-2">Iniciando análise...</p>
+    <!-- Título principal -->
+    <h1 class="processing-title">
+      Descobrindo seus
+      <span class="text-highlight">próximos filmes</span>
+    </h1>
 
-      <div class="mt-8 bg-gray-50 rounded-lg p-4">
-        <p class="text-sm text-gray-600">Você será redirecionado automaticamente quando estiver pronto.</p>
-        <a href="/" class="inline-block mt-3 text-indigo-600 hover:text-indigo-800 text-sm">
-          ← Voltar para o início
-        </a>
-      </div>
+    <!-- Mensagem de status -->
+    <p data-processing-target="statusMessage" class="processing-status">
+      Processando suas recomendações...
+    </p>
+
+    <!-- Link para voltar -->
+    <div class="processing-back">
+      <%= link_to "← Voltar para o início", root_path, class: "back-link" %>
     </div>
   </div>
 </div>
 
 <%= turbo_stream_from "user_#{current_user.id}_recommendations" %>
-<div id="recommendations_container" class="hidden">
-  <%= render "shared/loading", message: "Iniciando análise..." %>
-</div>
-
-<script>
-  const sessionId = "<%= params[:id] %>";
-  let stepIndex = 0;
-  let completed = false;
-  let progressInterval = null;
-
-  const steps = [
-    { progress: 10, message: "🔍 Buscando filmes similares no TMDB..." },
-    { progress: 25, message: "🎬 Analisando padrões de gosto..." },
-    { progress: 40, message: "🤖 Consultando inteligência artificial (Claude)..." },
-    { progress: 60, message: "📊 Selecionando melhores recomendações..." },
-    { progress: 80, message: "💾 Salvando suas recomendações..." },
-    { progress: 95, message: "✨ Finalizando..." }
-  ];
-
-  const progressBar = document.getElementById('progress-bar');
-  const progressText = document.getElementById('progress-text');
-  const statusMessage = document.getElementById('status-message');
-
-  function updateProgress() {
-    if (completed) return;
-
-    if (stepIndex < steps.length) {
-      const step = steps[stepIndex];
-      progressBar.style.width = step.progress + '%';
-      progressText.textContent = step.progress + '%';
-      statusMessage.textContent = step.message;
-      stepIndex++;
-
-      const delay = Math.random() * 2000 + 2000;
-      progressInterval = setTimeout(updateProgress, delay);
-    }
-  }
-
-  function completeProgress() {
-    if (progressInterval) {
-      clearTimeout(progressInterval);
-    }
-    completed = true;
-    progressBar.style.width = '100%';
-    progressText.textContent = '100%';
-    statusMessage.textContent = '🎉 Pronto! Redirecionando...';
-  }
-
-  function checkAndRedirect() {
-    fetch(`/movies/check_status?id=${sessionId}`)
-      .then(response => response.json())
-      .then(data => {
-        if (data.status === "completed") {
-          completeProgress();
-          console.log('✅ Sessão completa, redirecionando para /sessions/' + sessionId);
-          setTimeout(() => {
-            window.location.href = `/sessions/${sessionId}`;
-          }, 500);
-        } else {
-          console.log('⏳ Aguardando conclusão... Status:', data.status);
-          setTimeout(checkAndRedirect, 2000);
-        }
-      })
-      .catch(error => {
-        console.error('❌ Erro ao verificar status:', error);
-        setTimeout(checkAndRedirect, 3000);
-      });
-  }
-
-  setTimeout(updateProgress, 1000);
-  setTimeout(checkAndRedirect, 2000);
-</script>

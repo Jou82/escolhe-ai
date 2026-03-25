@@ -65,4 +65,32 @@ export default class extends Controller {
   closeOnOverlayClick(event) {
     if (event.target === this.overlayTarget) this.close()
   }
+  submitLogin(event) {
+    event.preventDefault()
+    const form = event.target
+
+    fetch(form.action, {
+      method: 'POST',
+      body: new FormData(form),
+      headers: { 'Accept': 'application/json', 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content }
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        window.location.href = data.redirect
+      } else {
+        this.showError(data.error)
+      }
+    })
+  }
+
+  showError(message) {
+    let el = this.element.querySelector('.modal-error')
+    if (!el) {
+      el = document.createElement('div')
+      el.className = 'modal-error'
+      this.element.querySelector('.login-modal-form').prepend(el)
+    }
+    el.textContent = message
+  }
 }

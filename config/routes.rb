@@ -30,6 +30,7 @@ Rails.application.routes.draw do
     collection do
       get :processing
       get :check_status
+      get :search
     end
   end
 

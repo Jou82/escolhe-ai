@@ -234,31 +234,30 @@ body {
   }
 }
 
-// ===== GENRE CHIPS =====
-.chips {
+// ===== MOVIE CHIPS =====
+.trending {
   display: flex;
+  align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 12px;
   margin-top: 1.2rem;
   flex-wrap: wrap;
 }
 
-.chip {
-  padding: 6px 14px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 100px;
-  font-family: 'Work Sans', sans-serif;
-  font-size: 0.75rem;
+.trending-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
   color: $text-dim;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  user-select: none;
+}
 
-  &:hover,
-  &.active {
-    background: rgba($accent-blue, 0.1);
-    border-color: rgba($accent-blue, 0.2);
+.trending-link {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  color: $text-muted;
+  cursor: pointer;
+  transition: color 0.2s ease;
+
+  &:hover {
     color: $accent-blue-light;
   }
 }

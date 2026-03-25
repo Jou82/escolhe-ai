@@ -13,13 +13,37 @@ class SessionsController < ApplicationController
     @suggested_movies = @session_record.likes.where(suggestion: true).includes(:movie).map(&:movie)
   end
 
-  # No controller
-  def random_movie
+# app/controllers/sessions_controller.rb
+def random_movie
   @session_record = current_user.sessions.find(params[:id])
-  @movie = @session_record.random_recommendation  # Sorteia 1 filme
 
-  redirect_to session_movie_path(@session_record, @movie)  # Vai para a página do filme
+  # Pega as recomendações diretamente do session_record
+  recommendations = @session_record.recommendations || []
+
+  if recommendations.any?
+    # Escolhe uma recomendação aleatória
+    random_rec = recommendations.sample
+
+    # Pega o tmdb_id da recomendação (que é um hash)
+    tmdb_id = random_rec.dig("tmdb", "tmdb_id")
+
+    Rails.logger.info "=" * 60
+    Rails.logger.info "Roleta Russa - Recomendação sorteada:"
+    Rails.logger.info "  TMDB ID: #{tmdb_id}"
+    Rails.logger.info "  Título: #{random_rec["title"]}"
+    Rails.logger.info "  Session ID: #{@session_record.id}"
+    Rails.logger.info "=" * 60
+
+    if tmdb_id
+      redirect_to session_movie_path(@session_record, tmdb_id)
+    else
+      redirect_to session_path(@session_record), alert: "Filme sem TMDB ID disponível"
+    end
+  else
+    redirect_to session_path(@session_record), alert: "Nenhuma recomendação disponível para sortear"
   end
+end
+# app/controllers/sessions_controller
   def new
   end
 end

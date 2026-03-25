@@ -68,6 +68,8 @@
   align-items: center;
   gap: 1rem;
   padding: 1.5rem;
+  min-width: 0;
+  overflow: hidden;
   text-decoration: none;
   color: inherit;
   border-right: 1px solid $border-card;

@@ -1,6 +1,8 @@
 class SessionsController < ApplicationController
   def index
     @sessions = current_user.sessions.order(created_at: :desc)
+    @visible_sessions = @sessions.first(3)
+    @hidden_sessions = @sessions.drop(3)
   end
 
   def show

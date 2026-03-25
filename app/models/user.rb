@@ -28,8 +28,11 @@ class User < ApplicationRecord
   "avatar_10_pf75ri",
   "avatar_11_wekxdv",
   "avatar_12_d6yrgb",
-  "avatar_13_gdjhwo"
-].freeze
+  "avatar_13_gdjhwo",
+  "avatar_14_sbe7tx",
+  "avatar_15_ojrgmc",
+  "avatar_16_kpsbwm"
+  ].freeze
 
   def self.from_omniauth(auth)
     where(provider: auth.provider, uid: auth.uid).first_or_create do |user|

@@ -1,8 +1,8 @@
 require "rack/attack"
 
-# Rack::Attack.safelist("allow localhost in development") do |req|
-#   Rails.env.development? && (req.ip == "127.0.0.1" || req.ip == "::1")
-# end
+Rack::Attack.safelist("allow localhost in development") do |req|
+  Rails.env.development? && (req.ip == "127.0.0.1" || req.ip == "::1")
+end
 
 Rack::Attack.throttle("movies/ip", limit: 3, period: 1.day) do |req|
   req.ip if req.path == "/movies" && req.post?

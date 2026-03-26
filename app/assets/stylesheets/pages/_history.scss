@@ -274,3 +274,11 @@
     }
   }
 }
+
+@media (max-width: 1024px) {
+  .history-page {
+    .back-link {
+      margin-bottom: 0;
+    }
+  }
+}

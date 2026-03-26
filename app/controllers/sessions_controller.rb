@@ -35,12 +35,12 @@ def random_movie
     Rails.logger.info "=" * 60
 
     if tmdb_id
-      redirect_to session_movie_path(@session_record, tmdb_id)
+      redirect_to movie_session_movie_path(@session_record, tmdb_id)
     else
-      redirect_to session_path(@session_record), alert: "Filme sem TMDB ID disponível"
+      redirect_to movie_session_path(@session_record), alert: "Filme sem TMDB ID disponível"
     end
   else
-    redirect_to session_path(@session_record), alert: "Nenhuma recomendação disponível para sortear"
+    redirect_to movie_session_path(@session_record), alert: "Nenhuma recomendação disponível para sortear"
   end
 end
 # app/controllers/sessions_controller

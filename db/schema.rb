@@ -236,6 +236,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_26_125402) do
     t.string "confirmation_token"
     t.datetime "confirmed_at"
     t.datetime "created_at", null: false
+    t.string "display_name"
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
     t.string "provider"

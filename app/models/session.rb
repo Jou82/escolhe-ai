@@ -2,7 +2,9 @@
 class Session < ApplicationRecord
   belongs_to :user
 
-  enum :status, { processing: 0, completed: 1, failed: 2 }
+
+  enum :status, { processing: 0, completed: 1, failed: 2 }, default: :processing
+
   has_many :likes, dependent: :destroy
   has_many :movies, through: :likes
 

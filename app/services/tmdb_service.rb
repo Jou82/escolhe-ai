@@ -33,17 +33,12 @@ class TmdbService
     @year  = year
   end
 
-  # ─────────────────────────────────────────
-  # INSTANCE — chamado por enrich_recommendations
-  # ─────────────────────────────────────────
-
   def call
     movie = search_movie
     return nil unless movie
 
     movie_id = movie["id"]
 
-    # Dispara providers, cast e trailer em paralelo
     t_providers = Thread.new { fetch_providers(movie_id) }
     t_cast      = Thread.new { fetch_cast(movie_id) }
     t_trailer   = Thread.new { fetch_trailer(movie_id) }
@@ -67,10 +62,6 @@ class TmdbService
       trailer_url:    trailer
     }
   end
-
-  # ─────────────────────────────────────────
-  # CLASS METHODS — candidatos e enriquecimento
-  # ─────────────────────────────────────────
 
   def self.test_connection
     response = Faraday.get("#{BASE_URL}/movie/550", { api_key: ENV.fetch("TMDB_API_KEY", nil) })
@@ -120,7 +111,6 @@ class TmdbService
     scored.reject { |c| director_film_ids.include?(c[:tmdb_id]) }.first(top_n)
   end
 
-  # ⚡ MÉTODO OTIMIZADO COM PARALLEL
   def self.enrich_recommendations(recommendations)
     return [] if recommendations.blank?
 
@@ -150,16 +140,13 @@ class TmdbService
     end
   end
 
-  # 💾 MÉTODO COM CACHE
   def self.enrich_recommendations_with_cache(recommendations)
     return [] if recommendations.blank?
 
     Rails.logger.info "🚀 Enriquecendo #{recommendations.size} recomendações com CACHE em paralelo..."
 
     Parallel.map(recommendations, in_threads: 3) do |rec|
-      # Tenta buscar do cache primeiro
       cache_key = "tmdb:movie:enriched:#{rec['tmdb_id'] || rec['title']}"
-
       cached_data = Rails.cache.read(cache_key)
 
       if cached_data
@@ -175,7 +162,6 @@ class TmdbService
           tmdb_data = new(rec["title"], rec["year"]).call
           tmdb_data ||= new(rec["original_title"], rec["year"]).call if rec["original_title"]
 
-          # Salva no cache se conseguiu buscar
           if tmdb_data
             Rails.cache.write(cache_key, tmdb_data, expires_in: 24.hours)
           end
@@ -195,7 +181,6 @@ class TmdbService
     end
   end
 
-  # 🎬 BUSCA MÚLTIPLOS FILMES POR ID EM PARALELO COM CACHE
   def self.fetch_movies_by_ids(tmdb_ids)
     return [] if tmdb_ids.blank?
 
@@ -224,8 +209,6 @@ class TmdbService
                 release_date: movie["release_date"],
                 genres: movie["genres"]&.map { |g| g["name"] }
               }
-            else
-              nil
             end
           end
         end
@@ -342,9 +325,87 @@ class TmdbService
       .map { |movie| normalize_candidate(movie, score: 50) }
   end
 
-  # ─────────────────────────────────────────
-  # SCORING
-  # ─────────────────────────────────────────
+  def self.discover_arthouse_candidates(exclude_titles = [], limit: 15)
+    Rails.logger.info "🎨 Buscando filmes de arte/festival via TMDB..."
+
+    threads = [
+      Thread.new do
+        with_retry("discover_mubi") do
+          Timeout.timeout(TIMEOUT) do
+            r = Faraday.get(
+              "#{BASE_URL}/discover/movie",
+              {
+                api_key:              ENV.fetch("TMDB_API_KEY", nil),
+                language:             "pt-BR",
+                watch_region:         "BR",
+                with_watch_providers: PROVIDER_IDS["MUBI"],
+                sort_by:              "vote_average.desc",
+                "vote_count.gte"   => 100,
+                "vote_average.gte" => 7.0,
+                page:                 1
+              }
+            )
+            JSON.parse(r.body)["results"] || []
+          end
+        end || []
+      end,
+
+      Thread.new do
+        with_retry("discover_cult") do
+          Timeout.timeout(TIMEOUT) do
+            r = Faraday.get(
+              "#{BASE_URL}/discover/movie",
+              {
+                api_key:                ENV.fetch("TMDB_API_KEY", nil),
+                language:               "pt-BR",
+                watch_region:           "BR",
+                sort_by:                "vote_average.desc",
+                "vote_count.gte"     => 200,
+                "vote_count.lte"     => 3000,
+                "vote_average.gte"   => 7.5,
+                with_original_language: "fr|it|de|ja|ko|es|pt",
+                page:                   1
+              }
+            )
+            JSON.parse(r.body)["results"] || []
+          end
+        end || []
+      end,
+
+      Thread.new do
+        with_retry("discover_awarded") do
+          Timeout.timeout(TIMEOUT) do
+            [1, 2].flat_map do |page|
+              r = Faraday.get(
+                "#{BASE_URL}/discover/movie",
+                {
+                  api_key:            ENV.fetch("TMDB_API_KEY", nil),
+                  language:           "pt-BR",
+                  watch_region:       "BR",
+                  sort_by:            "vote_average.desc",
+                  "vote_count.gte" => 500,
+                  "vote_average.gte" => 7.8,
+                  "popularity.lte" => 50,
+                  page:               page
+                }
+              )
+              JSON.parse(r.body)["results"] || []
+            end
+          end
+        end || []
+      end
+    ]
+
+    results = threads.flat_map(&:value)
+      .uniq { |m| m["id"] }
+      .reject { |m| exclude_titles.include?(m["title"]) }
+      .sort_by { |m| -(m["vote_average"].to_f) }
+      .first(limit)
+      .map { |movie| normalize_candidate(movie, score: 65) }
+
+    Rails.logger.info "🎨 Arthouse: #{results.size} filmes encontrados"
+    results
+  end
 
   def self.score_candidates(similar_by_source, user_movies)
     user_ids      = user_movies.map { |m| m[:tmdb_id] }
@@ -420,10 +481,6 @@ class TmdbService
     else                0
     end
   end
-
-  # ─────────────────────────────────────────
-  # PRIVATE
-  # ─────────────────────────────────────────
 
   private
 
@@ -516,7 +573,6 @@ class TmdbService
     "https://image.tmdb.org/t/p/#{size}#{path}"
   end
 
-  # Helper para gerar URL do poster (class method)
   def self.poster_url_from_path(path, size = "w500")
     return nil unless path
     "https://image.tmdb.org/t/p/#{size}#{path}"

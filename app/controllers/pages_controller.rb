@@ -16,9 +16,11 @@ class PagesController < ApplicationController
   def update_profile
     platforms = params[:streaming_platforms] || []
     avatar = params.dig(:user, :avatar)
+    display_name = params.dig(:user, :display_name)
 
     attrs = { streaming_platforms: platforms.reject(&:blank?) }
     attrs[:avatar] = avatar if avatar.present?
+    attrs[:display_name] = display_name if display_name.present?
 
     current_user.update(attrs)
     render json: { success: true }

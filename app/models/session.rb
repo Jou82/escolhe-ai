@@ -11,6 +11,7 @@ class Session < ApplicationRecord
   attribute :input_movies, :json
 
   def recommended_movies
+    
     likes.where(suggestion: true).includes(:movie).map(&:movie)
   end
 

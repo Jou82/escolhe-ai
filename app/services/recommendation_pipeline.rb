@@ -310,43 +310,31 @@ class RecommendationPipeline
     end
   end
 
-  def fetch_candidates_guaranteed
-    retries = 0
-    loop do
-      begin
-        Timeout.timeout(TMDB_TIMEOUT) do
-          candidates = TmdbService.find_candidates(@movies, top_n: 30)
-          return candidates if candidates.present?
-        end
-      rescue Timeout::Error, Errno::ECONNREFUSED, SocketError => e
-        retries += 1
-        wait_time = [2 ** retries, 10].min
-        Rails.logger.warn "TMDB tentativa #{retries} falhou: #{e.message}. Aguardando #{wait_time}s..."
-        sleep(wait_time)
-      end
-    end
-  end
 
-  def fetch_ai_guaranteed(candidates, limited_exclude)
-    retries = 0
-    loop do
-      begin
-        Timeout.timeout(ANTHROPIC_TIMEOUT) do
-          return AnthropicService.new(@movies, candidates, user_platforms, limited_exclude).call
-        end
-      rescue Timeout::Error => e
-        retries += 1
-        wait_time = [2 ** retries, 10].min
-        Rails.logger.warn "Anthropic tentativa #{retries} falhou: #{e.message}. Aguardando #{wait_time}s..."
-        sleep(wait_time)
-      rescue => e
-        retries += 1
-        wait_time = [2 ** retries, 10].min
-        Rails.logger.warn "Anthropic erro #{retries}: #{e.message}. Aguardando #{wait_time}s..."
-        sleep(wait_time)
+def fetch_candidates_guaranteed
+  retries = 0
+  loop do
+    begin
+      Timeout.timeout(TMDB_TIMEOUT) do
+        tmdb_candidates = TmdbService.find_candidates(@movies, top_n: 15)
+        arthouse_candidates = TmdbService.discover_arthouse_candidates(
+          @exclude.last(MAX_EXCLUDE_HISTORY),
+          limit: 15
+        )
+
+        Rails.logger.info "🎬 TMDB: #{tmdb_candidates.size} | 🎨 Arthouse: #{arthouse_candidates.size}"
+
+        combined = (tmdb_candidates + arthouse_candidates).shuffle
+        return combined if combined.present?
       end
+    rescue Timeout::Error, Errno::ECONNREFUSED, SocketError => e
+      retries += 1
+      wait_time = [2 ** retries, 10].min
+      Rails.logger.warn "Candidatos tentativa #{retries} falhou: #{e.message}. Aguardando #{wait_time}s..."
+      sleep(wait_time)
     end
   end
+end
 
   def enrich_guaranteed(recommendations)
     retries = 0
@@ -363,6 +351,27 @@ class RecommendationPipeline
       end
     end
   end
+
+  def fetch_ai_guaranteed(candidates, limited_exclude)
+  retries = 0
+  loop do
+    begin
+      Timeout.timeout(ANTHROPIC_TIMEOUT) do
+        return AnthropicService.new(@movies, candidates, user_platforms, limited_exclude).call
+      end
+    rescue Timeout::Error => e
+      retries += 1
+      wait_time = [2 ** retries, 10].min
+      Rails.logger.warn "Anthropic tentativa #{retries} falhou: #{e.message}. Aguardando #{wait_time}s..."
+      sleep(wait_time)
+    rescue => e
+      retries += 1
+      wait_time = [2 ** retries, 10].min
+      Rails.logger.warn "Anthropic erro #{retries}: #{e.message}. Aguardando #{wait_time}s..."
+      sleep(wait_time)
+    end
+  end
+end
 
   def remaining_candidates(candidates, already_recommended)
     return [] if candidates.blank?

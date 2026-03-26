@@ -2,7 +2,6 @@ require 'net/http'
 
 class MoviesController < ApplicationController
 
-
   def index
   end
 
@@ -85,7 +84,7 @@ class MoviesController < ApplicationController
     @session_record = current_user.sessions.find(params[:id])
 
     if @session_record.completed?
-      redirect_to session_path(@session_record) and return
+      redirect_to movie_session_path(@session_record) and return
     end
   end
 
@@ -95,7 +94,7 @@ class MoviesController < ApplicationController
     return render json: { status: "not_found" }, status: :not_found unless session_record
 
     if session_record.completed?
-      render json: { status: "completed", url: session_path(session_record) }
+      render json: { status: "completed", url: movie_session_path(session_record) }
     elsif session_record.failed?
       render json: { status: "failed", error: session_record.error_message }
     else

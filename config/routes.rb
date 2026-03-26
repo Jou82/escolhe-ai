@@ -17,7 +17,7 @@ Rails.application.routes.draw do
 
   root to: "pages#home"
 
-  resources :sessions, only: [:new, :create, :show, :index] do
+  resources :sessions, only: [:new, :create, :show, :index], as: :movie_sessions do
     resources :movies, only: [:show], controller: "session_movies"
 
     # NOVA ROTA ADICIONADA AQUI

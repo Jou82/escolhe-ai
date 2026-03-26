@@ -47,9 +47,24 @@
   font-weight: 600;
   color: $text-muted;
   letter-spacing: 0.3px;
-  padding-top: 1.8rem;
   white-space: nowrap;
 }
+
+.history-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 1.8rem;
+}
+
+.history-inputs {
+  font-size: 0.72rem;
+  color: $text-dim;
+  line-height: 1.5;
+  font-style: italic;
+}
+
+
 
 // ===== CARDS ROW =====
 .history-cards {

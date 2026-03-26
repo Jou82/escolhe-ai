@@ -20,10 +20,14 @@
       <!-- PRIMEIRAS 3 SESSÕES -->
       <% @visible_sessions.each do |session| %>
         <% next unless session.completed? %>
-
         <div class="history-entry">
-          <div class="history-date">
-            <%= session.created_at.in_time_zone('Brasilia').strftime("%d %b %Y às %H:%M") %>
+          <div class="history-left">
+            <div class="history-date">
+              <%= session.created_at.in_time_zone('Brasilia').strftime("%d %b %Y às %H:%M") %>
+            </div>
+            <div class="history-inputs">
+              <%= session.input_movies_list.map(&:title).join(", ") %>
+            </div>
           </div>
 
           <div class="history-cards">

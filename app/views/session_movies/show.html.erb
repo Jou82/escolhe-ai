@@ -176,7 +176,6 @@
 
       <%# Where to watch %>
       <div class="card card--watch">
-        <h3 class="card__label">Onde assistir</h3>
         <div class="watch-list">
           <% all_streaming = @rec_data&.dig("tmdb", "streaming") || [] %>
           <% user_platforms = current_user.streaming_platforms || [] %>

@@ -2,8 +2,9 @@ class User < ApplicationRecord
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable, :registerable,
-         :recoverable, :rememberable, :validatable, :omniauthable, omniauth_providers: [:google_oauth2]
+         :recoverable, :rememberable, :validatable, :omniauthable, :confirmable, omniauth_providers: [:google_oauth2]
   has_many :sessions, dependent: :destroy
+  validates :email, presence: true, format: { with: URI::MailTo::EMAIL_REGEXP }
   serialize :streaming_platforms, coder: JSON
 
   # Callback: Define o avatar antes de criar o registro no banco

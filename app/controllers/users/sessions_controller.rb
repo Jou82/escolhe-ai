@@ -1,12 +1,14 @@
 class Users::SessionsController < Devise::SessionsController
 
   def create
-    self.resource = warden.authenticate(auth_options)
-    if resource
+    # usa o método padrão do Devise para autenticar
+    self.resource = resource_class.find_for_authentication(email: params[:user][:email])
+
+    if self.resource&.valid_password?(params[:user][:password])
       sign_in(resource_name, resource)
-      redirect_to root_path, notice: "Login realizado com sucesso!"
+      render json: { success: true, redirect: root_path }
     else
-      redirect_to root_path, alert: "E-mail ou senha incorretos."
+      render json: { success: false, error: "E-mail ou senha incorretos." }
     end
   end
 end

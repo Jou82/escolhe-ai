@@ -5,9 +5,9 @@ class Users::RegistrationsController < Devise::RegistrationsController
     resource.save
     if resource.persisted?
       sign_in(resource)
-      redirect_to root_path, notice: "Conta criada com sucesso!"
+      render json: { success: true, redirect: root_path }
     else
-      redirect_to root_path, alert: resource.errors.full_messages.first
+      render json: { success: false, error: resource.errors.full_messages.first }
     end
   end
 

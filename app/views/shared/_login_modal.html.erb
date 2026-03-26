@@ -22,8 +22,7 @@
       </div>
 
       <div class="login-modal-divider"><span>OU CONTINUE COM EMAIL</span></div>
-
-      <%= simple_form_for(User.new, as: :user, url: user_session_path, data: { turbo: false }, html: { class: "login-modal-form" }) do |f| %>
+      <%= simple_form_for(User.new, as: :user, url: user_session_path, html: { class: "login-modal-form", data: { turbo: false, action: "submit->login-modal#submitLogin" } }) do |f| %>
         <div class="login-field">
           <label>EMAIL</label>
           <%= f.input :email, required: false, label: false, placeholder: "nome@exemplo.com",
@@ -63,8 +62,7 @@
       </div>
 
       <div class="login-modal-divider"><span>OU CRIE COM EMAIL</span></div>
-
-      <%= simple_form_for(User.new, as: :user, url: users_path, data: { turbo: false }, html: { class: "login-modal-form" }) do |f| %>
+      <%= simple_form_for(User.new, as: :user, url: users_path, html: { class: "login-modal-form", data: { turbo: false, action: "submit->login-modal#submitRegister" } }) do |f| %>
         <div class="login-field">
           <label>EMAIL</label>
           <%= f.input :email, required: false, label: false, placeholder: "nome@exemplo.com",

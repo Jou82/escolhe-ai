@@ -1,5 +1,13 @@
-<p>Welcome <%= @email %>!</p>
+<h2 style="margin-bottom: 16px; font-size: 24px;">Sua pipoca já está pronta? 🎬</h2>
 
-<p>You can confirm your account email through the link below:</p>
+<p>Olá, <strong><%= @resource.email %></strong>!</p>
 
-<p><%= link_to 'Confirm my account', confirmation_url(@resource, confirmation_token: @token) %></p>
+<p>Faltam poucos segundos para você começar a navegar pela melhor curadoria de filmes. Para validar sua conta no <strong>Escolhe aí</strong> e liberar seu acesso, basta clicar no botão abaixo:</p>
+
+<div style="margin-top: 32px; margin-bottom: 32px;">
+  <%= link_to 'Confirmar minha conta', confirmation_url(@resource, confirmation_token: @token), class: 'button' %>
+</div>
+
+<p style="font-size: 13px; color: #64748b; line-height: 1.4;">
+  Se você não solicitou a criação de uma conta em nossa plataforma, pode ignorar este e-mail com segurança.
+</p>

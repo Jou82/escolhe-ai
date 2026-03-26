@@ -47,6 +47,10 @@ gem 'rails-i18n'
 gem 'devise-i18n'
 gem 'omniauth-google-oauth2'
 gem 'omniauth-rails_csrf_protection'
+group :development do
+  gem 'letter_opener'
+end
+gem 'letter_opener_web', group: :development
 # Douglas: Fim
 gem "autoprefixer-rails"
 gem "font-awesome-sass", "~> 6.1"

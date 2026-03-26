@@ -41,7 +41,7 @@
       </div>
 
       <div class="trending fade-in" data-home-target="chips">
-        <span class="trending-label">Trending:</span>
+        <span class="trending-label">Tendências:</span>
         <% @popular_movies.each do |movie| %>
           <span class="trending-link" data-action="click->home#insertChip" data-genre="<%= movie %>"><%= movie %></span>
         <% end %>

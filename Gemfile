@@ -89,3 +89,5 @@ gem 'parallel'
 
 gem "rack-attack", "~> 6.8"
 gem 'sitemap_generator'
+gem 'cssbundling-rails'
+gem 'image_optim'

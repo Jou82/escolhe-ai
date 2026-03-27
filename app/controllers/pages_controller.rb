@@ -5,7 +5,7 @@ class PagesController < ApplicationController
     url = URI("https://api.themoviedb.org/3/movie/popular?api_key=#{api_key}&language=pt-BR&page=1")
     response = Net::HTTP.get(url)
     data = JSON.parse(response)
-    @popular_movies = data["results"].first(20).sample(3).map { |m| m["title"] }
+    @popular_movies = data["results"].first(20).sample(3).map { |m| m["title"].gsub(",", "") }
   rescue
     @popular_movies = ["Um Sonho de Liberdade", "O Poderoso Chefão", "O Cavaleiro das Trevas", "O Senhor dos Anéis", "A Lista de Schindler"]
   end

@@ -17,6 +17,9 @@
 
     <meta name="robots" content="index, follow">
 
+    <!-- Google Search Console Verification -->
+    <meta name="google-site-verification" content="A8qAsRzWZdAerC0km2xpAGPIqVVluxOr1_spVz8uqkI" />
+
     <!-- Open Graph (Facebook, LinkedIn, WhatsApp) -->
     <meta property="og:title" content="<%= content_for?(:og_title) ? yield(:og_title) : "Escolhe Aí | Ferramenta Inteligente para Tomar Decisões" %>">
     <meta property="og:description" content="<%= content_for?(:og_description) ? yield(:og_description) : "Ferramenta gratuita que ajuda você a comparar opções e tomar decisões mais inteligentes. Análise personalizada e resultados confiáveis." %>">
@@ -32,9 +35,6 @@
 
     <!-- Canonical URL -->
     <link rel="canonical" href="<%= request.url %>">
-
-    <!-- Google Search Console Verification (adicione seu código) -->
-    <meta name="google-site-verification" content="SEU_CODIGO_AQUI">
 
     <%= yield :head %>
 

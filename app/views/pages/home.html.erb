@@ -34,7 +34,7 @@
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
-          <%= text_field_tag :movies, nil, class: "search-input", placeholder: "Digite 3 filmes separados por virgula", autocomplete: "off", data: {autocomplete_target: "input", action: "input->autocomplete#search"}%>
+          <%= text_field_tag :movies, nil, class: "search-input", placeholder: "Digite 3 produções separados por virgula", autocomplete: "off", data: {autocomplete_target: "input", action: "input->autocomplete#search"}%>
           <ul class="autocomplete-list" data-autocomplete-target="results"></ul>
           <button type="submit" class="btn-suggest">
             Descobrir

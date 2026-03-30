@@ -3,7 +3,7 @@ module SeoHelper
   # Gera o título completo da página
   # Uso: <%= seo_title("Comparar Notebooks") %>
   def seo_title(page_title = nil)
-    base_title = "Escolhe Aí | Ferramenta Inteligente para Tomar Decisões - Compare e Escolha"
+    base_title = "Escolhe Aí | Algoritmo Personalizado de Recomendação de Filmes"
 
     if page_title.present?
       "#{page_title} | #{base_title}"
@@ -18,25 +18,25 @@ module SeoHelper
     if description.present?
       description
     else
-      "Escolhe Aí - ferramenta inteligente para tomar decisões. Compare opções lado a lado, analise critérios personalizados e descubra a melhor escolha. Busca otimizada com 3 consultas/dia. Experimente grátis!"
+      "Escolhe Aí: diga 3 produções que você ama e nosso algoritmo personalizado recomenda 3 filmes perfeitos para você. Análise inteligente de temas, estética e emoção. Descubra trailers e onde assistir. Grátis!"
     end
   end
 
-  # Gera título para Open Graph
+  # Gera título para Open Graph (compartilhamento)
   def og_title(title = nil)
     if title.present?
       title
     else
-      "Escolhe Aí | Ferramenta Inteligente para Tomar Decisões"
+      "Escolhe Aí - Algoritmo que entende seu gosto"
     end
   end
 
-  # Gera descrição para Open Graph
+  # Gera descrição para Open Graph (compartilhamento)
   def og_description(description = nil)
     if description.present?
       description
     else
-      "Ferramenta gratuita que ajuda você a comparar opções e tomar decisões mais inteligentes. Análise personalizada e resultados confiáveis."
+      "Compartilhe 3 produções que marcaram você. Nosso algoritmo personalizado analisa temas, estética e emoção para encontrar o match perfeito para sua noite de cinema. Comece grátis!"
     end
   end
 end

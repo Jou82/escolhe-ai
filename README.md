@@ -100,7 +100,7 @@ GOOGLE_CLIENT_SECRET=your_secret_here
 - [ ] Personalized watchlist to save and organize recommendations
 - [ ] User feedback loop to improve recommendation accuracy
 - [ ] Series and novela recommendations (currently focused on films)
-- [ ] Multilingual support (English and Spanish)
+- [ ] Multilingual support (English and Portuguese)
 
 ---
 

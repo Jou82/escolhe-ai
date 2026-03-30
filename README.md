@@ -133,11 +133,11 @@ As the developer responsible for the front-end and authentication layer, Paulo d
 
 ## Roadmap
 
-- [ ] Mood and director filters
-- [ ] Personalized watchlist to save and organize recommendations
+- [ ] Filtered by streaming platforms
+- [ ] A “random selection” button to help decide what to watch
 - [ ] User feedback loop to improve recommendation accuracy
-- [ ] Series and novela recommendations (currently focused on films)
-- [ ] Multilingual support (English and Portuguese)
+- [ ] Movies, Series, and Soap Opera inputs (currently focused on films)
+- [ ] Recommend History
 
 ---
 

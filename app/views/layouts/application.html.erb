@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
   <head>
     <!-- Título Otimizado SEO -->
     <title><%= content_for(:title) || "Escolhe Aí | Ferramenta Inteligente para Tomar Decisões - Compare e Escolha" %></title>
@@ -17,6 +17,9 @@
 
     <meta name="robots" content="index, follow">
 
+    <!-- Google Search Console Verification -->
+    <meta name="google-site-verification" content="A8qAsRzWZdAerC0km2xpAGPIqVVluxOr1_spVz8uqkI" />
+
     <!-- Open Graph (Facebook, LinkedIn, WhatsApp) -->
     <meta property="og:title" content="<%= content_for?(:og_title) ? yield(:og_title) : "Escolhe Aí | Ferramenta Inteligente para Tomar Decisões" %>">
     <meta property="og:description" content="<%= content_for?(:og_description) ? yield(:og_description) : "Ferramenta gratuita que ajuda você a comparar opções e tomar decisões mais inteligentes. Análise personalizada e resultados confiáveis." %>">
@@ -33,14 +36,163 @@
     <!-- Canonical URL -->
     <link rel="canonical" href="<%= request.url %>">
 
-    <!-- Google Search Console Verification (adicione seu código) -->
-    <meta name="google-site-verification" content="SEU_CODIGO_AQUI">
-
     <%= yield :head %>
 
-    <link rel="icon" href="/icon.png" type="image/png">
-    <link rel="icon" href="/icon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/icon.png">
+    <!-- Favicon e ícones para todos os dispositivos -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="theme-color" content="#ffffff">
+
+    <!-- CSS crítico inline (melhora LCP e FCP) -->
+    <style>
+      /* Reset e cores base */
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body {
+        background: #0a0a0f;
+        color: #ffffff;
+        font-family: 'DM Sans', sans-serif;
+        overflow-x: hidden;
+      }
+
+      /* Hero section */
+      .hero {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        position: relative;
+        padding: 2rem;
+      }
+
+      .hero-title {
+        font-size: 3rem;
+        font-weight: 800;
+        line-height: 1.2;
+        margin-bottom: 1rem;
+      }
+
+      .hero-title em {
+        font-style: normal;
+        color: #e50914;
+      }
+
+      .hero-sub {
+        font-size: 1.2rem;
+        opacity: 0.8;
+        margin-bottom: 2rem;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      /* Busca */
+      .search-wrapper {
+        max-width: 600px;
+        margin: 0 auto;
+        position: relative;
+      }
+
+      .search-box {
+        display: flex;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 60px;
+        padding: 0.3rem;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .search-input {
+        flex: 1;
+        background: transparent;
+        border: none;
+        padding: 1rem 1.5rem;
+        color: #fff;
+        font-size: 1rem;
+        outline: none;
+      }
+
+      .search-input::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+      }
+
+      .btn-suggest {
+        background: #e50914;
+        border: none;
+        border-radius: 60px;
+        padding: 0.8rem 1.8rem;
+        color: #fff;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: transform 0.2s;
+      }
+
+      .btn-suggest:hover {
+        transform: scale(1.02);
+      }
+
+      /* Trending */
+      .trending {
+        margin-top: 2rem;
+        display: flex;
+        gap: 0.8rem;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .trending-label {
+        opacity: 0.6;
+        font-size: 0.9rem;
+      }
+
+      .trending-link {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 0.4rem 1rem;
+        border-radius: 40px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+
+      .trending-link:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
+
+      /* Animações */
+      .fade-in {
+        animation: fadeIn 0.8s ease forwards;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+
+    <!-- Pré-conexão para melhorar performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://api.themoviedb.org">
+    <link rel="preconnect" href="https://image.tmdb.org">
+
+    <!-- Pré-carregar fontes críticas -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" as="style">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" as="style">
+
+    <!-- Carregar as fontes -->
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 

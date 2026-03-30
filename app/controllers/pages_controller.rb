@@ -1,13 +1,16 @@
 class PagesController < ApplicationController
   skip_before_action :authenticate_user!, only: [:home]
   def home
-    api_key = ENV.fetch('TMDB_API_KEY', nil)
-    url = URI("https://api.themoviedb.org/3/movie/popular?api_key=#{api_key}&language=pt-BR&page=1")
-    response = Net::HTTP.get(url)
-    data = JSON.parse(response)
-    @popular_movies = data["results"].first(20).sample(3).map { |m| m["title"] }
-  rescue
-    @popular_movies = ["Um Sonho de Liberdade", "O Poderoso Chefão", "O Cavaleiro das Trevas", "O Senhor dos Anéis", "A Lista de Schindler"]
+    @popular_movies = Rails.cache.fetch("trending_movies", expires_in: 1.hour) do
+      api_key = ENV.fetch('TMDB_API_KEY', nil)
+      url = URI("https://api.themoviedb.org/3/movie/popular?api_key=#{api_key}&language=pt-BR&page=1")
+      response = Net::HTTP.get(url)
+      data = JSON.parse(response)
+      data["results"].first(20).sample(3).map { |m| m["title"].gsub(",", "") }
+    end
+  rescue => e
+    Rails.logger.error "Erro ao buscar filmes: #{e.message}"
+    @popular_movies = []
   end
 
   def profile

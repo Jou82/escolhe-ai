@@ -112,7 +112,7 @@ Escolhe Aí was built collaboratively by a team of four Le Wagon students:
 |---|---|
 | **Joana Dias** | AI integration — OpenAI API, prompt engineering, recommendation logic, Rails ↔ API connection |
 | **Paulo Coelho** | — |
-| **Douglas Reis** | — |
+| **Douglas Reis** | Platform reliability, user authentication, and visual storytelling — Google OAuth integration, copywriting & content strategy, custom error experience (400, 404, 406, 420, 500), transactional messaging via SendGrid  |
 | **Matheus Pereira** | — |
 
 ### Joana's Contribution — AI Layer

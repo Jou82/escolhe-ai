@@ -428,7 +428,6 @@ class TmdbService
 
     candidate_map.each_value { |c| c[:score] = calculate_score(c, total_sources) }
     candidate_map.values.sort_by { |c| -c[:score] }
-
   end
 
   def self.calculate_score(candidate, total_sources)

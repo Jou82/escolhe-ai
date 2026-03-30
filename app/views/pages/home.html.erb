@@ -1,3 +1,9 @@
+
+<% content_for :title, "Escolhe Aí | Descubra seu próximo filme favorito com recomendação inteligente" %>
+<% content_for :meta_description, "Escolhe Aí: diga 3 produções que você ama e nosso algoritmo recomenda 3 filmes perfeitos para você. Curadoria personalizada, trailers e onde assistir. Grátis!" %>
+<% content_for :og_title, "Escolhe Aí - Encontre seu próximo filme em segundos" %>
+<% content_for :og_description, "Compartilhe 3 produções que marcaram você. Nosso algoritmo entrega 3 recomendações imperdíveis. Descubra trailers, elenco e onde assistir. Comece grátis!" %>
+
 <div data-controller="home">
 
   <!-- HERO -->
@@ -18,7 +24,7 @@
       </h1>
 
       <p class="hero-sub fade-in">
-        Cite 3 produções que te marcaram. Nosso algoritmo entrega 3 filmes imperdíveis na hora
+        Diga 3 produções que marcaram você. Nosso algoritmo entrega 3 filmes imperdíveis na hora
       </p>
 
       <div class="search-wrapper fade-in" data-controller="autocomplete">
@@ -28,7 +34,7 @@
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
-          <%= text_field_tag :movies, nil, class: "search-input", placeholder: "Digite 3 filmes separados por virgula", autocomplete: "off", data: {autocomplete_target: "input", action: "input->autocomplete#search"}%>
+          <%= text_field_tag :movies, nil, class: "search-input", placeholder: "Digite 3 produções separadas por vírgula", autocomplete: "off", data: {autocomplete_target: "input", action: "input->autocomplete#search"}%>
           <ul class="autocomplete-list" data-autocomplete-target="results"></ul>
           <button type="submit" class="btn-suggest">
             Descobrir
@@ -98,19 +104,19 @@
       <div class="tlc-item fade-in">
         <div class="tlc-dot tlc-dot-1">1</div>
         <h3>Compartilhe seu gosto</h3>
-        <p>Indique 3 produções que marcaram você — valem filmes, séries ou novelas de qualquer época.</p>
+        <p>Escolha 3 produções que marcaram você — filmes, séries ou novelas de qualquer época, país ou gênero.</p>
         <div class="tlc-connector"></div>
       </div>
       <div class="tlc-item fade-in">
         <div class="tlc-dot tlc-dot-2">2</div>
         <h3>Analisamos a essência</h3>
-        <p>O algoritmo mergulha nos temas e estéticas para identificar o que realmente importa para você.</p>
+        <p>Nosso algoritmo personalizado mergulha em temas, estética e emoção para entender o que realmente te conecta.</p>
         <div class="tlc-connector"></div>
       </div>
       <div class="tlc-item fade-in">
         <div class="tlc-dot tlc-dot-3">3</div>
         <h3>Sua próxima imersão</h3>
-        <p>Mergulhe em detalhes de elenco, trailers e onde encontrar cada título. Nossa curadoria cuidou de tudo: seu único papel é dar o play.</p>
+        <p>Receba 3 recomendações perfeitas com trailers, elenco e onde assistir. Nossa curadoria cuidou de tudo: só dar o play!</p>
       </div>
     </div>
   </section>

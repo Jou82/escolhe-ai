@@ -1,6 +1,7 @@
 require 'net/http'
 
 class MoviesController < ApplicationController
+  before_action :check_rate_limit, only: [:create]
 
   def index
   end
@@ -45,6 +46,7 @@ class MoviesController < ApplicationController
   end
 
   def create
+    # Rate limit já verificado no before_action
     if params[:movies].is_a?(Array)
       @movie_titles = params[:movies].reject(&:blank?)
     else
@@ -101,4 +103,88 @@ class MoviesController < ApplicationController
       render json: { status: "processing" }
     end
   end
+
+  private
+
+  def check_rate_limit
+    user_ip = request.remote_ip
+    cache_key = "rate_limit:create_movies:#{user_ip}"
+
+    # Buscar contagem atual
+    busca_count = Rails.cache.read(cache_key).to_i
+
+    # Verificar se atingiu o limite de 3 buscas por dia
+    if busca_count >= 3
+      render_rate_limit_error
+      return false
+    else
+      # Incrementar contador (expira em 24 horas)
+      Rails.cache.write(cache_key, busca_count + 1, expires_in: 24.hours)
+    end
+  end
+
+  def render_rate_limit_error
+    render html: rate_limit_page.html_safe, status: 429
+  end
+
+def rate_limit_page
+  <<~HTML
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Limite atingido - Escolhe AI</title>
+      <link rel="stylesheet" href="/assets/rate_limit.css">
+      </head>
+      <body class="rate-limit-page">
+        <div class="hero-bg">
+          <div class="orb orb-1"></div>
+          <div class="orb orb-2"></div>
+          <div class="orb orb-3"></div>
+        </div>
+
+        <div class="content">
+          <div class="card">
+            <div class="logo">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
+              </svg>
+              <span>Escolhe AI</span>
+            </div>
+
+            <h1>
+              Chega de buscas<br>
+              <span>por hoje.</span>
+            </h1>
+
+            <div class="count-badge">
+              <strong>3/3</strong> buscas realizadas
+            </div>
+
+            <p class="message">
+              Você já usou suas <strong>3 buscas diárias</strong>.<br>
+              Volte amanhã para descobrir novos filmes!
+            </p>
+
+            <a href="/" class="btn-back">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+              Voltar ao início
+            </a>
+
+            <div class="trending">
+              <span class="trending-tag">🎬 Avatar</span>
+              <span class="trending-tag">🎬 Fogo e Cinzas</span>
+              <span class="trending-tag">🎬 Caminhos do Crime</span>
+              <span class="trending-tag">🎬 Socorro!</span>
+            </div>
+          </div>
+        </div>
+      </body>
+    </html>
+  HTML
+end
 end

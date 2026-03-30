@@ -2,7 +2,6 @@
 class Session < ApplicationRecord
   belongs_to :user
 
-
   enum :status, { processing: 0, completed: 1, failed: 2 }, default: :processing
 
   has_many :likes, dependent: :destroy
@@ -13,7 +12,6 @@ class Session < ApplicationRecord
   attribute :input_movies, :json
 
   def recommended_movies
-    
     likes.where(suggestion: true).includes(:movie).map(&:movie)
   end
 
@@ -25,6 +23,7 @@ class Session < ApplicationRecord
     data = recommendations_data
     return data if data.is_a?(Array)
     return JSON.parse(data) if data.is_a?(String)
+
     []
   rescue JSON::ParserError
     []
@@ -32,6 +31,6 @@ class Session < ApplicationRecord
 
   # NOVO MÉTODO - POSICIONADO CORRETAMENTE (fora do rescue)
   def random_recommendation
-    recommended_movies.first(3).shuffle.first
+    recommended_movies.first(3).sample
   end
 end

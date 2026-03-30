@@ -7,8 +7,8 @@ class SessionMoviesController < ApplicationController
 
     @rec_data = @recommendations.find { |rec| rec.dig("tmdb", "tmdb_id").to_s == params[:id].to_s }
 
-    if @rec_data.nil?
-      redirect_to movie_session_path(@session_record), alert: "Filme não encontrado." and return
-    end
+    return unless @rec_data.nil?
+
+    redirect_to movie_session_path(@session_record), alert: "Filme não encontrado." and return
   end
 end

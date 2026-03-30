@@ -59,11 +59,15 @@ class MoviesController < ApplicationController
     end
 
     previous_recommendations = current_user.sessions
-      .where(status: 1)
-      .where.not(recommendations_data: nil)
-      .flat_map { |s| JSON.parse(s.recommendations_data) rescue [] }
-      .map { |rec| rec["title"] }
-      .uniq
+                                           .where(status: 1)
+                                           .where.not(recommendations_data: nil)
+                                           .flat_map do |s|
+      JSON.parse(s.recommendations_data)
+    rescue StandardError
+      []
+    end
+                                           .map { |rec| rec["title"] }
+                                           .uniq
 
     Rails.logger.info "📚 Filmes já recomendados: #{previous_recommendations.join(', ')}"
 
@@ -85,9 +89,9 @@ class MoviesController < ApplicationController
   def processing
     @session_record = current_user.sessions.find(params[:id])
 
-    if @session_record.completed?
-      redirect_to movie_session_path(@session_record) and return
-    end
+    return unless @session_record.completed?
+
+    redirect_to movie_session_path(@session_record) and return
   end
 
   def check_status
@@ -107,18 +111,14 @@ class MoviesController < ApplicationController
   private
 
   def check_rate_limit
-    user_ip = request.remote_ip
-    cache_key = "rate_limit:create_movies:#{user_ip}"
+    cache_key = "rate_limit:create_movies:user:#{current_user.id}"
 
-    # Buscar contagem atual
     busca_count = Rails.cache.read(cache_key).to_i
 
-    # Verificar se atingiu o limite de 3 buscas por dia
     if busca_count >= 3
       render_rate_limit_error
       return false
     else
-      # Incrementar contador (expira em 24 horas)
       Rails.cache.write(cache_key, busca_count + 1, expires_in: 24.hours)
     end
   end
@@ -182,9 +182,8 @@ def rate_limit_page
               <span class="trending-tag">Socorro!</span>
             </div>
           </div>
-        </div>
-      </body>
-    </html>
-  HTML
-end
+        </body>
+      </html>
+    HTML
+  end
 end

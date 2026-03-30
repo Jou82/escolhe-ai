@@ -425,14 +425,8 @@ class TmdbService
       end
     end
 
-<<<<<<< Updated upstream
-    candidate_map.values
-                 .each { |c| c[:score] = calculate_score(c, total_sources) }
-                 .sort_by { |c| -c[:score] }
-=======
     candidate_map.each_value { |c| c[:score] = calculate_score(c, total_sources) }
     candidate_map.values.sort_by { |c| -c[:score] }
->>>>>>> Stashed changes
   end
 
   def self.calculate_score(candidate, total_sources)

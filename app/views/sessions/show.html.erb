@@ -1,3 +1,23 @@
+<%# Textos dinâmicos baseados nos filmes que o usuário colocou %>
+<%
+  # Extrai os títulos dos filmes que o usuário digitou
+  filmes_usuario = @user_movies.map(&:title).join(", ") if @user_movies.present?
+
+  # Extrai os títulos das recomendações
+  filmes_recomendados = @recommendations.map { |rec| rec["title"] }.join(", ") if @recommendations.present?
+
+  # Fallback caso as variáveis não existam
+  filmes_usuario ||= "seus filmes favoritos"
+  filmes_recomendados ||= "filmes imperdíveis"
+%>
+
+<%# TÍTULOS SEO DINÂMICOS %>
+<% content_for :title, "#{filmes_recomendados} | Recomendações baseadas em #{filmes_usuario} | Escolhe Aí" %>
+
+<% content_for :meta_description, "Você ama #{filmes_usuario}? Nossa inteligência recomendou: #{filmes_recomendados}. Descubra trailers, elenco e onde assistir. Recomendações personalizadas e gratuitas!" %>
+
+<% content_for :og_title, "Escolhe Aí | Suas Recomendações Personalizadas" %>
+<% content_for :og_description, "Baseado em #{filmes_usuario}, encontramos: #{filmes_recomendados}. Veja detalhes, avaliações e onde assistir esses filmes imperdíveis." %>
 <!-- HEADER WITH BACK -->
 <div class="results-top">
   <div class="results-top-left">
@@ -47,7 +67,7 @@
       </div>
       <div class="movie-action">
         <% tmdb_id = rec.dig("tmdb", "tmdb_id") %>
-        <%= link_to "Ver detalhes", session_movie_path(@session_record, tmdb_id), class: "btn-details" %>
+        <%= link_to "Ver detalhes", movie_session_movie_path(@session_record, tmdb_id), class: "btn-details" %>
       </div>
     </div>
   <% end %>

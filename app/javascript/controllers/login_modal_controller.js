@@ -1,11 +1,18 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["overlay", "panelLogin", "panelRegister", "panelForgot"]
+  static targets = ["overlay", "panelLogin", "panelRegister", "panelForgot", "panelResetPassword"]
 
   connect() {
     this.closeOnEscape = this.closeOnEscape.bind(this)
     this.closeOnOverlayClick = this.closeOnOverlayClick.bind(this)
+
+    // Auto-abrir modal se a página pedir via data-attribute
+    const panel = this.element.dataset.autoPanel
+    if (panel) {
+      this._showPanel(panel)
+      this._openOverlay()
+    }
   }
 
   open() {
@@ -46,9 +53,10 @@ export default class extends Controller {
   }
 
   _showPanel(name) {
-    this.panelLoginTarget.hidden   = (name !== "login")
-    this.panelRegisterTarget.hidden = (name !== "register")
-    this.panelForgotTarget.hidden  = (name !== "forgot")
+    this.panelLoginTarget.hidden          = (name !== "login")
+    this.panelRegisterTarget.hidden       = (name !== "register")
+    this.panelForgotTarget.hidden         = (name !== "forgot")
+    this.panelResetPasswordTarget.hidden  = (name !== "resetPassword")
   }
 
   _openOverlay() {
@@ -64,24 +72,6 @@ export default class extends Controller {
 
   closeOnOverlayClick(event) {
     if (event.target === this.overlayTarget) this.close()
-  }
-  submitLogin(event) {
-    event.preventDefault()
-    const form = event.target
-
-    fetch(form.action, {
-      method: 'POST',
-      body: new FormData(form),
-      headers: { 'Accept': 'application/json', 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content }
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.success) {
-        window.location.href = data.redirect
-      } else {
-        this.showError(data.error)
-      }
-    })
   }
 
   showError(message) {

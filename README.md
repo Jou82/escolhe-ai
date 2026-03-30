@@ -91,6 +91,43 @@ OPENAI_API_KEY=your_key_here
 GOOGLE_CLIENT_ID=your_id_here
 GOOGLE_CLIENT_SECRET=your_secret_here
 ```
+## 👥 Team Contributions
+
+---
+
+### 🤖 Joana's Contribution — AI Layer
+
+As the developer responsible for the AI layer, Joana designed and implemented:
+
+- **OpenAI API integration** — connecting the Rails back-end to the OpenAI endpoint
+- **Prompt engineering** — crafting the prompts that translate user input (3 productions) into meaningful taste analysis
+- **Recommendation logic** — processing, filtering, and structuring the model's responses into usable recommendations
+- **Rails ↔ API bridge** — the service layer connecting the AI responses to the rest of the application
+- **Heroku deployment** — configuring and deploying the application to production on Heroku
+
+---
+
+### 🛡️ Douglas's Contribution — Platform & User Experience Layer
+
+As the developer responsible for platform reliability, user authentication, and visual storytelling, Douglas designed and implemented:
+
+- **Google OAuth integration** — streamlining the onboarding process by implementing secure, third-party authentication via Google
+- **Copywriting & content strategy** — defining the brand's voice and crafting all site copy to ensure a cohesive, high-end narrative throughout the user journey
+- **Custom error experience** — redesigning the entire suite of error states (400, 404, 406, 420, and 500), transforming technical failures into branded, user-friendly touchpoints
+- **Transactional messaging** — integrating SendGrid for automated email verification and user notifications, ensuring a robust and professional communication layer
+
+---
+
+### 🎨 Paulo's Contribution — Front-End & Authentication Layer
+
+As the developer responsible for the front-end and authentication layer, Paulo designed and implemented:
+
+- **UI/UX design** — full visual identity of the app, including the dark cinema aesthetic, colour palette, typography, and responsive layout
+- **Devise authentication** — user registration, login, and password recovery flows
+- **Modal system** — dynamic auth modals (sign in / sign up / forgot password) built with Stimulus, replacing default Devise pages
+- **Homepage** — hero section, search bar, trending films, and animated components
+- **Component polish** — overall UI consistency across the app
+
 
 ---
 
@@ -108,37 +145,6 @@ GOOGLE_CLIENT_SECRET=your_secret_here
 
 Escolhe Aí was built collaboratively by a team of four Le Wagon students:
 
-| Name | Role |
-|---|---|
-| **Joana Dias** | AI integration — OpenAI API, prompt engineering, recommendation logic, Rails ↔ API connection |
-| **Paulo Coelho** | Front-end & authentication layer — UI/UX design (dark cinema aesthetic, colour palette, typography, responsive layout), Devise authentication (registration, login, password recovery), modal system with Stimulus, homepage (hero section, search bar, trending films, animations), and overall UI component polish |
-| **Douglas Reis** | Platform reliability, user authentication, and visual storytelling — Google OAuth integration, copywriting & content strategy, custom error experience (400, 404, 406, 420, 500), transactional messaging via SendGrid  |
-| **Matheus Pereira** | — |
-
-### Joana's Contribution — AI Layer
-
-As the developer responsible for the AI layer, Joana designed and implemented:
-- **OpenAI API integration** — connecting the Rails back-end to the OpenAI endpoint
-- **Prompt engineering** — crafting the prompts that translate user input (3 productions) into meaningful taste analysis
-- **Recommendation logic** — processing, filtering, and structuring the model's responses into usable recommendations
-- **Rails ↔ API bridge** — the service layer connecting the AI responses to the rest of the application
-
-Douglas's Contribution — Platform & User Experience Layer
-As the developer responsible for platform reliability, user authentication, and visual storytelling, Douglas designed and implemented:
-
--Google OAuth integration — streamlining the onboarding process by implementing secure, third-party authentication via Google
--Copywriting & content strategy — defining the brand's voice and crafting all site copy to ensure a cohesive, high-end narrative throughout the user journey
--Custom error experience — redesigning the entire suite of error states (400, 404, 406, 420, and 500), transforming technical failures into branded, user-friendly touchpoints
--Transactional messaging — integrating SendGrid for automated email verification and user notifications, ensuring a robust and professional communication layer
-
-Paulo's Contribution — Front-End & Authentication Layer
-As the developer responsible for the front-end and authentication layer, Paulo designed and implemented:
-
--UI/UX design — full visual identity of the app, including the dark cinema aesthetic, colour palette, typography, and responsive layout
--Devise authentication — user registration, login, and password recovery flows
--Modal system — dynamic auth modals (sign in / sign up / forgot password) built with Stimulus, replacing default Devise pages
--Homepage — hero section, search bar, trending films, and animated components
--Component polish — overall UI consistency across the app
 
 - 🔗 [GitHub](https://github.com/matheuspereirafx)
 - 💼 [LinkedIn](https://www.linkedin.com/in/matheus-pereira-8ba75820b/)

@@ -8,7 +8,7 @@ class PagesController < ApplicationController
       data = JSON.parse(response)
       data["results"].first(20).sample(3).map { |m| m["title"].gsub(",", "") }
     end
-  rescue => e
+  rescue StandardError => e
     Rails.logger.error "Erro ao buscar filmes: #{e.message}"
     @popular_movies = []
   end

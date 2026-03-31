@@ -1,6 +1,7 @@
 require 'net/http'
 
 class MoviesController < ApplicationController
+  before_action :check_rate_limit, only: [:create]
 
   def index
   end
@@ -45,6 +46,7 @@ class MoviesController < ApplicationController
   end
 
   def create
+    # Rate limit já verificado no before_action
     if params[:movies].is_a?(Array)
       @movie_titles = params[:movies].reject(&:blank?)
     else
@@ -57,11 +59,15 @@ class MoviesController < ApplicationController
     end
 
     previous_recommendations = current_user.sessions
-      .where(status: 1)
-      .where.not(recommendations_data: nil)
-      .flat_map { |s| JSON.parse(s.recommendations_data) rescue [] }
-      .map { |rec| rec["title"] }
-      .uniq
+                                           .where(status: 1)
+                                           .where.not(recommendations_data: nil)
+                                           .flat_map do |s|
+      JSON.parse(s.recommendations_data)
+    rescue StandardError
+      []
+    end
+                                           .map { |rec| rec["title"] }
+                                           .uniq
 
     Rails.logger.info "📚 Filmes já recomendados: #{previous_recommendations.join(', ')}"
 
@@ -83,9 +89,9 @@ class MoviesController < ApplicationController
   def processing
     @session_record = current_user.sessions.find(params[:id])
 
-    if @session_record.completed?
-      redirect_to movie_session_path(@session_record) and return
-    end
+    return unless @session_record.completed?
+
+    redirect_to movie_session_path(@session_record) and return
   end
 
   def check_status
@@ -101,8 +107,6 @@ class MoviesController < ApplicationController
       render json: { status: "processing" }
     end
   end
-<<<<<<< Updated upstream
-=======
 
   private
 
@@ -180,5 +184,4 @@ def rate_limit_page
       </html>
     HTML
   end
->>>>>>> Stashed changes
 end

@@ -185,6 +185,10 @@ class RecommendationPipeline
   private
 
   def generate_personalized_reason(movie)
+    # Normaliza tanto chaves string quanto símbolo
+    title = movie["title"] || movie[:title]
+    year  = movie["year"]  || movie[:year] || movie[:release_date]&.slice(0, 4)
+
     begin
       client = Anthropic::Client.new(api_key: ENV.fetch("ANTHROPIC_API_KEY", nil))
       response = client.messages.create(
@@ -194,7 +198,7 @@ class RecommendationPipeline
           {
             role: "user",
             content: "Filmes favoritos do usuário: #{@movies.join(', ')}. " \
-                     "Filme recomendado: #{movie['title']} (#{movie['year']}). " \
+                     "Filme recomendado: #{title} (#{year}). " \
                      "Escreva em 1 frase por que esse filme combina com o gosto do usuário. " \
                      "Tom descontraído, como se fosse um amigo indicando. Responda só o texto, sem aspas."
           }

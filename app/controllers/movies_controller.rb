@@ -101,8 +101,6 @@ class MoviesController < ApplicationController
       render json: { status: "processing" }
     end
   end
-<<<<<<< Updated upstream
-=======
 
   private
 
@@ -179,6 +177,5 @@ def rate_limit_page
         </body>
       </html>
     HTML
-  end
->>>>>>> Stashed changes
+end
 end

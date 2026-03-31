@@ -102,7 +102,7 @@ class AnthropicService
          - NUNCA recomende filmes que o usuário já listou
          - NUNCA recomende filmes listados em "FILMES PROIBIDOS"
          - Somente filmes disponíveis em streaming no Brasil
-         - O motivo deve referenciar padrões específicos encontrados nos 3 filmes
+         - O campo "reason" DEVE mencionar explicitamente pelo menos um dos filmes favoritos do usuário pelo nome e explicar a conexão temática, de estilo ou de narrativa entre eles. Exemplo: "Assim como em [filme favorito], este filme também..."
          - Inclua o título original quando for filme estrangeiro
          - Responda tudo em português (BR)
          - NUNCA recomende filmes que não estejam disponíveis em streaming por assinatura no Brasil. Isso é uma regra absoluta.
@@ -139,6 +139,8 @@ class AnthropicService
 
       ## CANDIDATOS PRÉ-FILTRADOS (escolha os 3 melhores):
       #{candidates_text}
+
+      Para cada recomendação, o campo "reason" deve mencionar pelo menos um dos meus filmes favoritos pelo nome e explicar a conexão.
     USER
   end
 

@@ -111,15 +111,13 @@ class MoviesController < ApplicationController
   private
 
   def check_rate_limit
-    cache_key = "rate_limit:create_movies:user:#{current_user.id}"
+    count = current_user.sessions
+                        .where("created_at >= ?", 24.hours.ago)
+                        .count
 
-    busca_count = Rails.cache.read(cache_key).to_i
-
-    if busca_count >= 3
+    if count >= 3
       render_rate_limit_error
       return false
-    else
-      Rails.cache.write(cache_key, busca_count + 1, expires_in: 24.hours)
     end
   end
 

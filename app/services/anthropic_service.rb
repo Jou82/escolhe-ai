@@ -24,9 +24,7 @@ class AnthropicService
     result = make_api_call
 
     # Salva no cache por 1 hora
-    if result
-      Rails.cache.write(cache_key, result, expires_in: 1.hour)
-    end
+    Rails.cache.write(cache_key, result, expires_in: 1.hour) if result
 
     result
   end
@@ -38,7 +36,7 @@ class AnthropicService
     Timeout.timeout(10) do
       response = client.messages.create(
         model: "claude-haiku-4-5-20251001",
-        max_tokens: 600,  # 🔥 Reduzido de 800 para 600
+        max_tokens: 600, # 🔥 Reduzido de 800 para 600
         system: system_prompt,
         messages: [
           { role: "user", content: user_prompt }
@@ -65,7 +63,7 @@ class AnthropicService
   def platform_instruction
     if @user_platforms.any?
       "O usuário possui APENAS estas plataformas: #{@user_platforms.join(', ')}. " \
-      "Recomende SOMENTE filmes disponíveis nessas plataformas. Isso é OBRIGATÓRIO."
+        "Recomende SOMENTE filmes disponíveis nessas plataformas. Isso é OBRIGATÓRIO."
     else
       "Recomende filmes disponíveis em qualquer plataforma de streaming no Brasil."
     end
@@ -109,7 +107,6 @@ class AnthropicService
     PROMPT
   end
 
-
   def user_prompt
     if @candidates.any?
       user_prompt_with_candidates
@@ -127,7 +124,8 @@ class AnthropicService
 
     candidates_text = limited_candidates.map.with_index(1) do |c, i|
       if c[:score].to_f >= 40
-        "#{i}. #{c[:title]} (#{c[:release_date]&.slice(0, 4) || '?'}) — TMDB ID: #{c[:tmdb_id]} | Nota: #{c[:vote_average]}/10 | Score: #{c[:score]}"
+        "#{i}. #{c[:title]} (#{c[:release_date]&.slice(0,
+                                                       4) || '?'}) — TMDB ID: #{c[:tmdb_id]} | Nota: #{c[:vote_average]}/10 | Score: #{c[:score]}"
       else
         "#{i}. #{c[:title]} (#{c[:release_date]&.slice(0, 4) || '?'}) — Score: #{c[:score]}"
       end

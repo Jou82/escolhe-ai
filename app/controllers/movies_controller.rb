@@ -1,7 +1,7 @@
 require 'net/http'
 
 class MoviesController < ApplicationController
-  before_action :check_rate_limit, only: [:create]
+  # before_action :check_rate_limit, only: [:create]
 
   def index
   end
@@ -108,26 +108,26 @@ class MoviesController < ApplicationController
     end
   end
 
-  private
+  # private
 
-  def check_rate_limit
-    cache_key = "rate_limit:create_movies:user:#{current_user.id}"
+  # def check_rate_limit
+  #   cache_key = "rate_limit:create_movies:user:#{current_user.id}"
 
-    busca_count = Rails.cache.read(cache_key).to_i
+  #   busca_count = Rails.cache.read(cache_key).to_i
 
-    if busca_count >= 3
-      render_rate_limit_error
-      return false
-    else
-      Rails.cache.write(cache_key, busca_count + 1, expires_in: 24.hours)
-    end
-  end
+  #   if busca_count >= 3
+  #     render_rate_limit_error
+  #     return false
+  #   else
+  #     Rails.cache.write(cache_key, busca_count + 1, expires_in: 24.hours)
+  #   end
+  # end
 
-  def render_rate_limit_error
-    render html: rate_limit_page.html_safe, status: 429
-  end
+  # def render_rate_limit_error
+  #   render html: rate_limit_page.html_safe, status: 429
+  # end
 
-def rate_limit_page
+# def rate_limit_page
   <<~HTML
     <!DOCTYPE html>
     <html>
@@ -185,5 +185,5 @@ def rate_limit_page
         </body>
       </html>
     HTML
-  end
+  # end
 end

@@ -166,7 +166,8 @@ class RecommendationPipeline
     end
 
     # ========== FILTRO FINAL PARA EVITAR REPETIÇÃO ==========
-    final_recs = filter_recommendations(final_recs, limited_exclude)
+    # Usa @exclude completo (não limitado) para garantir que nenhum filme já recomendado volte
+    final_recs = filter_recommendations(final_recs, @exclude)
 
     {
       analysis: @analysis,

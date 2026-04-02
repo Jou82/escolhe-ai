@@ -177,20 +177,23 @@ class RecommendationPipeline
   private
 
   def generate_personalized_reason(movie)
-    cache_key = "anthropic:reason:#{@movies.sort.join('_')}:#{movie['title']}"
+    title = movie["title"] || movie[:title]
+    year  = movie["year"]  || movie[:year] || movie[:release_date]&.slice(0, 4)
+
+    cache_key = "anthropic:reason:#{@movies.sort.join('_')}:#{title}"
 
     cached = Rails.cache.read(cache_key)
     if cached
-      Rails.logger.info "💾 [REASON CACHE] Hit para '#{movie['title']}'"
+      Rails.logger.info "💾 [REASON CACHE] Hit para '#{title}'"
       return cached
     end
 
     tmdb = movie["tmdb"] || movie[:tmdb] || {}
     overview = tmdb[:overview] || tmdb["overview"]
-    genres = (tmdb[:genres] || tmdb["genres"] || movie["genres"] || []).first(3).join(", ")
+    genres = (tmdb[:genres] || tmdb["genres"] || movie["genres"] || movie[:genres] || []).first(3).join(", ")
     cast = (tmdb[:cast] || tmdb["cast"] || []).first(3).map { |c| c[:name] || c["name"] }.join(", ")
 
-    movie_context = "Título: #{movie['title']} (#{movie['year']})"
+    movie_context = "Título: #{title} (#{year})"
     movie_context += " | Géneros: #{genres}" if genres.present?
     movie_context += " | Sinopse: #{overview}" if overview.present?
     movie_context += " | Elenco: #{cast}" if cast.present?
@@ -205,8 +208,8 @@ class RecommendationPipeline
             role: "user",
             content: "Filmes favoritos do usuário: #{@movies.join(', ')}.\n" \
                      "Filme recomendado — #{movie_context}.\n" \
-                     "Com base APENAS nas informações acima, escreva em 1 frase por que esse filme combina com o gosto do usuário. " \
-                     "Mencione algo específico do filme (género, sinopse ou elenco). " \
+                     "Escreva em 1 frase explicando a ligação DIRETA entre este filme e os filmes favoritos do usuário. " \
+                     "Exemplo: 'Se você curtiu [filme favorito] pela [característica], vai amar [filme recomendado] porque [conexão específica].' " \
                      "Tom descontraído, como se fosse um amigo indicando. Responda só o texto, sem aspas."
           }
         ]

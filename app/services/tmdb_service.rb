@@ -7,9 +7,9 @@ class TmdbService
   WEIGHTS = {
     frequency: 0.30,
     rating: 0.25,
-    popularity: 0.15,
-    votes: 0.15,
-    cult: 0.15
+    popularity: 0.10,
+    votes: 0.10,
+    cult: 0.25
   }.freeze
 
   PROVIDER_IDS = {
@@ -388,6 +388,49 @@ class TmdbService
               )
               JSON.parse(r.body)["results"] || []
             end
+          end
+        end || []
+      end,
+
+      Thread.new do
+        with_retry("discover_brazilian") do
+          Timeout.timeout(TIMEOUT) do
+            r = Faraday.get(
+              "#{BASE_URL}/discover/movie",
+              {
+                api_key: ENV.fetch("TMDB_API_KEY", nil),
+                language: "pt-BR",
+                watch_region: "BR",
+                with_original_language: "pt",
+                sort_by: "vote_average.desc",
+                "vote_count.gte" => 100,
+                "vote_average.gte" => 6.5,
+                page: 1
+              }
+            )
+            JSON.parse(r.body)["results"] || []
+          end
+        end || []
+      end,
+
+      Thread.new do
+        with_retry("discover_brazilian_festival") do
+          Timeout.timeout(TIMEOUT) do
+            r = Faraday.get(
+              "#{BASE_URL}/discover/movie",
+              {
+                api_key: ENV.fetch("TMDB_API_KEY", nil),
+                language: "pt-BR",
+                watch_region: "BR",
+                with_original_language: "pt",
+                sort_by: "vote_average.desc",
+                "vote_count.gte" => 50,
+                "vote_average.gte" => 7.0,
+                "popularity.lte" => 30,
+                page: 1
+              }
+            )
+            JSON.parse(r.body)["results"] || []
           end
         end || []
       end

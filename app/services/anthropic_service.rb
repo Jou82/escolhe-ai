@@ -11,7 +11,8 @@ class AnthropicService
 
   def call
     # 🔥 CACHE: Evita chamadas repetidas para a IA
-    cache_key = "anthropic:#{@movies.sort.join('_')}"
+    platforms_key = @user_platforms.sort.join('_')
+    cache_key = "anthropic:#{@movies.sort.join('_')}:platforms:#{platforms_key}"
 
     cached_result = Rails.cache.read(cache_key)
     if cached_result

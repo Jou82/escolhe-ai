@@ -177,21 +177,44 @@ class RecommendationPipeline
   private
 
   def generate_personalized_reason(movie)
+    cache_key = "anthropic:reason:#{@movies.sort.join('_')}:#{movie['title']}"
+
+    cached = Rails.cache.read(cache_key)
+    if cached
+      Rails.logger.info "💾 [REASON CACHE] Hit para '#{movie['title']}'"
+      return cached
+    end
+
+    tmdb = movie["tmdb"] || movie[:tmdb] || {}
+    overview = tmdb[:overview] || tmdb["overview"]
+    genres = (tmdb[:genres] || tmdb["genres"] || movie["genres"] || []).first(3).join(", ")
+    cast = (tmdb[:cast] || tmdb["cast"] || []).first(3).map { |c| c[:name] || c["name"] }.join(", ")
+
+    movie_context = "Título: #{movie['title']} (#{movie['year']})"
+    movie_context += " | Géneros: #{genres}" if genres.present?
+    movie_context += " | Sinopse: #{overview}" if overview.present?
+    movie_context += " | Elenco: #{cast}" if cast.present?
+
     client = Anthropic::Client.new(api_key: ENV.fetch("ANTHROPIC_API_KEY", nil))
-    response = client.messages.create(
-      model: "claude-haiku-4-5-20251001",
-      max_tokens: 200,
-      messages: [
-        {
-          role: "user",
-          content: "Filmes favoritos do usuário: #{@movies.join(', ')}. " \
-                   "Filme recomendado: #{movie['title']} (#{movie['year']}). " \
-                   "Escreva em 1 frase por que esse filme combina com o gosto do usuário. " \
-                   "Tom descontraído, como se fosse um amigo indicando. Responda só o texto, sem aspas."
-        }
-      ]
-    )
-    response.content.first.text.strip
+    Timeout.timeout(10) do
+      response = client.messages.create(
+        model: "claude-haiku-4-5-20251001",
+        max_tokens: 200,
+        messages: [
+          {
+            role: "user",
+            content: "Filmes favoritos do usuário: #{@movies.join(', ')}.\n" \
+                     "Filme recomendado — #{movie_context}.\n" \
+                     "Com base APENAS nas informações acima, escreva em 1 frase por que esse filme combina com o gosto do usuário. " \
+                     "Mencione algo específico do filme (género, sinopse ou elenco). " \
+                     "Tom descontraído, como se fosse um amigo indicando. Responda só o texto, sem aspas."
+          }
+        ]
+      )
+      result = response.content.first.text.strip
+      Rails.cache.write(cache_key, result, expires_in: 24.hours)
+      result
+    end
   rescue StandardError => e
     Rails.logger.warn("Erro ao gerar reason: #{e.message}")
     "Recomendado baseado nos seus filmes favoritos: #{@movies.join(', ')}."
@@ -249,6 +272,7 @@ class RecommendationPipeline
       end
     rescue Timeout::Error, Errno::ECONNREFUSED, SocketError => e
       retries += 1
+      raise e if retries > MAX_RETRIES
       wait_time = [2**retries, 10].min
       Rails.logger.warn "TMDB rent/buy tentativa #{retries} falhou: #{e.message}. Aguardando #{wait_time}s..."
       sleep(wait_time)
@@ -311,6 +335,7 @@ class RecommendationPipeline
       end
     rescue Timeout::Error, Errno::ECONNREFUSED, SocketError => e
       retries += 1
+      raise e if retries > MAX_RETRIES
       wait_time = [2**retries, 10].min
       Rails.logger.warn "Candidatos tentativa #{retries} falhou: #{e.message}. Aguardando #{wait_time}s..."
       sleep(wait_time)
@@ -321,10 +346,11 @@ class RecommendationPipeline
     retries = 0
     loop do
       Timeout.timeout(TMDB_TIMEOUT) do
-        return TmdbService.enrich_recommendations(recommendations)
+        return TmdbService.enrich_recommendations_with_cache(recommendations)
       end
     rescue Timeout::Error, Errno::ECONNREFUSED, SocketError => e
       retries += 1
+      raise e if retries > MAX_RETRIES
       wait_time = [2**retries, 10].min
       Rails.logger.warn "TMDB enrich tentativa #{retries} falhou: #{e.message}. Aguardando #{wait_time}s..."
       sleep(wait_time)
@@ -339,11 +365,13 @@ class RecommendationPipeline
       end
     rescue Timeout::Error => e
       retries += 1
+      raise e if retries > MAX_RETRIES
       wait_time = [2**retries, 10].min
       Rails.logger.warn "Anthropic tentativa #{retries} falhou: #{e.message}. Aguardando #{wait_time}s..."
       sleep(wait_time)
     rescue StandardError => e
       retries += 1
+      raise e if retries > MAX_RETRIES
       wait_time = [2**retries, 10].min
       Rails.logger.warn "Anthropic erro #{retries}: #{e.message}. Aguardando #{wait_time}s..."
       sleep(wait_time)

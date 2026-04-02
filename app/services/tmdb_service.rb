@@ -112,35 +112,6 @@ class TmdbService
     scored.reject { |c| director_film_ids.include?(c[:tmdb_id]) }.first(top_n)
   end
 
-  def self.enrich_recommendations(recommendations)
-    return [] if recommendations.blank?
-
-    Rails.logger.info "🚀 Enriquecendo #{recommendations.size} recomendações em paralelo..."
-
-    Parallel.map(recommendations, in_threads: 3) do |rec|
-      tmdb_data = nil
-      retries = 0
-
-      begin
-        Timeout.timeout(TIMEOUT) do
-          tmdb_data = new(rec["title"], rec["year"]).call
-          tmdb_data ||= new(rec["original_title"], rec["year"]).call if rec["original_title"]
-        end
-      rescue Timeout::Error, Faraday::ConnectionFailed, Faraday::TimeoutError => e
-        retries += 1
-        if retries <= MAX_RETRIES
-          Rails.logger.warn "TMDB enrich timeout (tentativa #{retries}) para '#{rec['title']}', retrying..."
-          sleep(0.5)
-          retry
-        else
-          Rails.logger.warn "TMDB timeout enriching '#{rec['title']}': #{e.message}"
-        end
-      end
-
-      rec.merge("tmdb" => tmdb_data)
-    end
-  end
-
   def self.enrich_recommendations_with_cache(recommendations)
     return [] if recommendations.blank?
 
@@ -303,20 +274,25 @@ class TmdbService
     provider_id = PROVIDER_IDS[platform_name]
     return [] unless provider_id
 
-    r = Faraday.get(
-      "#{BASE_URL}/discover/movie",
-      {
-        api_key: ENV.fetch("TMDB_API_KEY", nil),
-        language: "pt-BR",
-        watch_region: "BR",
-        with_watch_providers: provider_id,
-        sort_by: "popularity.desc",
-        page: 1,
-        "vote_count.gte" => 50
-      }
-    )
+    results = with_retry("discover_by_single_platform") do
+      Timeout.timeout(TIMEOUT) do
+        r = Faraday.get(
+          "#{BASE_URL}/discover/movie",
+          {
+            api_key: ENV.fetch("TMDB_API_KEY", nil),
+            language: "pt-BR",
+            watch_region: "BR",
+            with_watch_providers: provider_id,
+            sort_by: "popularity.desc",
+            page: 1,
+            "vote_count.gte" => 50
+          }
+        )
+        JSON.parse(r.body)["results"] || []
+      end
+    end || []
 
-    (JSON.parse(r.body)["results"] || [])
+    results
       .reject { |m| exclude_titles.include?(m["title"]) }
       .first(limit)
       .map { |movie| normalize_candidate(movie, score: 50) }
@@ -325,6 +301,23 @@ class TmdbService
   def self.discover_arthouse_candidates(exclude_titles = [], limit: 15)
     Rails.logger.info "🎨 Buscando filmes de arte/festival via TMDB..."
 
+    cache_key = "tmdb:arthouse_candidates:v1"
+    raw_results = Rails.cache.fetch(cache_key, expires_in: 30.minutes) do
+      Rails.logger.info "🎨 [ARTHOUSE] Cache miss — buscando no TMDB..."
+      fetch_arthouse_from_tmdb
+    end
+
+    results = raw_results
+                .reject { |m| exclude_titles.include?(m["title"]) }
+                .sort_by { |m| -m["vote_average"].to_f }
+                .first(limit)
+                .map { |movie| normalize_candidate(movie, score: 65) }
+
+    Rails.logger.info "🎨 Arthouse: #{results.size} filmes encontrados"
+    results
+  end
+
+  def self.fetch_arthouse_from_tmdb
     threads = [
       Thread.new do
         with_retry("discover_mubi") do
@@ -436,20 +429,9 @@ class TmdbService
       end
     ]
 
-    results = threads.flat_map(&:value)
-                     .uniq { |m| m["id"] }
-                     .reject { |m| exclude_titles.include?(m["title"]) }
-                     .sort_by { |m| -m["vote_average"].to_f }
-                     .first(limit)
-                     .map do |movie|
-      normalize_candidate(
-        movie, score: 65
-      )
-    end
-
-    Rails.logger.info "🎨 Arthouse: #{results.size} filmes encontrados"
-    results
+    threads.flat_map(&:value).uniq { |m| m["id"] }
   end
+  private_class_method :fetch_arthouse_from_tmdb
 
   def self.score_candidates(similar_by_source, user_movies)
     user_ids      = user_movies.map { |m| m[:tmdb_id] }
@@ -612,16 +594,14 @@ class TmdbService
       end
   end
 
-  def poster_url(path, size = "w500")
+  def self.poster_url_from_path(path, size = "w500")
     return nil unless path
 
     "https://image.tmdb.org/t/p/#{size}#{path}"
   end
 
-  def self.poster_url_from_path(path, size = "w500")
-    return nil unless path
-
-    "https://image.tmdb.org/t/p/#{size}#{path}"
+  def poster_url(path, size = "w500")
+    self.class.poster_url_from_path(path, size)
   end
 
   def self.with_retry(method_name, &block)

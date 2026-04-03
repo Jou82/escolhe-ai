@@ -11,7 +11,9 @@ class AnthropicService
 
   def call
     # 🔥 CACHE: Evita chamadas repetidas para a IA
-    cache_key = "anthropic:#{@movies.sort.join('_')}"
+    platforms_key = @user_platforms.sort.join('_')
+    exclude_key   = Digest::MD5.hexdigest(@exclude_titles.sort.join('_'))
+    cache_key = "anthropic:#{@movies.sort.join('_')}:platforms:#{platforms_key}:exclude:#{exclude_key}"
 
     cached_result = Rails.cache.read(cache_key)
     if cached_result
@@ -24,9 +26,7 @@ class AnthropicService
     result = make_api_call
 
     # Salva no cache por 1 hora
-    if result
-      Rails.cache.write(cache_key, result, expires_in: 1.hour)
-    end
+    Rails.cache.write(cache_key, result, expires_in: 1.hour) if result
 
     result
   end
@@ -38,7 +38,7 @@ class AnthropicService
     Timeout.timeout(10) do
       response = client.messages.create(
         model: "claude-haiku-4-5-20251001",
-        max_tokens: 600,  # 🔥 Reduzido de 800 para 600
+        max_tokens: 600, # 🔥 Reduzido de 800 para 600
         system: system_prompt,
         messages: [
           { role: "user", content: user_prompt }
@@ -65,7 +65,7 @@ class AnthropicService
   def platform_instruction
     if @user_platforms.any?
       "O usuário possui APENAS estas plataformas: #{@user_platforms.join(', ')}. " \
-      "Recomende SOMENTE filmes disponíveis nessas plataformas. Isso é OBRIGATÓRIO."
+        "Recomende SOMENTE filmes disponíveis nessas plataformas. Isso é OBRIGATÓRIO."
     else
       "Recomende filmes disponíveis em qualquer plataforma de streaming no Brasil."
     end
@@ -85,30 +85,26 @@ class AnthropicService
   end
 
   def system_prompt
-    # 🔥 PROMPT OTIMIZADO: Mais enxuto e direto
     <<~PROMPT
-      Especialista em cinema. Analise os filmes favoritos e recomende exatamente 3 filmes.
-      IMPORTANTE: Responda SOMENTE com o JSON. Não escreva nada antes ou depois. Comece diretamente com {.
+      Você é um especialista em cinema. Analise os filmes favoritos do usuário e escolha exatamente 3 recomendações.
+
+      REGRA ABSOLUTA: Escolha EXCLUSIVAMENTE filmes da lista de CANDIDATOS fornecida. NUNCA recomende filmes fora dessa lista.
+      REGRA ABSOLUTA: NUNCA recomende filmes listados como PROIBIDOS, mesmo que apareçam nos candidatos.
+      REGRA ABSOLUTA: NUNCA recomende sequências, prequelas ou filmes da mesma franquia dos filmes favoritos.
 
       #{platform_instruction}
-      #{format_exclude_titles}
 
-      Responda APENAS com JSON:
-      {"analysis":"perfil em 1 frase","recommendations":[{"title":"Título PT","original_title":"Title EN","year":2020,"reason":"motivo em 1 frase","genres":["Gênero"]}]}
+      Responda SOMENTE com JSON, começando diretamente com {. Nada antes ou depois.
 
-       Regras:
-         - NUNCA recomende sequências, prequelas ou filmes da mesma franquia dos filmes favoritos do usuário
-         - Recomende exatamente 3 filmes
-         - NUNCA recomende filmes que o usuário já listou
-         - NUNCA recomende filmes listados em "FILMES PROIBIDOS"
-         - Somente filmes disponíveis em streaming no Brasil
-         - O motivo deve referenciar padrões específicos encontrados nos 3 filmes
-         - Inclua o título original quando for filme estrangeiro
-         - Responda tudo em português (BR)
-         - NUNCA recomende filmes que não estejam disponíveis em streaming por assinatura no Brasil. Isso é uma regra absoluta.
+      Formato:
+      {"analysis":"perfil do usuário em 1 frase","recommendations":[{"title":"Título PT","original_title":"Title EN","year":2020,"reason":"motivo em 1 frase","genres":["Gênero"]}]}
+
+      Regras adicionais:
+        - Recomende exatamente 3 filmes
+        - Inclua o título original quando for filme estrangeiro
+        - Responda tudo em português (BR)
     PROMPT
   end
-
 
   def user_prompt
     if @candidates.any?
@@ -127,7 +123,8 @@ class AnthropicService
 
     candidates_text = limited_candidates.map.with_index(1) do |c, i|
       if c[:score].to_f >= 40
-        "#{i}. #{c[:title]} (#{c[:release_date]&.slice(0, 4) || '?'}) — TMDB ID: #{c[:tmdb_id]} | Nota: #{c[:vote_average]}/10 | Score: #{c[:score]}"
+        "#{i}. #{c[:title]} (#{c[:release_date]&.slice(0,
+                                                       4) || '?'}) — TMDB ID: #{c[:tmdb_id]} | Nota: #{c[:vote_average]}/10 | Score: #{c[:score]}"
       else
         "#{i}. #{c[:title]} (#{c[:release_date]&.slice(0, 4) || '?'}) — Score: #{c[:score]}"
       end
@@ -139,6 +136,7 @@ class AnthropicService
 
       ## CANDIDATOS PRÉ-FILTRADOS (escolha os 3 melhores):
       #{candidates_text}
+      #{format_exclude_titles}
     USER
   end
 

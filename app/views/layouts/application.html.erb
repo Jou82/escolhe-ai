@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
   <head>
-    <!-- Título Otimizado SEO -->
-    <title><%= content_for(:title) || "Escolhe Aí | Ferramenta Inteligente para Tomar Decisões - Compare e Escolha" %></title>
-
+    <%= render 'layouts/gtm_head' %>
+    <title><%= content_for(:title) || "Escolhe Ai" %></title>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="application-name" content="Escolhe Aí">
@@ -205,7 +204,7 @@
     <%= render "shared/navbar" %>
     <%= render "shared/login_modal" unless user_signed_in? %>
     <%= render "shared/flashes" %>
-
+    <%= render 'layouts/gtm_body' %>
     <main class="main-content">
       <%= yield %>
     </main>

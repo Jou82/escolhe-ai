@@ -1,6 +1,7 @@
 require 'net/http'
 
 class MoviesController < ApplicationController
+  before_action :check_rate_limit, only: [:create]
 
   def index
   end
@@ -57,11 +58,15 @@ class MoviesController < ApplicationController
     end
 
     previous_recommendations = current_user.sessions
-      .where(status: 1)
-      .where.not(recommendations_data: nil)
-      .flat_map { |s| JSON.parse(s.recommendations_data) rescue [] }
-      .map { |rec| rec["title"] }
-      .uniq
+                                           .where(status: 1)
+                                           .where.not(recommendations_data: nil)
+                                           .flat_map do |s|
+      JSON.parse(s.recommendations_data)
+    rescue StandardError
+      []
+    end
+                                           .map { |rec| rec["title"] }
+                                           .uniq
 
     Rails.logger.info "📚 Filmes já recomendados: #{previous_recommendations.join(', ')}"
 
@@ -83,9 +88,9 @@ class MoviesController < ApplicationController
   def processing
     @session_record = current_user.sessions.find(params[:id])
 
-    if @session_record.completed?
-      redirect_to movie_session_path(@session_record) and return
-    end
+    return unless @session_record.completed?
+
+    redirect_to movie_session_path(@session_record) and return
   end
 
   def check_status
@@ -100,5 +105,77 @@ class MoviesController < ApplicationController
     else
       render json: { status: "processing" }
     end
+  end
+
+  private
+
+  def check_rate_limit
+    count = current_user.sessions
+                        .where("created_at >= ?", 24.hours.ago)
+                        .where.not(status: 2)
+                        .count
+
+    if count >= 3
+      render_rate_limit_error
+      return false
+    end
+  end
+
+  def render_rate_limit_error
+    render html: rate_limit_page.html_safe, status: 429
+  end
+
+  def rate_limit_page
+    <<~HTML
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Limite atingido - Escolhe AI</title>
+          <link rel="stylesheet" href="/assets/rate_limit.css">
+        </head>
+        <body class="rate-limit-page">
+          <div class="hero-bg">
+            <div class="orb orb-1"></div>
+            <div class="orb orb-2"></div>
+            <div class="orb orb-3"></div>
+          </div>
+
+          <div class="content">
+            <div class="card">
+              <div class="logo">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline>
+                </svg>
+                <span>Escolhe AI</span>
+              </div>
+
+              <h1>
+                Chega de buscas<br>
+                <span>por hoje.</span>
+              </h1>
+
+              <div class="count-badge">
+                <strong>3/3</strong> buscas realizadas
+              </div>
+
+              <p class="message">
+                Você já usou suas <strong>3 buscas diárias</strong>.<br>
+                Volte amanhã para descobrir novos filmes!
+              </p>
+
+              <a href="/" class="btn-back">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+                Voltar ao início
+              </a>
+            </div>
+          </div>
+        </body>
+      </html>
+    HTML
   end
 end

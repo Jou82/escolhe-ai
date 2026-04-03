@@ -5,27 +5,27 @@ class TmdbService
   MAX_RETRIES = 1
 
   WEIGHTS = {
-    frequency:  0.30,
-    rating:     0.25,
-    popularity: 0.15,
-    votes:      0.15,
-    cult:       0.15
+    frequency: 0.30,
+    rating: 0.25,
+    popularity: 0.10,
+    votes: 0.10,
+    cult: 0.25
   }.freeze
 
   PROVIDER_IDS = {
-    "Netflix"             => 8,
-    "Amazon Prime Video"  => 119,
-    "Disney Plus"         => 337,
-    "HBO Max"             => 384,
-    "Globoplay"           => 307,
-    "Apple TV+"           => 350,
-    "Paramount+"          => 531,
-    "MUBI"                => 11,
-    "Telecine"            => 227,
-    "Crunchyroll"         => 283,
-    "Claro tv+"           => 1968,
-    "Star+"               => 619,
-    "Looke"               => 47
+    "Netflix" => 8,
+    "Amazon Prime Video" => 119,
+    "Disney Plus" => 337,
+    "HBO Max" => 384,
+    "Globoplay" => 307,
+    "Apple TV+" => 350,
+    "Paramount+" => 531,
+    "MUBI" => 11,
+    "Telecine" => 227,
+    "Crunchyroll" => 283,
+    "Claro tv+" => 1968,
+    "Star+" => 619,
+    "Looke" => 47
   }.freeze
 
   def initialize(title, year = nil)
@@ -48,18 +48,18 @@ class TmdbService
     trailer   = t_trailer.value
 
     {
-      tmdb_id:        movie_id,
-      title:          movie["title"],
+      tmdb_id: movie_id,
+      title: movie["title"],
       original_title: movie["original_title"],
-      overview:       movie["overview"],
-      poster_url:     poster_url(movie["poster_path"]),
-      vote_average:   movie["vote_average"],
-      release_date:   movie["release_date"],
-      streaming:      extract_br_providers(providers, "flatrate"),
-      rent:           extract_br_providers(providers, "rent"),
-      buy:            extract_br_providers(providers, "buy"),
-      cast:           cast,
-      trailer_url:    trailer
+      overview: movie["overview"],
+      poster_url: poster_url(movie["poster_path"]),
+      vote_average: movie["vote_average"],
+      release_date: movie["release_date"],
+      streaming: extract_br_providers(providers, "flatrate"),
+      rent: extract_br_providers(providers, "rent"),
+      buy: extract_br_providers(providers, "buy"),
+      cast: cast,
+      trailer_url: trailer
     }
   end
 
@@ -72,12 +72,13 @@ class TmdbService
 
   def self.find_candidates(movies, top_n: 15)
     user_movies = movies
-      .map { |title| Thread.new { new(title).send(:search_movie) } }
-      .filter_map do |t|
-        movie = t.value
-        next unless movie
-        { tmdb_id: movie["id"], title: movie["title"] }
-      end
+                  .map { |title| Thread.new { new(title).send(:search_movie) } }
+                  .filter_map do |t|
+                    movie = t.value
+                    next unless movie
+
+                    { tmdb_id: movie["id"], title: movie["title"] }
+                  end
 
     return [] if user_movies.empty?
 
@@ -90,7 +91,7 @@ class TmdbService
 
     user_director_ids = Set.new
     director_film_ids = Set.new
-    similar_by_source = user_movies.each_with_object({}) { |um, h| h[um[:tmdb_id]] = [] }
+    similar_by_source = user_movies.to_h { |um| [um[:tmdb_id], []] }
 
     threads.each do |t|
       type, tmdb_id, data = t.value
@@ -109,35 +110,6 @@ class TmdbService
     scored = score_candidates(similar_by_source, user_movies)
 
     scored.reject { |c| director_film_ids.include?(c[:tmdb_id]) }.first(top_n)
-  end
-
-  def self.enrich_recommendations(recommendations)
-    return [] if recommendations.blank?
-
-    Rails.logger.info "🚀 Enriquecendo #{recommendations.size} recomendações em paralelo..."
-
-    Parallel.map(recommendations, in_threads: 3) do |rec|
-      tmdb_data = nil
-      retries = 0
-
-      begin
-        Timeout.timeout(TIMEOUT) do
-          tmdb_data = new(rec["title"], rec["year"]).call
-          tmdb_data ||= new(rec["original_title"], rec["year"]).call if rec["original_title"]
-        end
-      rescue Timeout::Error, Faraday::ConnectionFailed, Faraday::TimeoutError => e
-        retries += 1
-        if retries <= MAX_RETRIES
-          Rails.logger.warn "TMDB enrich timeout (tentativa #{retries}) para '#{rec["title"]}', retrying..."
-          sleep(0.5)
-          retry
-        else
-          Rails.logger.warn "TMDB timeout enriching '#{rec["title"]}': #{e.message}"
-        end
-      end
-
-      rec.merge("tmdb" => tmdb_data)
-    end
   end
 
   def self.enrich_recommendations_with_cache(recommendations)
@@ -162,18 +134,16 @@ class TmdbService
           tmdb_data = new(rec["title"], rec["year"]).call
           tmdb_data ||= new(rec["original_title"], rec["year"]).call if rec["original_title"]
 
-          if tmdb_data
-            Rails.cache.write(cache_key, tmdb_data, expires_in: 24.hours)
-          end
+          Rails.cache.write(cache_key, tmdb_data, expires_in: 24.hours) if tmdb_data
         end
       rescue Timeout::Error, Faraday::ConnectionFailed, Faraday::TimeoutError => e
         retries += 1
         if retries <= MAX_RETRIES
-          Rails.logger.warn "TMDB enrich timeout (tentativa #{retries}) para '#{rec["title"]}', retrying..."
+          Rails.logger.warn "TMDB enrich timeout (tentativa #{retries}) para '#{rec['title']}', retrying..."
           sleep(0.5)
           retry
         else
-          Rails.logger.warn "TMDB timeout enriching '#{rec["title"]}': #{e.message}"
+          Rails.logger.warn "TMDB timeout enriching '#{rec['title']}': #{e.message}"
         end
       end
 
@@ -252,18 +222,16 @@ class TmdbService
         all_films    = []
 
         directors.each do |director|
-          begin
-            Timeout.timeout(TIMEOUT) do
-              r = Faraday.get("#{BASE_URL}/person/#{director['id']}/movie_credits",
-                              { api_key: ENV.fetch("TMDB_API_KEY", nil), language: "pt-BR" })
-              films = JSON.parse(r.body)["crew"]
+          Timeout.timeout(TIMEOUT) do
+            r = Faraday.get("#{BASE_URL}/person/#{director['id']}/movie_credits",
+                            { api_key: ENV.fetch("TMDB_API_KEY", nil), language: "pt-BR" })
+            films = JSON.parse(r.body)["crew"]
                         &.select { |c| c["job"] == "Director" }
                         &.reject { |c| c["id"] == movie_id } || []
-              all_films.concat(films)
-            end
-          rescue Timeout::Error, Faraday::ConnectionFailed, Faraday::TimeoutError => e
-            Rails.logger.warn "TMDB timeout for director #{director['id']}: #{e.message}"
+            all_films.concat(films)
           end
+        rescue Timeout::Error, Faraday::ConnectionFailed, Faraday::TimeoutError => e
+          Rails.logger.warn "TMDB timeout for director #{director['id']}: #{e.message}"
         end
 
         [director_ids, all_films]
@@ -281,14 +249,14 @@ class TmdbService
           r = Faraday.get(
             "#{BASE_URL}/discover/movie",
             {
-              api_key:              ENV.fetch("TMDB_API_KEY", nil),
-              language:             "pt-BR",
-              watch_region:         "BR",
+              api_key: ENV.fetch("TMDB_API_KEY", nil),
+              language: "pt-BR",
+              watch_region: "BR",
               with_watch_providers: provider_id,
-              with_genres:          genre_ids.first(3).join(","),
-              sort_by:              "vote_average.desc",
-              "vote_count.gte"   => 50,
-              page:                 1
+              with_genres: genre_ids.first(3).join(","),
+              sort_by: "vote_average.desc",
+              "vote_count.gte" => 50,
+              page: 1
             }
           )
           JSON.parse(r.body)["results"] || []
@@ -306,20 +274,25 @@ class TmdbService
     provider_id = PROVIDER_IDS[platform_name]
     return [] unless provider_id
 
-    r = Faraday.get(
-      "#{BASE_URL}/discover/movie",
-      {
-        api_key:              ENV.fetch("TMDB_API_KEY", nil),
-        language:             "pt-BR",
-        watch_region:         "BR",
-        with_watch_providers: provider_id,
-        sort_by:              "popularity.desc",
-        page:                 1,
-        "vote_count.gte"   => 50
-      }
-    )
+    results = with_retry("discover_by_single_platform") do
+      Timeout.timeout(TIMEOUT) do
+        r = Faraday.get(
+          "#{BASE_URL}/discover/movie",
+          {
+            api_key: ENV.fetch("TMDB_API_KEY", nil),
+            language: "pt-BR",
+            watch_region: "BR",
+            with_watch_providers: provider_id,
+            sort_by: "popularity.desc",
+            page: 1,
+            "vote_count.gte" => 50
+          }
+        )
+        JSON.parse(r.body)["results"] || []
+      end
+    end || []
 
-    (JSON.parse(r.body)["results"] || [])
+    results
       .reject { |m| exclude_titles.include?(m["title"]) }
       .first(limit)
       .map { |movie| normalize_candidate(movie, score: 50) }
@@ -328,6 +301,23 @@ class TmdbService
   def self.discover_arthouse_candidates(exclude_titles = [], limit: 15)
     Rails.logger.info "🎨 Buscando filmes de arte/festival via TMDB..."
 
+    cache_key = "tmdb:arthouse_candidates:v1"
+    raw_results = Rails.cache.fetch(cache_key, expires_in: 30.minutes) do
+      Rails.logger.info "🎨 [ARTHOUSE] Cache miss — buscando no TMDB..."
+      fetch_arthouse_from_tmdb
+    end
+
+    results = raw_results
+                .reject { |m| exclude_titles.include?(m["title"]) }
+                .sort_by { |m| -m["vote_average"].to_f }
+                .first(limit)
+                .map { |movie| normalize_candidate(movie, score: 65) }
+
+    Rails.logger.info "🎨 Arthouse: #{results.size} filmes encontrados"
+    results
+  end
+
+  def self.fetch_arthouse_from_tmdb
     threads = [
       Thread.new do
         with_retry("discover_mubi") do
@@ -335,14 +325,14 @@ class TmdbService
             r = Faraday.get(
               "#{BASE_URL}/discover/movie",
               {
-                api_key:              ENV.fetch("TMDB_API_KEY", nil),
-                language:             "pt-BR",
-                watch_region:         "BR",
+                api_key: ENV.fetch("TMDB_API_KEY", nil),
+                language: "pt-BR",
+                watch_region: "BR",
                 with_watch_providers: PROVIDER_IDS["MUBI"],
-                sort_by:              "vote_average.desc",
-                "vote_count.gte"   => 100,
+                sort_by: "vote_average.desc",
+                "vote_count.gte" => 100,
                 "vote_average.gte" => 7.0,
-                page:                 1
+                page: 1
               }
             )
             JSON.parse(r.body)["results"] || []
@@ -356,15 +346,15 @@ class TmdbService
             r = Faraday.get(
               "#{BASE_URL}/discover/movie",
               {
-                api_key:                ENV.fetch("TMDB_API_KEY", nil),
-                language:               "pt-BR",
-                watch_region:           "BR",
-                sort_by:                "vote_average.desc",
-                "vote_count.gte"     => 200,
-                "vote_count.lte"     => 3000,
-                "vote_average.gte"   => 7.5,
+                api_key: ENV.fetch("TMDB_API_KEY", nil),
+                language: "pt-BR",
+                watch_region: "BR",
+                sort_by: "vote_average.desc",
+                "vote_count.gte" => 200,
+                "vote_count.lte" => 3000,
+                "vote_average.gte" => 7.5,
                 with_original_language: "fr|it|de|ja|ko|es|pt",
-                page:                   1
+                page: 1
               }
             )
             JSON.parse(r.body)["results"] || []
@@ -379,33 +369,69 @@ class TmdbService
               r = Faraday.get(
                 "#{BASE_URL}/discover/movie",
                 {
-                  api_key:            ENV.fetch("TMDB_API_KEY", nil),
-                  language:           "pt-BR",
-                  watch_region:       "BR",
-                  sort_by:            "vote_average.desc",
+                  api_key: ENV.fetch("TMDB_API_KEY", nil),
+                  language: "pt-BR",
+                  watch_region: "BR",
+                  sort_by: "vote_average.desc",
                   "vote_count.gte" => 500,
                   "vote_average.gte" => 7.8,
                   "popularity.lte" => 50,
-                  page:               page
+                  page: page
                 }
               )
               JSON.parse(r.body)["results"] || []
             end
           end
         end || []
+      end,
+
+      Thread.new do
+        with_retry("discover_brazilian") do
+          Timeout.timeout(TIMEOUT) do
+            r = Faraday.get(
+              "#{BASE_URL}/discover/movie",
+              {
+                api_key: ENV.fetch("TMDB_API_KEY", nil),
+                language: "pt-BR",
+                watch_region: "BR",
+                with_original_language: "pt",
+                sort_by: "vote_average.desc",
+                "vote_count.gte" => 100,
+                "vote_average.gte" => 6.5,
+                page: 1
+              }
+            )
+            JSON.parse(r.body)["results"] || []
+          end
+        end || []
+      end,
+
+      Thread.new do
+        with_retry("discover_brazilian_festival") do
+          Timeout.timeout(TIMEOUT) do
+            r = Faraday.get(
+              "#{BASE_URL}/discover/movie",
+              {
+                api_key: ENV.fetch("TMDB_API_KEY", nil),
+                language: "pt-BR",
+                watch_region: "BR",
+                with_original_language: "pt",
+                sort_by: "vote_average.desc",
+                "vote_count.gte" => 50,
+                "vote_average.gte" => 7.0,
+                "popularity.lte" => 30,
+                page: 1
+              }
+            )
+            JSON.parse(r.body)["results"] || []
+          end
+        end || []
       end
     ]
 
-    results = threads.flat_map(&:value)
-      .uniq { |m| m["id"] }
-      .reject { |m| exclude_titles.include?(m["title"]) }
-      .sort_by { |m| -(m["vote_average"].to_f) }
-      .first(limit)
-      .map { |movie| normalize_candidate(movie, score: 65) }
-
-    Rails.logger.info "🎨 Arthouse: #{results.size} filmes encontrados"
-    results
+    threads.flat_map(&:value).uniq { |m| m["id"] }
   end
+  private_class_method :fetch_arthouse_from_tmdb
 
   def self.score_candidates(similar_by_source, user_movies)
     user_ids      = user_movies.map { |m| m[:tmdb_id] }
@@ -425,23 +451,23 @@ class TmdbService
       end
     end
 
-    candidate_map.values
-                 .each { |c| c[:score] = calculate_score(c, total_sources) }
-                 .sort_by { |c| -c[:score] }
+    candidate_map.each_value { |c| c[:score] = calculate_score(c, total_sources) }
+    candidate_map.values.sort_by { |c| -c[:score] }
   end
 
   def self.calculate_score(candidate, total_sources)
     (
-      frequency_score(candidate[:frequency], total_sources) * WEIGHTS[:frequency] +
-      rating_score(candidate[:vote_average])                * WEIGHTS[:rating]    +
-      popularity_score(candidate[:popularity])              * WEIGHTS[:popularity] +
-      votes_score(candidate[:vote_count])                   * WEIGHTS[:votes]     +
-      cult_score(candidate[:vote_average], candidate[:popularity]) * WEIGHTS[:cult]
+      (frequency_score(candidate[:frequency], total_sources) * WEIGHTS[:frequency]) +
+      (rating_score(candidate[:vote_average])                * WEIGHTS[:rating])    +
+      (popularity_score(candidate[:popularity])              * WEIGHTS[:popularity]) +
+      (votes_score(candidate[:vote_count])                   * WEIGHTS[:votes]) +
+      (cult_score(candidate[:vote_average], candidate[:popularity]) * WEIGHTS[:cult])
     ).round(1)
   end
 
   def self.frequency_score(frequency, total_sources)
     return 0 if total_sources.zero?
+
     (frequency.to_f / total_sources * 100).clamp(0, 100)
   end
 
@@ -486,10 +512,10 @@ class TmdbService
 
   def search_movie
     params = {
-      api_key:  ENV.fetch("TMDB_API_KEY", nil),
-      query:    @title,
+      api_key: ENV.fetch("TMDB_API_KEY", nil),
+      query: @title,
       language: "pt-BR",
-      region:   "BR"
+      region: "BR"
     }
     params[:year] = @year if @year
 
@@ -520,7 +546,7 @@ class TmdbService
 
     trailer = t_ptbr.value.find { |v| v["type"] == "Trailer" && v["site"] == "YouTube" }
     trailer ||= t_en.value.find { |v| v["type"] == "Trailer" && v["site"] == "YouTube" }
-    trailer ? "https://www.youtube.com/watch?v=#{trailer["key"]}" : nil
+    trailer ? "https://www.youtube.com/watch?v=#{trailer['key']}" : nil
   rescue StandardError => e
     Rails.logger.warn "TMDB error fetching trailer for #{movie_id}: #{e.message}"
     nil
@@ -542,7 +568,7 @@ class TmdbService
     credits = JSON.parse(response.body)
     (credits["cast"] || []).first(6).map do |member|
       {
-        name:      member["name"],
+        name: member["name"],
         character: member["character"],
         photo_url: member["profile_path"] ? poster_url(member["profile_path"], "w185") : nil
       }
@@ -561,21 +587,21 @@ class TmdbService
       .reject { |p| p["provider_name"].to_s.downcase.match?(/with ads|ads$/) }
       .map do |p|
         {
-          name:     p["provider_name"],
+          name: p["provider_name"],
           logo_url: poster_url(p["logo_path"], "w92"),
-          link:     link
+          link: link
         }
       end
   end
 
-  def poster_url(path, size = "w500")
+  def self.poster_url_from_path(path, size = "w500")
     return nil unless path
+
     "https://image.tmdb.org/t/p/#{size}#{path}"
   end
 
-  def self.poster_url_from_path(path, size = "w500")
-    return nil unless path
-    "https://image.tmdb.org/t/p/#{size}#{path}"
+  def poster_url(path, size = "w500")
+    self.class.poster_url_from_path(path, size)
   end
 
   def self.with_retry(method_name, &block)
@@ -598,17 +624,17 @@ class TmdbService
 
   def self.normalize_candidate(movie, score: nil)
     candidate = {
-      tmdb_id:        movie["id"],
-      title:          movie["title"],
+      tmdb_id: movie["id"],
+      title: movie["title"],
       original_title: movie["original_title"],
-      overview:       movie["overview"],
-      poster_path:    movie["poster_path"],
-      vote_average:   movie["vote_average"] || 0,
-      vote_count:     movie["vote_count"]   || 0,
-      popularity:     movie["popularity"]   || 0,
-      release_date:   movie["release_date"],
-      genre_ids:      movie["genre_ids"]    || [],
-      frequency:      1
+      overview: movie["overview"],
+      poster_path: movie["poster_path"],
+      vote_average: movie["vote_average"] || 0,
+      vote_count: movie["vote_count"]   || 0,
+      popularity: movie["popularity"]   || 0,
+      release_date: movie["release_date"],
+      genre_ids: movie["genre_ids"] || [],
+      frequency: 1
     }
     candidate[:score] = score if score
     candidate

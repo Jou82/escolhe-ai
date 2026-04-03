@@ -18,6 +18,19 @@ Rails.application.configure do
   # Cache assets for far-future expiry since they are all digest stamped.
   config.public_file_server.headers = { "cache-control" => "public, max-age=#{1.year.to_i}" }
 
+ config.action_mailer.delivery_method = :smtp
+ config.action_mailer.perform_deliveries = true
+ config.action_mailer.default_url_options = { host: "www.escolheai.net", protocol: "https" }
+
+config.action_mailer.smtp_settings = {
+  address:              'smtp.sendgrid.net',
+  port:                 587,
+  domain:               'escolheai.net',
+  user_name:            'apikey',
+  password:             ENV['SENDGRID_API_KEY'],
+  authentication:       :plain,
+  enable_starttls_auto: true
+}
   # Enable serving of images, stylesheets, and JavaScripts from an asset server.
   # config.asset_host = "http://assets.example.com"
 
@@ -87,4 +100,5 @@ Rails.application.configure do
   #
   # Skip DNS rebinding protection for the default health check endpoint.
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
+   config.middleware.use Rack::Deflater
 end

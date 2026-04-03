@@ -68,7 +68,8 @@ class GenerateRecommendationsJob < ApplicationJob
         end
         existing_input_likes = session_record.likes.where(suggestion: false, movie_id: input_movie_ids).pluck(:movie_id)
         new_input_likes = (input_movie_ids - existing_input_likes).map do |mid|
-          { session_id: session_record.id, movie_id: mid, suggestion: false, created_at: Time.current, updated_at: Time.current }
+          { session_id: session_record.id, movie_id: mid, suggestion: false, created_at: Time.current,
+            updated_at: Time.current }
         end
         Like.insert_all(new_input_likes) if new_input_likes.any?
 
@@ -94,7 +95,8 @@ class GenerateRecommendationsJob < ApplicationJob
 
         existing_rec_likes = session_record.likes.where(suggestion: true, movie_id: rec_movie_ids).pluck(:movie_id)
         new_rec_likes = (rec_movie_ids - existing_rec_likes).map do |mid|
-          { session_id: session_record.id, movie_id: mid, suggestion: true, created_at: Time.current, updated_at: Time.current }
+          { session_id: session_record.id, movie_id: mid, suggestion: true, created_at: Time.current,
+            updated_at: Time.current }
         end
         Like.insert_all(new_rec_likes) if new_rec_likes.any?
 
@@ -105,9 +107,7 @@ class GenerateRecommendationsJob < ApplicationJob
         Rails.logger.info "✅ [JOB] Completou em: #{total_duration}s"
 
         # Alerta se demorar mais que 15 segundos
-        if total_duration > 15
-          Rails.logger.warn "⚠️  Job lento: #{total_duration}s - Verificar otimizações"
-        end
+        Rails.logger.warn "⚠️  Job lento: #{total_duration}s - Verificar otimizações" if total_duration > 15
 
         broadcast_completion(user, session_record)
       else

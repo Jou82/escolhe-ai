@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <%= render 'layouts/gtm_head' %>
     <title><%= content_for(:title) || "Escolhe Ai" %></title>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -27,7 +28,7 @@
     <%= render "shared/navbar" %>
     <%= render "shared/login_modal" unless user_signed_in? %>
     <%= render "shared/flashes" %>
-
+    <%= render 'layouts/gtm_body' %>
     <main class="main-content">
       <%= yield %>
     </main>

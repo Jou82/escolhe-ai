@@ -57,7 +57,7 @@ gem "font-awesome-sass", "~> 6.1"
 gem "simple_form", github: "heartcombo/simple_form"
 gem "sassc-rails"
 gem "cloudinary"
-gem 'anthropic', '~> 1.25'
+gem 'anthropic', '~> 1.30'
 gem "faraday", "~> 2.0"
 
 group :development, :test do

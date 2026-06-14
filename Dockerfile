@@ -1,11 +1,9 @@
-FROM ruby:3.3-slim
+FROM ruby:3.3.5
 
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y \
-  build-essential \
   postgresql-client \
-  git \
   && rm -rf /var/lib/apt/lists/*
 
 COPY Gemfile Gemfile.lock ./

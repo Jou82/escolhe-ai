@@ -12,6 +12,14 @@ puts "Database cleaned!"
 # ============================================
 # SEU CÓDIGO ORIGINAL (mantido exatamente como está)
 # ============================================
+
+# Disable email delivery during seeds (development/docker-compose)
+skip_callback = ENV["SKIP_EMAIL"] == "true" || !ENV["SENDGRID_API_KEY"].present?
+
+if skip_callback
+  User.skip_callback(:create, :after, :send_devise_notification)
+end
+
 User.create!([
   { email: "paulo@test.com", password: "123456" },
   { email: "maria@test.com", password: "123456" },

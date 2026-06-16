@@ -2,7 +2,6 @@ FROM ruby:3.3.5
 
 WORKDIR /app
 
-# Instala Node.js e dependências do sistema
 RUN apt-get update && \
   apt-get install -y curl && \
   curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
@@ -14,8 +13,8 @@ RUN bundle install
 
 COPY . .
 
-# Pré-compila assets sem precisar do banco de dados
-RUN DISABLE_DATABASE_ENVIRONMENT_CHECK=1 bundle exec rails assets:precompile
+# SECRET_KEY_BASE_DUMMY evita precisar de master.key durante o build
+RUN RAILS_ENV=production SECRET_KEY_BASE_DUMMY=1 bundle exec rails assets:precompile
 
 EXPOSE 3000
-CMD ["bin/rails", "server", "-b", "0.0.0.0"]
+CMD ["sh", "-c", "bundle exec rails db:migrate && bundle exec rails server -b 0.0.0.0 -p ${PORT:-3000}"]

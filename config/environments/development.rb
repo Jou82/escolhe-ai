@@ -30,22 +30,29 @@ Rails.application.configure do
   # Store uploaded files on the local file system
   config.active_storage.service = :cloudinary
 
-  # --- CONFIGURAÇÃO CIRÚRGICA: SENDGRID ---
-  config.action_mailer.raise_delivery_errors = true
-  config.action_mailer.perform_deliveries = true
-  config.action_mailer.delivery_method = :smtp
-  config.action_mailer.default_url_options = { host: "localhost", port: 3000 }
+  # --- CONFIGURAÇÃO: EMAIL (SENDGRID ou :test) ---
+  if ENV['SENDGRID_API_KEY'].present?
+    # Use SendGrid in development if API key is provided
+    config.action_mailer.raise_delivery_errors = true
+    config.action_mailer.perform_deliveries = true
+    config.action_mailer.delivery_method = :smtp
+    config.action_mailer.smtp_settings = {
+      address:              'smtp.sendgrid.net',
+      port:                 587,
+      domain:               'escolheai.net',
+      user_name:            'apikey',
+      password:             ENV['SENDGRID_API_KEY'],
+      authentication:       :plain,
+      enable_starttls_auto: true
+    }
+  else
+    # Use :test delivery in docker-compose without API key
+    config.action_mailer.delivery_method = :test
+    config.action_mailer.perform_deliveries = false
+  end
 
-  config.action_mailer.smtp_settings = {
-    address:              'smtp.sendgrid.net',
-    port:                 587,
-    domain:               'escolheai.net',
-    user_name:            'apikey',
-    password:             ENV['SENDGRID_API_KEY'],
-    authentication:       :plain,
-    enable_starttls_auto: true
-  }
-  # --- FIM DA ALTERAÇÃO ---
+  config.action_mailer.default_url_options = { host: "localhost", port: 3000 }
+  # --- FIM DA CONFIGURAÇÃO ---
 
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log

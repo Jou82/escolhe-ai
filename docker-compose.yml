@@ -25,7 +25,7 @@ services:
     container_name: escolhe_ai_web
     command: >
       sh -c "
-        bundle exec rails db:prepare &&
+        bundle exec rails db:migrate &&
         bundle exec rails server -b 0.0.0.0 -p 3000
       "
     environment:

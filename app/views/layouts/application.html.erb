@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
   <head>
+    <meta charset="UTF-8">
     <%= render 'layouts/gtm_head' %>
     <title><%= content_for(:title) || "Escolhe Ai" %></title>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -24,13 +25,13 @@
     <meta property="og:description" content="<%= content_for?(:og_description) ? yield(:og_description) : "Ferramenta gratuita que ajuda você a comparar opções e tomar decisões mais inteligentes. Análise personalizada e resultados confiáveis." %>">
     <meta property="og:type" content="website">
     <meta property="og:url" content="<%= request.url %>">
-    <meta property="og:image" content="<%= content_for?(:og_image) ? yield(:og_image) : "https://#{request.host}/og-image.jpg" %>">
+    <meta property="og:image" content="<%= content_for?(:og_image) ? yield(:og_image) : "https://#{request.host}/og-image.svg" %>">
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="<%= content_for?(:twitter_title) ? yield(:twitter_title) : "Escolhe Aí | Compare e Escolha a Melhor Opção" %>">
     <meta name="twitter:description" content="<%= content_for?(:twitter_description) ? yield(:twitter_description) : "Descubra a melhor escolha com nossa ferramenta inteligente. Comparação precisa e resultados confiáveis." %>">
-    <meta name="twitter:image" content="<%= content_for?(:twitter_image) ? yield(:twitter_image) : "https://#{request.host}/twitter-image.jpg" %>">
+    <meta name="twitter:image" content="<%= content_for?(:twitter_image) ? yield(:twitter_image) : "https://#{request.host}/twitter-image.svg" %>">
 
     <!-- Canonical URL -->
     <link rel="canonical" href="<%= request.url %>">

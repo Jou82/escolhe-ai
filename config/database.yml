@@ -1,22 +1,10 @@
-# PostgreSQL. Versions 9.3 and up are supported.
-#
-# Install the pg driver:
-#   gem install pg
-# On macOS with Homebrew:
-#   gem install pg -- --with-pg-config=/opt/homebrew/bin/pg_config
-# On Windows:
-#   gem install pg
-#       Choose the win32 build.
-#       Install PostgreSQL and put its /bin directory on your path.
-#
-# Configure Using Gemfile
-# gem "pg"
-#
 default: &default
   adapter: postgresql
   encoding: unicode
-  # For details on connection pooling, see Rails configuration guide
-  # https://guides.rubyonrails.org/configuring.html#database-pooling
+  host: 127.0.0.1
+  port: 5433
+  username: escolheai
+  password: <%= ENV["ESCOLHEAI_DATABASE_PASSWORD"] %>
   max_connections: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
 
 development:
@@ -30,10 +18,25 @@ test:
 production:
   primary:
     <<: *default
+<<<<<<< HEAD
     url: <%= ENV["DATABASE_URL"] %>
   cable:
     <<: *default
     url: <%= ENV["DATABASE_URL"] %>
+=======
+    database: escolheai_production
+  cache:
+    <<: *default
+    database: escolheai_production_cache
+    migrations_paths: db/cache_migrate
+  queue:
+    <<: *default
+    database: escolheai_production_queue
+    migrations_paths: db/queue_migrate
+  cable:
+    <<: *default
+    database: escolheai_production_cable
+>>>>>>> fa997b1b06b97489b2766c6d4783127abb4a70a4
     migrations_paths: db/cable_migrate
   queue:
     <<: *default

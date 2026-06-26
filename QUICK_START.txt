@@ -1,0 +1,68 @@
+╔═══════════════════════════════════════════════════════════╗
+║     🚀 ESCOLHE-AI DEPLOY — QUICK START (1 página)        ║
+╚═══════════════════════════════════════════════════════════╝
+
+✅ STATUS: Tudo pronto! Docker build em andamento...
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📋 PASSO-A-PASSO (3 minutos de leitura)
+
+1. 🐳 DOCKER BUILD (acontecendo agora)
+   Aguarde o build terminar (~10 min)
+
+2. ⚡ RODOU DEPLOY SCRIPT (5 minutos)
+   bash scripts/deploy-to-hetzner.sh
+
+   O script vai pedir:
+   - Hetzner API Token
+   - SendGrid API Key
+   - Google OAuth ID/Secret
+
+3. 🖥️ CONFIGURAR COOLIFY (5 minutos)
+   Abrir dashboard Coolify → adicionar repo → Deploy
+
+4. ✅ PRONTO! (1 minuto)
+   curl https://escolhe-ai.net/up
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📚 DOCUMENTAÇÃO (escolha uma)
+
+Quer rápido?       → DEPLOY_RAPIDO.md (30-45 min)
+Quer detalhado?    → DEPLOYMENT.md (completo)
+Quer checklist?    → DEPLOYMENT_CHECKLIST.md
+Quer saber status? → DEPLOY_SUMMARY.md
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 PRÓXIMO COMANDO
+
+Quando Docker terminar, execute:
+
+    bash scripts/deploy-to-hetzner.sh
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✨ TUDO JÁ ESTÁ PREPARADO ✨
+
+- ✅ Código atualizado
+- ✅ Docker Compose pronto
+- ✅ Rails config otimizado
+- ✅ Scripts de automação
+- ✅ Documentação completa
+- ✅ Checklist de validação
+
+VOCÊ SÓ PRECISA:
+1. Aguardar Docker build
+2. Rodar script deploy
+3. Clicar botão em Coolify
+4. Pronto! 🚀
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Tempo total estimado: 30-45 minutos
+Custo mensal: €5.50 (Hetzner VPS)
+Downtime: 0 (deploy zero-downtime com Coolify)
+
+Ready? Go! 🚀

@@ -18,3 +18,6 @@ RUN RAILS_ENV=production SECRET_KEY_BASE_DUMMY=1 bundle exec rails assets:precom
 
 EXPOSE 3000
 CMD ["sh", "-c", "bundle exec rails db:migrate && bundle exec rails server -b 0.0.0.0 -p ${PORT:-3000}"]
+
+# Note: db:seed is optional and can be run manually
+# Rails will auto-create schema if needed via db:migrate

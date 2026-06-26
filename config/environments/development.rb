@@ -30,7 +30,6 @@ Rails.application.configure do
   # Store uploaded files on the local file system
   config.active_storage.service = :cloudinary
 
-<<<<<<< HEAD
   # --- CONFIGURAÇÃO: EMAIL (SENDGRID ou :test) ---
   if ENV['SENDGRID_API_KEY'].present?
     # Use SendGrid in development if API key is provided
@@ -51,13 +50,6 @@ Rails.application.configure do
     config.action_mailer.delivery_method = :test
     config.action_mailer.perform_deliveries = false
   end
-
-=======
-  # --- CONFIGURAÇÃO CIRÚRGICA: SENDGRID ---
-  config.action_mailer.raise_delivery_errors = true
-  config.action_mailer.perform_deliveries = true
-  config.action_mailer.delivery_method = :smtp
->>>>>>> fa997b1b06b97489b2766c6d4783127abb4a70a4
   config.action_mailer.default_url_options = { host: "localhost", port: 3000 }
   # --- FIM DA CONFIGURAÇÃO ---
 

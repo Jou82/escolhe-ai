@@ -16,8 +16,8 @@ Rails.application.configure do
   config.action_controller.perform_caching = true
 
   # Cache assets for far-future expiry since they are all digest stamped.
-  config.public_file_server.headers = { "cache-control" => "public, max-age=#{1.year.to_i}" }
-
+ config.public_file_server.headers = { "cache-control" => "public, max-age=#{1.year.to_i}" }
+ config.action_mailer.default_options = { from: 'joana.jou@gmail.com' }
  config.action_mailer.delivery_method = :smtp
  config.action_mailer.perform_deliveries = true
  config.action_mailer.default_url_options = { host: "escolheai.net", protocol: "https" }
@@ -101,4 +101,8 @@ config.action_mailer.smtp_settings = {
   # Skip DNS rebinding protection for the default health check endpoint.
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
    config.middleware.use Rack::Deflater
+# Host authorization
+config.hosts << "www.escolheai.net"
+config.hosts << "escolheai.net"
+config.hosts << "localhost"  # para testes internos
 end

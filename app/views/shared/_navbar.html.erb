@@ -16,20 +16,12 @@
 
         <div class="user-menu" data-controller="dropdown">
           <button class="user-menu-toggle" data-action="click->dropdown#toggle">
-<<<<<<< HEAD
-            <img src="<%= current_user.avatar_url %>" class="nav-avatar" alt="Avatar do usuário <%= current_user.email %>">
-=======
             <img src="<%= current_user.avatar_url %>" class="nav-avatar" alt="User Avatar">
->>>>>>> fa997b1b06b97489b2766c6d4783127abb4a70a4
           </button>
 
           <div class="user-menu-panel" data-dropdown-target="menu">
             <%= link_to profile_path, class: "user-menu-item" do %>
-<<<<<<< HEAD
-              <img src="<%= current_user.avatar_url %>" class="nav-avatar-mini" alt="Avatar do perfil">
-=======
               <img src="<%= current_user.avatar_url %>" class="nav-avatar-mini">
->>>>>>> fa997b1b06b97489b2766c6d4783127abb4a70a4
               Perfil
             <% end %>
 

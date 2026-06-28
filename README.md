@@ -51,6 +51,11 @@ Decision fatigue on streaming platforms is real. With hundreds of titles across 
 
 ---
 
+## 📋 Documentation
+
+- **[Infrastructure & Operations](./INFRASTRUCTURE.md)** — Deployment architecture, cost optimization, incident responses, and operations roadmap
+---
+
 ## Architecture Decisions
 
 **Why OpenAI API?**
@@ -167,4 +172,3 @@ Escolhe Aí was built collaboratively by a team of four Le Wagon students:
 ---
 
 *Developed during the AI Software Development Bootcamp at [Le Wagon](https://www.lewagon.com) (Brazil cohort), Jan/2026–March/2026.*
-

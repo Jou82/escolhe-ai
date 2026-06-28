@@ -17,7 +17,7 @@ Rails.application.configure do
 
   # Cache assets for far-future expiry since they are all digest stamped.
  config.public_file_server.headers = { "cache-control" => "public, max-age=#{1.year.to_i}" }
- config.action_mailer.default_options = { from: 'joana.jou@gmail.com' }
+ config.action_mailer.default_options = { from: 'suporte@escolheai.net' }
  config.action_mailer.delivery_method = :smtp
  config.action_mailer.perform_deliveries = true
  config.action_mailer.default_url_options = { host: "escolheai.net", protocol: "https" }

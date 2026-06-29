@@ -104,5 +104,7 @@ config.action_mailer.smtp_settings = {
 # Host authorization
 config.hosts << "www.escolheai.net"
 config.hosts << "escolheai.net"
+config.hosts << /.*/  # libera o hostname interno do container no healthcheck
+config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
 config.hosts << "localhost"  # para testes internos
 end

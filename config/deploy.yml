@@ -23,6 +23,7 @@ env:
     RAILS_ENV: production
   secret:
     - RAILS_MASTER_KEY
+    - SECRET_KEY_BASE
     - RAILS_ENV
     - DATABASE_URL
     - GOOGLE_CLIENT_ID

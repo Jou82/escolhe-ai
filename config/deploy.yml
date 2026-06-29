@@ -11,7 +11,9 @@ servers:
 
 proxy:
   app_port: 3000
-  host: escolheai.net
+  hosts:
+    - escolheai.net
+    - www.escolheai.net
   ssl: true
   healthcheck:
     path: /up

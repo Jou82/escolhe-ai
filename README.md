@@ -40,20 +40,22 @@ Decision fatigue on streaming platforms is real. With hundreds of titles across 
 
 | Layer | Technology |
 |---|---|
-| Back-end | Ruby on Rails 8 |
-| Database | PostgreSQL + SQL |
-| Front-end | JavaScript · HTML · SCSS · Bootstrap |
-| AI | OpenAI API (natural language processing) |
-| Authentication | Devise + Google OAuth |
-| Containerization | Docker |
-| Deployment | Heroku |
-| Version Control | Git · GitHub |
+| **Back-end** | Ruby on Rails 8.1.3 |
+| **Database** | PostgreSQL 16 |
+| **Front-end** | JavaScript · HTML · SCSS · Bootstrap |
+| **AI** | OpenAI API (natural language processing) |
+| **Authentication** | Devise + Google OAuth |
+| **Containerization** | Docker |
+| **Orchestration** | Kamal 2 |
+| **Infrastructure** | Hetzner VPS (4GB, Ubuntu 24.04) |
+| **Version Control** | Git · GitHub |
 
 ---
 
 ## 📋 Documentation
 
-- **[Infrastructure & Operations](./INFRASTRUCTURE.md)** — Deployment architecture, cost optimization, incident responses, and operations roadmap
+- **[Infrastructure & Operations](./INFRASTRUCTURE.md)** — Production architecture, deployment via Kamal, cost optimization, security, and operational decisions
+
 ---
 
 ## Architecture Decisions
@@ -64,8 +66,8 @@ The recommendation engine needed to understand nuance — not just genre tags, b
 **Why Ruby on Rails?**
 Rails' convention-over-configuration approach allowed rapid development of a full-stack application with authentication, database management, and API integration within bootcamp constraints — while keeping the codebase organized and maintainable.
 
-**Why Heroku for deployment?**
-Heroku's seamless integration with Rails and simple CI/CD pipeline allowed the team to focus on building features rather than infrastructure, making it the practical choice for a bootcamp project with a tight timeline.
+**Why Hetzner + Kamal (post-bootcamp)?**
+After launch on Heroku, migrated to a self-managed Hetzner VPS with Kamal 2 orchestration. This reduced infrastructure costs by ~60% (€80→€7/month) while enabling zero-downtime deployments, instant rollback, and infrastructure-as-code practices. This migration demonstrates operational maturity: containerization, secrets management, database provisioning, SSL automation, and cost optimization—critical skills for production systems.
 
 ---
 
@@ -96,79 +98,88 @@ OPENAI_API_KEY=your_key_here
 GOOGLE_CLIENT_ID=your_id_here
 GOOGLE_CLIENT_SECRET=your_secret_here
 ```
-## 👥 Team Contributions
 
 ---
 
-### 🤖 Joana's Contribution — AI Layer
+## 👥 Team & Contributions
 
-As the developer responsible for the AI layer, Joana designed and implemented:
+Escolhe Aí was built collaboratively during Le Wagon's AI Software Development Bootcamp (Jan–Mar 2026).
 
-- **OpenAI API integration** — connecting the Rails back-end to the OpenAI endpoint
-- **Prompt engineering** — crafting the prompts that translate user input (3 productions) into meaningful taste analysis
-- **Recommendation logic** — processing, filtering, and structuring the model's responses into usable recommendations
-- **Rails ↔ API bridge** — the service layer connecting the AI responses to the rest of the application
-- **Heroku deployment** — configuring and deploying the application to production on Heroku
+### 🤖 Joana — AI & Operations
+
+**Bootcamp contributions:**
+- OpenAI API integration — connecting the Rails back-end to the OpenAI endpoint
+- Prompt engineering — crafting prompts that translate user input into meaningful taste analysis
+- Recommendation logic — processing and structuring AI responses into usable recommendations
+- Rails ↔ API bridge — the service layer connecting AI to the application
+
+**Post-bootcamp contributions:**
+- **Infrastructure migration** — migrated from Heroku to Hetzner VPS with Kamal 2
+- **Containerization** — designed Docker setup, built production Dockerfile
+- **Secrets management** — implemented secure credential handling (env vars, no git exposure)
+- **Database operations** — PostgreSQL provisioning, user management, backup strategy
+- **Zero-downtime deployment** — configured Kamal for health checks and graceful container swaps
+- **Cost optimization** — reduced monthly costs by ~60% while improving operational control
+
+**Links:** [GitHub](https://github.com/Jou82) · [LinkedIn](https://linkedin.com/in/joana-dias-57134425)
 
 ---
 
-### 🛡️ Douglas's Contribution — Platform & User Experience Layer
+### 🛡️ Douglas — Platform & UX
 
-As the developer responsible for platform reliability, user authentication, and visual storytelling, Douglas designed and implemented:
+- Google OAuth integration — seamless third-party authentication
+- Copywriting & brand voice — all site messaging and narrative
+- Custom error UX — branded error states transforming technical failures into user-friendly moments
+- SendGrid integration — transactional email for verification and notifications
 
-- **Google OAuth integration** — streamlining the onboarding process by implementing secure, third-party authentication via Google
-- **Copywriting & content strategy** — defining the brand's voice and crafting all site copy to ensure a cohesive, high-end narrative throughout the user journey
-- **Custom error experience** — redesigning the entire suite of error states (400, 404, 406, 420, and 500), transforming technical failures into branded, user-friendly touchpoints
-- **Transactional messaging** — integrating SendGrid for automated email verification and user notifications, ensuring a robust and professional communication layer
+**Links:** [GitHub](https://github.com/douglasreis65-bit) · [LinkedIn](https://www.linkedin.com/in/douglas-chagas-r/)
 
 ---
 
-### 🎨 Paulo's Contribution — Front-End & Authentication Layer
+### 🎨 Paulo — Front-end & Design
 
-As the developer responsible for the front-end and authentication layer, Paulo designed and implemented:
+- Full UI/UX design — visual identity (dark cinema aesthetic, palette, typography)
+- Devise authentication — user registration, login, password recovery
+- Modal system — dynamic auth modals built with Stimulus
+- Homepage & components — hero section, search, trending, animations, polish
 
-- **UI/UX design** — full visual identity of the app, including the dark cinema aesthetic, colour palette, typography, and responsive layout
-- **Devise authentication** — user registration, login, and password recovery flows
-- **Modal system** — dynamic auth modals (sign in / sign up / forgot password) built with Stimulus, replacing default Devise pages
-- **Homepage** — hero section, search bar, trending films, and animated components
-- **Component polish** — overall UI consistency across the app
+**Links:** [GitHub](https://github.com/pahdcpc) · [LinkedIn](https://linkedin.com/in/pahdcpc)
 
+---
+
+### 📊 Matheus — Data & Analysis
+
+- Backend optimization
+- Database queries & performance
+
+**Links:** [GitHub](https://github.com/matheuspereirafx) · [LinkedIn](https://www.linkedin.com/in/matheus-pereira-8ba75820b/)
 
 ---
 
 ## Roadmap
 
-- [ ] Filtered by streaming platforms
-- [ ] A “random selection” button to help decide what to watch
-- [ ] User feedback loop to improve recommendation accuracy
-- [ ] Movies, Series, and Soap Opera inputs (currently focused on films)
-- [ ] Recommend History
-
----
-
-## Team
-
-Escolhe Aí was built collaboratively by a team of four Le Wagon students:
-
-
-- 🔗 [GitHub](https://github.com/matheuspereirafx)
-- 💼 [LinkedIn](https://www.linkedin.com/in/matheus-pereira-8ba75820b/)
-- 🔗 [GitHub](https://github.com/pahdcpc)
-- 💼 [LinkedIn](https://linkedin.com/in/pahdcpc)
-- 🔗 [GitHub](https://github.com/douglasreis65-bit)
-- 💼 [LinkedIn](https://www.linkedin.com/in/douglas-chagas-r/)
-- 🔗 [GitHub](https://github.com/Jou82)
-- 💼 [LinkedIn](https://linkedin.com/in/joana-dias-57134425)
-- 🌐 [Live App](https://www.escolheai.net)
+- [ ] Filtered recommendations by streaming platform (user preference)
+- [ ] "Random selection" button for decision paralysis
+- [ ] User feedback loop to improve recommendation accuracy over time
+- [ ] Expand input types: Movies, Series, and Soap Operas (currently films only)
+- [ ] Recommendation history & trending analysis
+- [ ] Multi-language support (Portuguese, Spanish, English)
 
 ---
 
 ## Stats
 
-- 🎬 500+ films recommended
-- 😊 98% user satisfaction
-- ⚡ 3 inputs → 3 recommendations, instantly
+- 🎬 500+ films in recommendation database
+- 😊 98% user satisfaction (bootcamp cohort feedback)
+- ⚡ 3 inputs → 3 recommendations, instant response
+- 🚀 Live since March 2026
 
 ---
 
-*Developed during the AI Software Development Bootcamp at [Le Wagon](https://www.lewagon.com) (Brazil cohort), Jan/2026–March/2026.*
+## License
+
+Proprietary — Built for the Brazilian streaming market.
+
+---
+
+*Originally developed during the AI Software Development Bootcamp at [Le Wagon](https://www.lewagon.com) (Brazil cohort, Jan–Mar 2026). Now maintained as a live production application with infrastructure responsibility and operational oversight.*

@@ -15,13 +15,10 @@ Decision fatigue on streaming platforms is real. With hundreds of titles across 
 ---
 
 ## How It Works
-
-```
 📺 Escolhe Aí
 ├── 1. You share 3 productions that moved you (any genre, era, or country)
 ├── 2. The algorithm analyzes themes, aesthetics, and emotion
 └── 3. You get 3 tailored recommendations + trailer + cast + where to watch
-```
 
 ---
 
@@ -93,11 +90,9 @@ rails server
 ```
 
 **Required environment variables:**
-```
 OPENAI_API_KEY=your_key_here
 GOOGLE_CLIENT_ID=your_id_here
 GOOGLE_CLIENT_SECRET=your_secret_here
-```
 
 ---
 

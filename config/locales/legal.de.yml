@@ -1,4 +1,14 @@
 de:
+  terms:
+    accept:
+      title: "Nutzungsbedingungen akzeptieren"
+      subtitle: "Bevor Sie fortfahren, bestaetigen Sie bitte, dass Sie unsere Datenschutzerklaerung und Nutzungsbedingungen akzeptieren."
+      description_html: "Um EscolheAi zu nutzen, muessen Sie unsere %{privacy_link} und %{terms_link} akzeptieren."
+      privacy_label: "Datenschutzerklaerung"
+      terms_label: "Nutzungsbedingungen"
+      checkbox_label: "Ich bestaeutige, dass ich die Datenschutzerklaerung und Nutzungsbedingungen gelesen habe und akzeptiere"
+      submit_button: "Fortfahren"
+
   legal:
     privacy:
       title: "Datenschutzerklaerung"

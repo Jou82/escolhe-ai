@@ -1,4 +1,14 @@
 en:
+  terms:
+    accept:
+      title: "Accept Terms of Use"
+      subtitle: "Before continuing, please confirm that you accept our Privacy Policy and Terms of Use."
+      description_html: "To use EscolheAi, you must accept our %{privacy_link} and %{terms_link}."
+      privacy_label: "Privacy Policy"
+      terms_label: "Terms of Use"
+      checkbox_label: "I confirm that I have read and accept the Privacy Policy and Terms of Use"
+      submit_button: "Continue"
+
   legal:
     privacy:
       title: "Privacy Policy"

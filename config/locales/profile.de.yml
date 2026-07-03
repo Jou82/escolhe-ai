@@ -44,3 +44,6 @@ de:
       delete_modal_password_placeholder: "••••••••"
       delete_modal_cancel: "Abbrechen"
       delete_modal_confirm: "Konto dauerhaft löschen"
+      incorrect_password: "Falsches Passwort. Konto wurde nicht gelöscht."
+      incorrect_email_confirmation: "Bestätigungs-E-Mail stimmt nicht überein. Konto wurde nicht gelöscht."
+      account_deleted_success: "Ihr Konto und alle zugehörigen Daten wurden dauerhaft gelöscht."

@@ -44,3 +44,6 @@ pt-BR:
       delete_modal_password_placeholder: "••••••••"
       delete_modal_cancel: "Cancelar"
       delete_modal_confirm: "Encerrar conta permanentemente"
+      incorrect_password: "Senha incorreta. Conta não foi excluída."
+      incorrect_email_confirmation: "E-mail de confirmação não corresponde. Conta não foi excluída."
+      account_deleted_success: "Sua conta e todos os dados associados foram permanentemente deletados."

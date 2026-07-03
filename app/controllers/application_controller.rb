@@ -28,6 +28,7 @@ class ApplicationController < ActionController::Base
     return if devise_controller?
     return if controller_name == "terms"
     return if controller_name == "pages" && %w[privacy terms].include?(action_name)
+    return if controller_name == "accounts" && action_name == "destroy"
     return if current_user.terms_accepted_at.present?
 
     redirect_to accept_terms_path,

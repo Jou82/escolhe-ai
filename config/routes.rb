@@ -36,6 +36,8 @@ Rails.application.routes.draw do
 
   resources :likes, only: [:create]
 
+  delete "/account", to: "accounts#destroy", as: :destroy_account
+
   get "up" => "rails/health#show", as: :rails_health_check
 
   scope '(:locale)', locale: /pt-BR|pt|en|de/ do

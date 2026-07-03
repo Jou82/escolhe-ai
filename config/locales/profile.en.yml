@@ -44,3 +44,6 @@ en:
       delete_modal_password_placeholder: "••••••••"
       delete_modal_cancel: "Cancel"
       delete_modal_confirm: "Permanently delete account"
+      incorrect_password: "Incorrect password. Account was not deleted."
+      incorrect_email_confirmation: "Confirmation email does not match. Account was not deleted."
+      account_deleted_success: "Your account and all associated data have been permanently deleted."

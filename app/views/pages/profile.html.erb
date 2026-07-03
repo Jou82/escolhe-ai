@@ -11,8 +11,8 @@
       </div>
       <%# Language Selector %>
       <div class="language-selector">
-        <% %w[pt en de].each do |locale| %>
-          <% locale_name = {"pt" => "PT", "en" => "EN", "de" => "DE"}[locale] %>
+        <% %w[pt-BR en de].each do |locale| %>
+          <% locale_name = {"pt-BR" => "PT", "en" => "EN", "de" => "DE"}[locale] %>
           <a href="<%= profile_path(locale: locale) %>"
              class="language-selector__link <%= 'language-selector__link--active' if I18n.locale.to_s == locale %>">
             <%= locale_name %>

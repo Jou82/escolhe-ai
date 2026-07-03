@@ -9,7 +9,7 @@ module Users
         if @user.terms_accepted_at.present?
           redirect_to root_path, notice: I18n.t('devise.omniauth_callbacks.success', kind: 'Google')
         else
-          redirect_to accept_terms_path,
+          redirect_to accept_terms_scoped_path,
             notice: "Antes de continuar, por favor aceite nossa Política de Privacidade e Termos de Uso."
         end
       else

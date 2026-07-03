@@ -1,9 +1,9 @@
 <div class="legal-page">
 
   <div class="legal-page__lang-switcher">
-    <%= link_to "PT", accept_terms_path(locale: :pt), class: "legal-page__lang #{'legal-page__lang--active' if I18n.locale == :pt}" %>
-    <%= link_to "EN", accept_terms_path(locale: :en), class: "legal-page__lang #{'legal-page__lang--active' if I18n.locale == :en}" %>
-    <%= link_to "DE", accept_terms_path(locale: :de), class: "legal-page__lang #{'legal-page__lang--active' if I18n.locale == :de}" %>
+    <%= link_to "PT", accept_terms_scoped_path(locale: :pt), class: "legal-page__lang #{'legal-page__lang--active' if I18n.locale == :pt}" %>
+    <%= link_to "EN", accept_terms_scoped_path(locale: :en), class: "legal-page__lang #{'legal-page__lang--active' if I18n.locale == :en}" %>
+    <%= link_to "DE", accept_terms_scoped_path(locale: :de), class: "legal-page__lang #{'legal-page__lang--active' if I18n.locale == :de}" %>
   </div>
 
   <div class="legal-page__content" style="max-width: 600px; margin: 0 auto; padding: 2rem 1rem;">
@@ -19,7 +19,7 @@
       </div>
     <% end %>
 
-    <%= form_with url: accept_terms_path, method: :patch, local: true do |f| %>
+    <%= form_with url: accept_terms_scoped_path, method: :patch, local: true do |f| %>
       <div class="legal-page__section" style="margin-bottom: 2rem;">
         <p style="line-height: 1.6; margin-bottom: 1.5rem;">
           <%= t('terms.accept.description_html', privacy_link: link_to(t('terms.accept.privacy_label'), privacy_policy_path(locale: I18n.locale), target: "_blank", rel: "noopener"), terms_link: link_to(t('terms.accept.terms_label'), terms_of_use_path(locale: I18n.locale), target: "_blank", rel: "noopener")) %>

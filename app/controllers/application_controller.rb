@@ -1,10 +1,19 @@
 class ApplicationController < ActionController::Base
+  before_action :set_locale
   before_action :authenticate_user!
   before_action :require_terms_acceptance
 
   layout :devise_layout
 
   private
+
+  def set_locale
+    if params[:locale].present? && %w[pt en de].include?(params[:locale])
+      I18n.locale = params[:locale]
+    else
+      I18n.locale = I18n.default_locale
+    end
+  end
 
   def devise_layout
     devise_controller? ? "devise" : "application"

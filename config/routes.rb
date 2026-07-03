@@ -13,6 +13,8 @@ Rails.application.routes.draw do
     delete '/users',         to: 'users/registrations#destroy'
     get    '/users/cancel',  to: 'users/registrations#cancel', as: 'cancel_user_registration'
     get    '/users/sign_up', to: 'users/registrations#new',  as: 'new_user_registration'
+    get    'aceitar-termos',  to: 'terms#accept',  as: 'accept_terms'
+    patch  'aceitar-termos',  to: 'terms#update'
   end
 
   root to: "pages#home"
@@ -38,6 +40,8 @@ Rails.application.routes.draw do
 
   get "up" => "rails/health#show", as: :rails_health_check
   get "profile", to: "pages#profile", as: :profile
+  get "privacidade", to: "pages#privacy", as: :privacy_policy
+  get "termos", to: "pages#terms", as: :terms_of_use
   patch "profile", to: "pages#update_profile", as: :update_profile
 
   if Rails.env.development?

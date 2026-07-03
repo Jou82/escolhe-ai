@@ -5,8 +5,13 @@ module Users
       @user = User.from_omniauth(request.env['omniauth.auth'])
 
       if @user.persisted?
-        flash[:notice] = I18n.t 'devise.omniauth_callbacks.success', kind: 'Google'
-        sign_in_and_redirect @user, event: :authentication
+        sign_in @user, event: :authentication
+        if @user.terms_accepted_at.present?
+          redirect_to root_path, notice: I18n.t('devise.omniauth_callbacks.success', kind: 'Google')
+        else
+          redirect_to accept_terms_path,
+            notice: "Antes de continuar, por favor aceite nossa Política de Privacidade e Termos de Uso."
+        end
       else
         # Se der erro, guarda os dados na sessão e manda de volta pro cadastro
         session['devise.google_data'] = request.env['omniauth.auth'].except('extra').to_h

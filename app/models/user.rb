@@ -7,9 +7,19 @@ class User < ApplicationRecord
   validates :email, presence: true, format: { with: URI::MailTo::EMAIL_REGEXP }
   serialize :streaming_platforms, coder: JSON
 
-  # Callback: Define o avatar antes de criar o registro no banco
-  before_validation :set_random_avatar, on: :create
+  CURRENT_TERMS_VERSION = "2026-07-01"
 
+  attr_accessor :accept_terms
+
+  validates :accept_terms,
+    acceptance: { message: "você precisa aceitar a Política de Privacidade e os Termos de Uso" },
+    on: :create,
+    unless: :skip_terms_validation?
+
+  before_validation :set_random_avatar, on: :create
+  before_create :record_terms_acceptance
+
+  
   STREAMING_OPTIONS = [
     "Netflix", "Amazon Prime Video", "Disney Plus", "HBO Max",
     "Globoplay", "Apple TV+", "Paramount+", "MUBI",
@@ -40,6 +50,7 @@ class User < ApplicationRecord
       user.email = auth.info.email
       user.password = Devise.friendly_token[0, 20]
       user.skip_confirmation!
+      user.skip_terms_validation!
     end
   end
 
@@ -52,10 +63,25 @@ class User < ApplicationRecord
     )
   end
 
+  def skip_terms_validation!
+    @skip_terms_validation = true
+  end
+
   private
+
+  def skip_terms_validation?
+    @skip_terms_validation == true
+  end
 
   def set_random_avatar
     # Só atribui se o avatar estiver em branco
     self.avatar = AVATARS.sample if avatar.blank?
+  end
+
+  def record_terms_acceptance
+    if accept_terms.present?
+      self.terms_accepted_at = Time.current
+      self.terms_version = CURRENT_TERMS_VERSION
+    end
   end
 end

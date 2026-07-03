@@ -200,6 +200,58 @@
           <% end %>
         </div>
       </div>
+
+      <%# Card: Danger Zone — Delete Account %>
+      <div class="danger-card">
+        <div class="danger-card__icon">⚠</div>
+        <div>
+          <div class="danger-card__title">Encerrar conta</div>
+          <div class="danger-card__subtitle">Esta ação é permanente e irá apagar todos os seus dados.</div>
+        </div>
+        <button type="button"
+                class="btn btn--danger"
+                data-profile-target="deleteBtn"
+                data-action="click->profile#openDeleteModal">
+          Encerrar conta
+        </button>
+      </div>
+
+      <%# Modal: Delete Account Confirmation %>
+      <div class="delete-modal" data-profile-target="deleteModal">
+        <div class="delete-modal__backdrop" data-action="click->profile#closeDeleteModal"></div>
+        <div class="delete-modal__box">
+          <h3 class="delete-modal__title">Tem certeza?</h3>
+          <p class="delete-modal__subtitle">Esta ação não pode ser desfeita. Sua conta e todos os seus dados serão permanentemente deletados.</p>
+
+          <%= form_with url: user_registration_path, method: :delete, local: true, style: "display: contents;" do |f| %>
+            <% if current_user.provider.present? %>
+              <%# OAuth user — apenas checkbox de confirmação %>
+              <div class="delete-modal__checkbox">
+                <label class="delete-modal__label">
+                  <input type="checkbox" id="delete-confirm-checkbox" />
+                  <span>Confirmo que desejo encerrar minha conta permanentemente</span>
+                </label>
+              </div>
+            <% else %>
+              <%# Email/password user — pedir senha %>
+              <div class="form-group">
+                <label class="form-label" for="delete-password">Confirme sua senha para continuar:</label>
+                <input type="password"
+                       id="delete-password"
+                       class="form-input"
+                       placeholder="••••••••"
+                       autocomplete="current-password"
+                       name="current_password">
+              </div>
+            <% end %>
+
+            <div class="delete-modal__actions">
+              <button type="button" class="btn btn--outline" data-action="click->profile#closeDeleteModal">Cancelar</button>
+              <%= f.submit "Encerrar conta permanentemente", class: "btn btn--danger", data: { action: "click->profile#submitDelete" } %>
+            </div>
+          <% end %>
+        </div>
+      </div>
     </div>
   </div>
 </div>

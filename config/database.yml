@@ -2,7 +2,7 @@ default: &default
   adapter: postgresql
   encoding: unicode
   host: 127.0.0.1
-  port: 5433
+  port: 5432
   username: escolheai
   password: <%= ENV["ESCOLHEAI_DATABASE_PASSWORD"] %>
   max_connections: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>

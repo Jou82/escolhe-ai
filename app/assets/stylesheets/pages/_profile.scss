@@ -719,3 +719,77 @@ $radius-lg:         16px;
   cursor: not-allowed;
   pointer-events: none;
 }
+
+// ─── Delete Modal ─────────────────────────────────────────────
+.delete-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  align-items: center;
+  justify-content: center;
+
+  &--open {
+    display: flex;
+  }
+
+  &__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+  }
+
+  &__box {
+    position: relative;
+    background: $bg-card;
+    border: 1px solid $border-card;
+    border-radius: $radius-lg;
+    padding: 2rem;
+    width: 100%;
+    max-width: 400px;
+    z-index: 1;
+  }
+
+  &__title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: $text-white;
+    margin: 0 0 0.4rem;
+  }
+
+  &__subtitle {
+    font-size: 0.82rem;
+    color: $text-muted;
+    margin: 0 0 1.5rem;
+    line-height: 1.6;
+  }
+
+  &__checkbox {
+    margin-bottom: 1.2rem;
+  }
+
+  &__label {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.82rem;
+    color: $text-light;
+    cursor: pointer;
+
+    input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: $accent-red;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    margin-top: 1.5rem;
+  }
+}

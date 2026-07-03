@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_27_231212) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_03_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -73,6 +73,27 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_27_231212) do
     t.text "synopsis"
     t.string "title"
     t.datetime "updated_at", null: false
+  end
+
+  create_table "recommendation_results", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "movie_id"
+    t.string "movie_title"
+    t.text "reasons"
+    t.bigint "recommendation_id", null: false
+    t.decimal "score"
+    t.datetime "updated_at", null: false
+    t.index ["recommendation_id"], name: "index_recommendation_results_on_recommendation_id"
+  end
+
+  create_table "recommendations", force: :cascade do |t|
+    t.json "ai_response"
+    t.datetime "created_at", null: false
+    t.jsonb "preferences"
+    t.integer "status"
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["user_id"], name: "index_recommendations_on_user_id"
   end
 
   create_table "sessions", force: :cascade do |t|
@@ -244,6 +265,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_27_231212) do
     t.datetime "reset_password_sent_at"
     t.string "reset_password_token"
     t.text "streaming_platforms"
+    t.datetime "terms_accepted_at"
+    t.string "terms_version"
     t.string "uid"
     t.string "unconfirmed_email"
     t.datetime "updated_at", null: false
@@ -258,6 +281,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_27_231212) do
   add_foreign_key "likes", "sessions"
   add_foreign_key "movie_genres", "genres"
   add_foreign_key "movie_genres", "movies"
+  add_foreign_key "recommendation_results", "recommendations"
+  add_foreign_key "recommendations", "users"
   add_foreign_key "sessions", "users"
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_claimed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade

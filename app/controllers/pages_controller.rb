@@ -1,5 +1,6 @@
 class PagesController < ApplicationController
-  skip_before_action :authenticate_user!, only: [:home]
+  skip_before_action :authenticate_user!, only: [:home, :privacy, :terms]
+  before_action :set_legal_locale, only: [:privacy, :terms]
   def home
     @popular_movies = Rails.cache.fetch("trending_movies", expires_in: 1.hour) do
       api_key = ENV.fetch('TMDB_API_KEY', nil)
@@ -16,6 +17,12 @@ class PagesController < ApplicationController
   def profile
   end
 
+  def terms
+  end
+
+  def privacy
+  end
+
   def update_profile
     platforms = params[:streaming_platforms] || []
     avatar = params.dig(:user, :avatar)
@@ -27,5 +34,13 @@ class PagesController < ApplicationController
 
     current_user.update(attrs)
     render json: { success: true }
+  end
+
+  private
+
+  def set_legal_locale
+    if params[:locale].present? && %w[pt en de].include?(params[:locale])
+      I18n.locale = params[:locale]
+    end
   end
 end

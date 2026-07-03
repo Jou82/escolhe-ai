@@ -1,0 +1,75 @@
+<%# app/views/pages/terms.html.erb %>
+<div class="legal-page">
+
+  <div class="legal-page__lang-switcher">
+    <%= link_to "PT", terms_of_use_path(locale: :pt), class: "legal-page__lang #{'legal-page__lang--active' if I18n.locale == :pt}" %>
+    <%= link_to "EN", terms_of_use_path(locale: :en), class: "legal-page__lang #{'legal-page__lang--active' if I18n.locale == :en}" %>
+    <%= link_to "DE", terms_of_use_path(locale: :de), class: "legal-page__lang #{'legal-page__lang--active' if I18n.locale == :de}" %>
+  </div>
+
+  <header class="legal-page__header">
+    <h1 class="legal-page__title"><%= t('legal.terms.title') %></h1>
+    <p class="legal-page__updated"><%= t('legal.terms.updated') %>: <%= Date.current.strftime("%d/%m/%Y") %></p>
+  </header>
+
+  <div class="legal-page__content">
+
+    <section class="legal-page__section">
+      <h2><%= t('legal.terms.section_1.title') %></h2>
+      <p><%= t('legal.terms.section_1.body') %></p>
+    </section>
+
+    <section class="legal-page__section">
+      <h2><%= t('legal.terms.section_2.title') %></h2>
+      <p><%= t('legal.terms.section_2.body') %></p>
+    </section>
+
+    <section class="legal-page__section">
+      <h2><%= t('legal.terms.section_3.title') %></h2>
+      <p><%= t('legal.terms.section_3.body') %></p>
+    </section>
+
+    <section class="legal-page__section">
+      <h2><%= t('legal.terms.section_4.title') %></h2>
+      <p><%= t('legal.terms.section_4.intro') %></p>
+      <ul>
+        <li><%= t('legal.terms.section_4.item_1') %></li>
+        <li><%= t('legal.terms.section_4.item_2') %></li>
+        <li><%= t('legal.terms.section_4.item_3') %></li>
+        <li><%= t('legal.terms.section_4.item_4') %></li>
+        <li><%= t('legal.terms.section_4.item_5') %></li>
+      </ul>
+    </section>
+
+    <section class="legal-page__section">
+      <h2><%= t('legal.terms.section_5.title') %></h2>
+      <p><%= t('legal.terms.section_5.body') %></p>
+    </section>
+
+    <section class="legal-page__section">
+      <h2><%= t('legal.terms.section_6.title') %></h2>
+      <p><%= t('legal.terms.section_6.body') %></p>
+    </section>
+
+    <section class="legal-page__section">
+      <h2><%= t('legal.terms.section_7.title') %></h2>
+      <p><%= t('legal.terms.section_7.body') %></p>
+    </section>
+
+    <section class="legal-page__section">
+      <h2><%= t('legal.terms.section_8.title') %></h2>
+      <p><%= t('legal.terms.section_8.body') %></p>
+    </section>
+
+    <section class="legal-page__section">
+      <h2><%= t('legal.terms.section_9.title') %></h2>
+      <p><%= t('legal.terms.section_9.body') %></p>
+    </section>
+
+    <section class="legal-page__section">
+      <h2><%= t('legal.terms.section_10.title') %></h2>
+      <p><%= t('legal.terms.section_10.body') %></p>
+    </section>
+
+  </div>
+</div>

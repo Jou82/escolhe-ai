@@ -1,0 +1,99 @@
+pt:
+  legal:
+    privacy:
+      title: "Politica de Privacidade"
+      updated: "Ultima atualizacao"
+      section_1:
+        title: "1. Controlador de Dados"
+        body: "Responsavel pelo tratamento de dados: Joana Dias. Para questoes de protecao de dados, contate: joana.jou@gmail.com"
+      section_2:
+        title: "2. Base Legal para Processamento"
+        body: "Processamos seus dados com base em: (a) execucao do contrato de servico (artigo 6(1)(b) RGPD), (b) seu consentimento explicito (artigo 6(1)(a) RGPD), e (c) interesse legitimo em manter seguranca e operar o servico (artigo 6(1)(f) RGPD)."
+      section_3:
+        title: "3. Dados Pessoais Coletados"
+        intro: "Coletamos os seguintes dados pessoais:"
+        item_1: "Dados de identidade: e-mail, senha criptografada (para login direto) ou nome e foto de perfil (via Google OAuth)"
+        item_2: "Dados de preferencia: historico de filmes avaliados, recomendacoes personalizadas"
+        item_3: "Dados tecnicos: endereco IP, tipo de navegador, data/hora de acesso, cookies de sessao"
+        item_4: "Dados opcionais: plataformas de streaming preferidas, nome de exibicao, avatar"
+      section_4:
+        title: "4. Finalidade do Processamento"
+        intro: "Seus dados sao processados para:"
+        item_1: "Autenticacao segura via email/senha ou Google OAuth"
+        item_2: "Gerenciamento e seguranca da sua conta"
+        item_3: "Fornecimento de recomendacoes personalizadas de filmes e series"
+        item_4: "Cumprimento de obrigacoes legais e conformidade regulatoria"
+        item_5: "Seguranca, prevencao de fraude e protecao contra abuso"
+      section_5:
+        title: "5. Compartilhamento de Dados com Terceiros"
+        intro: "Seus dados sao compartilhados com os seguintes processadores:"
+        item_1: "<strong>Google LLC</strong> (Google OAuth - opcional) - apenas e-mail e nome para autenticacao"
+        item_2: "<strong>The Movie Database (TMDB)</strong> - dados de filmes apenas (nao recebe dados pessoais)"
+        item_3: "<strong>Hetzner Online GmbH</strong> - hospedagem de infraestrutura (servidores na Alemanha, UE)"
+      section_6:
+        title: "6. Direitos do Titular de Dados (RGPD)"
+        intro: "Voce tem os seguintes direitos sob o RGPD:"
+        item_1: "Direito de acesso: obter copia de seus dados pessoais"
+        item_2: "Direito de retificacao: corrigir dados imprecisos ou incompletos"
+        item_3: "Direito de exclusao (direito ao esquecimento): solicitar exclusao de seus dados"
+        item_4: "Direito de restricao: limitar o processamento de seus dados"
+        item_5: "Direito de portabilidade: receber seus dados em formato estruturado"
+        item_6: "Direito de oposicao: opor-se ao processamento em certas circunstancias"
+        extra: "Para exercer qualquer desses direitos, contate: joana.jou@gmail.com"
+      section_7:
+        title: "7. Retencao de Dados"
+        body: "Mantemos seus dados pessoais apenas pelo tempo necessario para fornecer o servico e cumprir obrigacoes legais. Ao solicitar exclusao de conta, seus dados sao excluidos em ate 30 dias, exceto quando a retencao for exigida por lei. Dados de auditoria e logs de seguranca podem ser retidos por ate 3 anos."
+      section_8:
+        title: "8. Seguranca de Dados"
+        body: "Implementamos medidas tecnicas e organizacionais apropriadas para proteger seus dados, incluindo: criptografia HTTPS, criptografia de senhas com algoritmo bcrypt, controle de acesso baseado em funcao, monitoramento de seguranca continuo e testes regulares."
+      section_9:
+        title: "9. Transferencias Internacionais"
+        body: "Seus dados sao processados em servidores localizados na Alemanha (Uniao Europeia). Nao transferimos dados para fora do Espaco Economico Europeu sem consentimento explicito."
+      section_10:
+        title: "10. Cookies e Rastreamento"
+        body: "Usamos apenas cookies estritamente necessarios para manter sua sessao de login. Nao usamos cookies de rastreamento, analise ou publicidade."
+      section_11:
+        title: "11. Contato e Reclamacoes"
+        body: "Para questoes sobre privacidade: joana.jou@gmail.com. Se acredita que seus direitos RGPD foram violados, pode registrar uma reclamacao junto a autoridade de protecao de dados de sua jurisdicao."
+      section_12:
+        title: "12. Alteracoes nesta Politica"
+        body: "Podemos atualizar esta politica periodicamente. Mudancas significativas serao comunicadas por e-mail com 30 dias de antecedencia."
+
+    terms:
+      title: "Termos de Uso"
+      updated: "Ultima atualizacao"
+      section_1:
+        title: "1. Sobre o Servico"
+        body: "Escolhe Ai e uma plataforma gratuita de recomendacao de filmes e series alimentada por IA, desenvolvida para o mercado de streaming brasileiro. Ao criar uma conta e usar o servico, voce concorda em estar vinculado por estes Termos de Uso."
+      section_2:
+        title: "2. Elegibilidade e Conta"
+        body: "Voce deve ter pelo menos 13 anos para usar este servico. Se e menor de idade, voce deve ter consentimento dos pais ou responsavel legal. Voce e responsavel por manter a confidencialidade de sua senha e por todas as atividades em sua conta."
+      section_3:
+        title: "3. Autenticacao"
+        body: "Voce pode fazer login de duas formas: (a) usando e-mail e senha, ou (b) usando Google OAuth. Para login por email/senha, voce deve fornecer um e-mail ativo. Para Google OAuth, seus dados de autenticacao sao gerenciados pelo Google de acordo com seus termos."
+      section_4:
+        title: "4. Uso Aceitavel"
+        intro: "Voce concorda em usar este servico apenas para fins legitimos e nao:"
+        item_1: "Tentar acessar, modificar ou danificar a infraestrutura do servico"
+        item_2: "Usar o servico para fins ilegais, fraudulentos ou prejudiciais"
+        item_3: "Praticar assedio, abuso ou discriminacao contra outros usuarios"
+        item_4: "Automatizar o acesso ou usar bots sem autorizacao explicita"
+        item_5: "Compartilhar sua senha ou credenciais com terceiros"
+      section_5:
+        title: "5. Conteudo de Terceiros"
+        body: "As informacoes sobre filmes sao fornecidas pela TMDB (The Movie Database) e sujeitas aos seus termos de servico. O EscolheAi nao e responsavel pela precisao, integridade ou legalidade desses dados."
+      section_6:
+        title: "6. Propriedade Intelectual"
+        body: "Todo conteudo do EscolheAi, incluindo algoritmos, design, recomendacoes e codigo, e protegido por direitos autorais e propriedade intelectual. Voce nao pode reproduzir, distribuir, modificar ou reutilizar sem autorizacao explicita."
+      section_7:
+        title: "7. Disponibilidade e Manutencao"
+        body: "O servico e fornecido no estado em que se encontra, sem garantias de disponibilidade continua. Realizamos manutencao regular e atualizacoes que podem causar interrupcoes temporarias. Nao somos responsaveis por perdas decorrentes de indisponibilidade do servico."
+      section_8:
+        title: "8. Limitacao de Responsabilidade"
+        body: "Na maxima extensao permitida por lei, o EscolheAi nao e responsavel por danos indiretos, incidentais, especiais ou consequentes decorrentes do uso ou impossibilidade de usar o servico, mesmo que informado da possibilidade de tais danos."
+      section_9:
+        title: "9. Encerramento de Conta"
+        body: "Voce pode solicitar encerramento de conta a qualquer momento contando joana.jou@gmail.com. Apos 30 dias, seus dados pessoais serao excluidos de nossos sistemas. Podemos suspender ou encerrar contas que violem estes termos ou a lei aplicavel."
+      section_10:
+        title: "10. Lei Aplicavel e Jurisdicao"
+        body: "Estes termos sao regidos pela lei brasileira. Usuarios na Uniao Europeia tem direitos adicionais sob o RGPD e legislacao europeia de protecao ao consumidor. Para disputas, voce pode recorrer aos tribunais de sua jurisdicao ou medidas de resolucao alternativa de conflitos."

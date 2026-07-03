@@ -3,6 +3,37 @@
 // Following the project's dark theme
 // ============================================
 
+// Top navigation tabs
+.top-nav {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1.5rem 1rem 0;
+
+  button {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: $text-muted;
+    padding: 0.5rem 1.25rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    &:hover {
+      color: $text-light;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    &.active {
+      background: $accent-blue;
+      color: $text-white;
+      border-color: $accent-blue;
+    }
+  }
+}
+
 .legal-page {
   max-width: 900px;
   margin: 0 auto;

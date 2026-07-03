@@ -70,6 +70,17 @@
           <%= f.input :password_confirmation, required: false, label: false, placeholder: "••••••••",
                       input_html: { autocomplete: "new-password", class: "login-input" } %>
         </div>
+        <div class="form-check mb-3">
+          <%= check_box_tag "user[accept_terms]", "1", false,
+                class: "form-check-input",
+                id: "accept_terms" %>
+          <label class="form-check-label small" for="accept_terms">
+            Li e aceito a
+            <%= link_to "Política de Privacidade", privacy_policy_path, target: "_blank", rel: "noopener" %>
+            e os
+            <%= link_to "Termos de Uso", terms_of_use_path, target: "_blank", rel: "noopener" %>.
+          </label>
+        </div>
         <%= f.button :submit, "Criar conta", class: "login-submit-btn" %>
       <% end %>
       <div class="login-modal-footer">

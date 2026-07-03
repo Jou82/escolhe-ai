@@ -38,7 +38,7 @@ Rails.application.routes.draw do
 
   get "up" => "rails/health#show", as: :rails_health_check
 
-  scope '(:locale)', locale: /pt|en|de/ do
+  scope '(:locale)', locale: /pt-BR|pt|en|de/ do
     get "profile", to: "pages#profile", as: :profile
     get "privacidade", to: "pages#privacy", as: :privacy_policy
     get "termos", to: "pages#terms", as: :terms_of_use

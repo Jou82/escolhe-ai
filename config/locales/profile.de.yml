@@ -1,0 +1,46 @@
+de:
+  profile:
+    header:
+      eyebrow: "Verwalten Sie Ihre Profileinstellungen"
+      title: "Mein Profil"
+
+    info_card:
+      avatar_modal_title: "Wählen Sie Ihren Avatar"
+      avatar_modal_cancel: "Abbrechen"
+      avatar_modal_save: "Speichern"
+      display_name_label: "Wie möchten Sie genannt werden?"
+      display_name_placeholder: "Ihr Name"
+      email_label: "E-Mail"
+      email_placeholder: "ihre@email.com"
+      save_changes: "Änderungen speichern"
+      email_modal_title: "Bestätigen Sie Ihr Passwort"
+      email_modal_subtitle: "Geben Sie Ihr aktuelles Passwort ein, um Ihre E-Mail zu ändern."
+      current_password_label: "Aktuelles Passwort"
+      email_modal_cancel: "Abbrechen"
+      email_modal_confirm: "Bestätigen"
+
+    streaming_card:
+      title: "Wo streamen Sie?"
+      subtitle: "Teilen Sie uns Ihre Streaming-Plattformen für maßgeschneiderte Empfehlungen mit."
+      search_placeholder: "Streaming-Dienste suchen (Netflix, Prime usw.)"
+
+    security_card:
+      title: "Sicherheit"
+      subtitle: "Stärken Sie die Integrität Ihres Zugriffs mit einem starken Passwort."
+      current_password_label: "Aktuelles Passwort"
+      new_password_label: "Neues Passwort"
+      password_confirmation_label: "Neues Passwort bestätigen"
+      password_placeholder: "••••••••"
+      update_password_button: "Passwort aktualisieren"
+
+    danger_card:
+      title: "Konto löschen"
+      subtitle: "Diese Aktion ist dauerhaft und löscht alle Ihre Daten."
+      delete_button: "Konto löschen"
+      delete_modal_title: "Sind Sie sich sicher?"
+      delete_modal_subtitle: "Diese Aktion kann nicht rückgängig gemacht werden. Ihr Konto und alle Ihre Daten werden dauerhaft gelöscht."
+      delete_modal_confirmation_checkbox: "Ich bestätige, dass ich mein Konto dauerhaft löschen möchte"
+      delete_modal_password_label: "Bestätigen Sie Ihr Passwort, um fortzufahren:"
+      delete_modal_password_placeholder: "••••••••"
+      delete_modal_cancel: "Abbrechen"
+      delete_modal_confirm: "Konto dauerhaft löschen"

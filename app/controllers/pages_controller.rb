@@ -15,6 +15,7 @@ class PagesController < ApplicationController
   end
 
   def profile
+    set_profile_locale
   end
 
   def terms
@@ -39,6 +40,12 @@ class PagesController < ApplicationController
   private
 
   def set_legal_locale
+    if params[:locale].present? && %w[pt en de].include?(params[:locale])
+      I18n.locale = params[:locale]
+    end
+  end
+
+  def set_profile_locale
     if params[:locale].present? && %w[pt en de].include?(params[:locale])
       I18n.locale = params[:locale]
     end

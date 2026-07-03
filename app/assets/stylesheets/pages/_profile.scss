@@ -721,6 +721,10 @@ $radius-lg:         16px;
 }
 
 // ─── Delete Modal ─────────────────────────────────────────────
+.hidden {
+  display: none !important;
+}
+
 .delete-modal {
   display: none;
   position: fixed;

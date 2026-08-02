@@ -1,103 +1,22 @@
 .search-wrapper {
-  position: relative;
+  position: relative; // Essencial para o dropdown posicionar corretamente
   z-index: 100;
-}
-
-.search-field {
-  position: relative;
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.25rem 0;
-}
-
-.search-chips {
-  display: contents;
-}
-
-.search-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  max-width: 100%;
-  padding: 0.2rem 0.4rem 0.2rem 0.2rem;
-  background: #eef4ff;
-  border: 1px solid rgba(59, 130, 246, 0.25);
-  color: #0b0e20;
-  border-radius: 10px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  line-height: 1.15;
-}
-
-.search-chip-poster {
-  width: 22px;
-  height: 32px;
-  object-fit: cover;
-  border-radius: 4px;
-  background: #dbe7ff;
-  flex-shrink: 0;
-}
-
-.search-chip-text {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  max-width: 150px;
-  padding-right: 0.15rem;
-}
-
-.search-chip-label {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.search-chip-year {
-  color: rgba(11, 14, 32, 0.55);
-  font-size: 0.68rem;
-  font-weight: 500;
-}
-
-.search-chip-remove {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  border: none;
-  border-radius: 50%;
-  background: rgba(11, 14, 32, 0.1);
-  color: #0b0e20;
-  font-size: 0.95rem;
-  line-height: 1;
-  cursor: pointer;
-  padding: 0;
-  margin-right: 0.1rem;
-
-  &:hover {
-    background: rgba(11, 14, 32, 0.2);
-  }
 }
 
 .autocomplete-list {
   position: absolute;
-  top: calc(100% + 10px);
+  top: 100%;
   left: 0;
   width: 100%;
-  max-height: 380px;
-  overflow-y: auto;
-  background: #0f1328;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 14px;
-  padding: 6px;
+  background: #111430; // Cor do seu tema
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  margin-top: 10px;
+  padding: 8px;
   list-style: none;
   z-index: 1000;
-  display: none;
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+  display: none; // Escondido por padrão
+  box-shadow: 0 15px 50px rgba(0,0,0,0.6);
 
   &.is-visible {
     display: block;
@@ -105,113 +24,27 @@
 }
 
 .autocomplete-item {
-  padding: 10px;
+  padding: 12px 16px;
   cursor: pointer;
-  border-radius: 10px;
-  display: grid;
-  grid-template-columns: 48px minmax(0, 1fr) auto;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 12px;
-  transition: background 0.15s ease;
+  transition: background 0.2s;
 
-  &:hover,
-  &.is-active {
-    background: rgba(96, 165, 250, 0.14);
-
-    .movie-title {
-      color: #93c5fd;
-    }
-
-    .movie-select-hint {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
-
-  .movie-poster {
-    width: 48px;
-    height: 72px;
-    object-fit: cover;
-    border-radius: 6px;
-    background: #1a1f3a;
-    flex-shrink: 0;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
-  }
-
-  .movie-meta {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    min-width: 0;
-  }
-
-  .movie-title-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-width: 0;
+  &:hover {
+    background: rgba(96, 165, 250, 0.1);
+    .movie-title { color: #60a5fa; }
   }
 
   .movie-title {
-    color: #fff;
-    font-size: 0.92rem;
-    font-weight: 600;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 500;
   }
 
-  .movie-year-badge {
-    flex-shrink: 0;
-    padding: 2px 6px;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.08);
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 0.7rem;
-    font-weight: 600;
-  }
-
-  .movie-subtitle {
-    color: rgba(255, 255, 255, 0.45);
-    font-size: 0.75rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .movie-stats {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-top: 2px;
-  }
-
-  .movie-rating {
-    color: #fbbf24;
-    font-size: 0.75rem;
-    font-weight: 700;
-  }
-
-  .movie-votes {
+  .movie-year {
     color: rgba(255, 255, 255, 0.4);
-    font-size: 0.7rem;
+    font-size: 0.8rem;
   }
-
-  .movie-select-hint {
-    color: #93c5fd;
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    opacity: 0;
-    transform: translateX(4px);
-    transition: all 0.15s ease;
-    white-space: nowrap;
-  }
-}
-
-.autocomplete-message {
-  padding: 16px 12px;
-  color: rgba(255, 255, 255, 0.65);
-  font-size: 0.85rem;
-  text-align: center;
 }

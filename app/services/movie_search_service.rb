@@ -1,6 +1,6 @@
-# Frozen string support keeps search ranking deterministic and easy to test.
+# Ranks TMDB movie search results for the existing autocomplete UI.
+# Keeps the same JSON shape: [{ id, title, year }, ...]
 class MovieSearchService
-  POSTER_BASE = "https://image.tmdb.org/t/p/w92"
   RESULT_LIMIT = 8
   MIN_VOTES_SOFT = 40
 
@@ -113,16 +113,10 @@ class MovieSearchService
   end
 
   def present(movie)
-    poster_path = movie["poster_path"]
     {
       id: movie["id"],
       title: movie["title"],
-      original_title: movie["original_title"],
-      year: movie["release_date"]&.slice(0, 4),
-      poster_url: poster_path.present? ? "#{POSTER_BASE}#{poster_path}" : nil,
-      rating: movie["vote_average"].to_f.round(1),
-      vote_count: movie["vote_count"].to_i,
-      overview: movie["overview"].to_s.truncate(110)
+      year: movie["release_date"]&.slice(0, 4)
     }
   end
 end

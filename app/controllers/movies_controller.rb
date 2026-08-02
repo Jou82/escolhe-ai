@@ -1,3 +1,5 @@
+require 'net/http'
+
 class MoviesController < ApplicationController
   before_action :check_rate_limit, only: [:create]
 
@@ -5,6 +7,7 @@ class MoviesController < ApplicationController
   end
 
   def search
+    # Same UI payload (title/id/year); better ranking via MovieSearchService.
     render json: MovieSearchService.call(params[:q])
   end
 
@@ -19,14 +22,16 @@ class MoviesController < ApplicationController
   end
 
   def create
-    @movie_inputs = parse_movie_inputs
+    if params[:movies].is_a?(Array)
+      @movie_titles = params[:movies].reject(&:blank?)
+    else
+      @movie_titles = params[:movies].to_s.split(',').map(&:strip).reject(&:blank?)
+    end
 
-    if @movie_inputs.length != 3
+    if @movie_titles.length != 3
       flash[:alert] = "Por favor, selecione 3 filmes válidos."
       return redirect_to root_path
     end
-
-    @movie_titles = @movie_inputs.map { |m| m[:title] }
 
     previous_recommendations = current_user.sessions
                                            .where(status: 1)
@@ -42,13 +47,13 @@ class MoviesController < ApplicationController
     Rails.logger.info "📚 Filmes já recomendados: #{previous_recommendations.join(', ')}"
 
     session_record = current_user.sessions.create!(
-      input_movies: @movie_inputs.map { |m| m.stringify_keys },
+      input_movies: @movie_titles,
       status: 0
     )
 
     GenerateRecommendationsJob.perform_later(
       current_user.id,
-      @movie_inputs.map { |m| m.stringify_keys },
+      @movie_titles,
       previous_recommendations,
       session_record.id
     )
@@ -89,29 +94,6 @@ class MoviesController < ApplicationController
   end
 
   private
-
-  # Accepts either:
-  # - movies[] + tmdb_ids[] + years[] from the chip UI
-  # - legacy comma-separated movies string
-  def parse_movie_inputs
-    if params[:movies].is_a?(Array)
-      titles = params[:movies].map { |t| t.to_s.strip }.reject(&:blank?)
-      ids = Array(params[:tmdb_ids]).map { |id| id.to_s.strip.presence }
-      years = Array(params[:years]).map { |y| y.to_s.strip.presence }
-
-      titles.each_with_index.map do |title, index|
-        {
-          title: title,
-          tmdb_id: ids[index]&.to_i&.positive? ? ids[index].to_i : nil,
-          year: years[index]
-        }
-      end
-    else
-      params[:movies].to_s.split(",").map(&:strip).reject(&:blank?).map do |title|
-        { title: title, tmdb_id: nil, year: nil }
-      end
-    end
-  end
 
   def check_rate_limit
     # Only completed searches count. Stuck "processing" sessions (e.g. when

@@ -20,31 +20,13 @@ export default class extends Controller {
       if (!signed) {
         event.preventDefault()
         event.stopImmediatePropagation()
-        this.openLoginModal()
-        return
-      }
-
-      const movieInputs = form.querySelectorAll('input[name="movies[]"]')
-      if (movieInputs.length !== 3) {
-        event.preventDefault()
-        event.stopImmediatePropagation()
-        alert('Seleciona 3 produções para continuar.')
+        // Abrir o modal de login
+        const loginModal = this.application.getControllerForElementAndIdentifier(
+          document.body, 'login-modal'
+        )
+        if (loginModal) loginModal.open()
       }
     })
-  }
-
-  openLoginModal() {
-    const loginModal = this.application.getControllerForElementAndIdentifier(
-      document.body,
-      'login-modal'
-    )
-    if (loginModal) loginModal.open()
-  }
-
-  autocompleteController() {
-    const el = document.querySelector('[data-controller~="autocomplete"]')
-    if (!el) return null
-    return this.application.getControllerForElementAndIdentifier(el, 'autocomplete')
   }
 
   // ===== SCROLL REVEAL =====
@@ -130,44 +112,27 @@ export default class extends Controller {
     })
   }
 
-  // ===== TRENDING CHIP CLICK =====
+  // ===== GENRE CHIP CLICK =====
   insertChip(event) {
-    const title = event.currentTarget.dataset.genre
-    if (!title) return
-
-    const signed = document.querySelector('meta[name="user-signed-in"]')?.content === 'true'
-    if (!signed) {
-      this.openLoginModal()
-      return
-    }
-
-    const autocomplete = this.autocompleteController()
-    if (autocomplete) {
-      const existing = autocomplete.selected.findIndex(
-        (m) => m.title.toLowerCase() === title.toLowerCase()
-      )
-      if (existing > -1) {
-        autocomplete.selected.splice(existing, 1)
-        autocomplete.renderChips()
-        autocomplete.syncHiddenFields()
-        event.currentTarget.classList.remove('active')
-      } else {
-        autocomplete.addChip({ title, id: null, year: null })
-        event.currentTarget.classList.add('active')
-      }
-      return
-    }
-
-    // Fallback if autocomplete controller is unavailable
+    const genre = event.currentTarget.dataset.genre
     const input = document.querySelector('.search-input')
     if (!input) return
+
+    // Toggle active state
     event.currentTarget.classList.toggle('active')
+
+    // Get current value and append/remove genre
     const currentValue = input.value.trim()
-    const titles = currentValue ? currentValue.split(',').map((g) => g.trim()).filter(Boolean) : []
-    const idx = titles.indexOf(title)
-    if (idx > -1) titles.splice(idx, 1)
-    else titles.push(title)
-    input.value = titles.join(', ')
+    const genres = currentValue ? currentValue.split(',').map(g => g.trim()).filter(Boolean) : []
+
+    const genreIndex = genres.indexOf(genre)
+    if (genreIndex > -1) {
+      genres.splice(genreIndex, 1)
+    } else {
+      genres.push(genre)
+    }
+
+    input.value = genres.join(', ')
     input.focus()
   }
 

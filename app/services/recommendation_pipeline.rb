@@ -8,8 +8,7 @@ class RecommendationPipeline
   MAX_EXCLUDE_HISTORY = 30 # ← NOVO: Limita histórico de exclusão
 
   def initialize(movies, user = nil, exclude = [])
-    @movie_inputs = Array(movies).map { |entry| TmdbService.normalize_input(entry) }
-    @movies = @movie_inputs.map { |entry| entry[:title] }.reject(&:blank?)
+    @movies = movies
     @user = user
     @exclude = exclude
     @candidates = []
@@ -228,8 +227,8 @@ class RecommendationPipeline
   def user_movies_genres_from_tmdb
     @user_movies_genres_from_tmdb ||= begin
       genres = Set.new
-      @movie_inputs.each do |input|
-        tmdb_data = TmdbService.new(input[:title], input[:year], tmdb_id: input[:tmdb_id]).call
+      @movies.each do |title|
+        tmdb_data = TmdbService.new(title).call
         genres.merge(tmdb_data[:genres]) if tmdb_data && tmdb_data[:genres]
       end
       genres.to_a
@@ -327,7 +326,7 @@ class RecommendationPipeline
     retries = 0
     loop do
       Timeout.timeout(TMDB_TIMEOUT) do
-        tmdb_candidates = TmdbService.find_candidates(@movie_inputs, top_n: 15)
+        tmdb_candidates = TmdbService.find_candidates(@movies, top_n: 15)
         arthouse_candidates = TmdbService.discover_arthouse_candidates(
           @exclude.last(MAX_EXCLUDE_HISTORY),
           limit: 15

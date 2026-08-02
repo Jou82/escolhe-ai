@@ -1,305 +1,160 @@
-# Deployment Guide — escolhe-ai.net (Hetzner + Coolify)
+# Deployment Guide — escolheai.net (Railway)
 
 ## Quick Start
 
-### 1. Infrastructure Setup (One-time)
+### 1. Create the Railway project
 
-#### 1.1 Create Hetzner VPS
-- Login to [hetzner.com](https://www.hetzner.com/cloud)
-- Create new project: "escolhe-ai"
-- Create VM:
-  - **OS:** Ubuntu 24.04 LTS
-  - **Type:** CX22 (2vCPU, 4GB RAM, ~€5.50/month) — good for MVP
-  - **Location:** Choose nearest (ex: Helsinki, Frankfurt)
-  - **SSH Key:** Add your public key
-- **IP Address:** Note the public IP (ex: `195.201.xxx.xxx`)
+1. Go to [railway.app](https://railway.app) and sign in with GitHub
+2. **New Project** → **Deploy from GitHub repo** → select `Jou82/escolhe-ai`
+3. Railway detects the `Dockerfile` (see `railway.toml` → `builder = "docker"`)
 
-#### 1.2 Update DNS
-- Go to your domain registrar
-- Point `escolhe-ai.net` A record to your Hetzner IP
-- Point `www.escolhe-ai.net` CNAME to `escolhe-ai.net` (or A record to same IP)
-- **Wait 5-10 min** for DNS propagation
+### 2. Add PostgreSQL
 
-#### 1.3 Install Coolify on VPS
-```bash
-ssh root@195.201.xxx.xxx
+1. In the project → **+ New** → **Database** → **PostgreSQL**
+2. Railway injects `DATABASE_URL` into the web service automatically
+3. Link the Postgres service to the web service if it is not linked yet
 
-# Download & install Coolify
-curl -fsSL https://get.coool.app | bash
+### 3. Environment variables
 
-# Follow the prompts, set admin password
-# Coolify will be available at: https://195.201.xxx.xxx:4000
-```
-
-#### 1.4 Initial Coolify Setup
-1. Access https://195.201.xxx.xxx:4000
-2. Login with your password
-3. **Settings** → **Domains** → Add `coolify.escolhe-ai.net`
-4. Generate SSL certificate (Let's Encrypt)
-
----
-
-### 2. Repository Connection
-
-#### 2.1 GitHub Personal Access Token
-1. Go to [github.com/settings/tokens](https://github.com/settings/tokens)
-2. Generate new token (Personal access tokens → Tokens classic)
-3. **Name:** Coolify Deploy
-4. **Scopes:** `repo` (full control) + `admin:repo_hook` (webhooks)
-5. **Copy the token** (save somewhere safe)
-
-#### 2.2 Add Repository to Coolify
-1. In Coolify dashboard → **Repositories**
-2. Click **+ Add**
-3. Paste GitHub token
-4. Select repo: `Jou82/escolhe-ai`
-5. **Connect**
-
----
-
-### 3. Create Application in Coolify
-
-#### 3.1 New Application
-1. **Applications** → **+ New Application**
-2. **Name:** `escolhe-ai-prod`
-3. **Repository:** Select `Jou82/escolhe-ai`
-4. **Branch:** `master`
-5. **Dockerfile:** `./Dockerfile`
-
-#### 3.2 Environment Variables
-Add these in Coolify UI (**Environment** tab):
+In the web service → **Variables**, set:
 
 ```
 RAILS_ENV=production
-RAILS_MASTER_KEY=<get from config/master.key>
-SECRET_KEY_BASE=<run: bundle exec rails secret>
-
-DATABASE_URL=postgresql://escolhe_ai:STRONG_PASSWORD@escolhe_ai_db:5432/escolhe_ai_production
-
-SENDGRID_API_KEY=<your SendGrid API key>
-
-GOOGLE_CLIENT_ID=<your Google OAuth ID>
-GOOGLE_CLIENT_SECRET=<your Google OAuth secret>
-
-APP_HOST=escolhe-ai.net
-APP_PROTOCOL=https
+RAILS_MASTER_KEY=<from config/master.key>
+SECRET_KEY_BASE=<bundle exec rails secret>
 RAILS_LOG_TO_STDOUT=true
 RAILS_MAX_THREADS=5
+
+SENDGRID_API_KEY=<SendGrid API key>
+GOOGLE_CLIENT_ID=<Google OAuth client id>
+GOOGLE_CLIENT_SECRET=<Google OAuth client secret>
+OPENAI_API_KEY=<or Anthropic key used by the app>
+CLOUDINARY_URL=<if using Cloudinary>
+
+# Optional — defaults to escolheai.net in production.rb
+# APP_HOST=escolheai.net
+# APP_PROTOCOL=https
 ```
 
-**To get RAILS_MASTER_KEY:**
+`DATABASE_URL` is provided by the Railway Postgres plugin — do not hardcode it.
+
+**RAILS_MASTER_KEY:**
 ```bash
 cat config/master.key
 ```
 
-**To generate SECRET_KEY_BASE:**
+**SECRET_KEY_BASE:**
 ```bash
 bundle exec rails secret
 ```
 
-#### 3.3 Create PostgreSQL Service
-1. **Services** → **+ Add Service** → **PostgreSQL**
-2. **Name:** `escolhe_ai_db`
-3. **Password:** Generate a strong password
-4. **Port:** 5432
-5. **Database:** `escolhe_ai_production`
-6. **Username:** `escolhe_ai`
-7. **Save**
+### 4. Custom domain + DNS
+
+1. Railway service → **Settings** → **Networking** → **Custom Domain**
+2. Add `escolheai.net` and `www.escolheai.net`
+3. At your DNS provider:
+   - `escolheai.net` → CNAME/A as shown by Railway
+   - `www.escolheai.net` → CNAME to the Railway target
+4. Wait for DNS + Let's Encrypt provisioning
+
+### 5. Google OAuth redirect URIs
+
+In [Google Cloud Console](https://console.cloud.google.com/) → OAuth client, add:
+
+```
+https://escolheai.net/users/auth/google_oauth2/callback
+https://www.escolheai.net/users/auth/google_oauth2/callback
+```
+
+(Also keep the Railway preview URL callback if you test on `*.up.railway.app`.)
+
+### 6. Deploy
+
+- Push to the connected branch (usually `master`) — Railway rebuilds automatically
+- Or click **Deploy** in the Railway dashboard
+
+On boot, `railway.toml` runs:
+
+```
+bundle exec rails db:migrate && bundle exec rails server -b 0.0.0.0 -p ${PORT:-3000}
+```
+
+Health check: `GET /up` (timeout 120s).
 
 ---
 
-### 4. Configure Application Ports & Domain
+## How it works
 
-#### 4.1 Port Mapping
-1. Application **Ports** tab
-2. **Container Port:** 3000
-3. **Published Port:** Leave empty (Coolify auto-assigns)
+```
+Browser
+  ↓ HTTPS (Railway edge / Let's Encrypt)
+Railway Proxy (SSL termination)
+  ↓ HTTP + X-Forwarded-* headers
+Web container (Puma on $PORT)
+  ↓ DATABASE_URL
+Railway PostgreSQL
+```
 
-#### 4.2 Domain & SSL
-1. Application **Domains** tab
-2. Add domain: `escolhe-ai.net`
-3. Check **Generate SSL Certificate** (Let's Encrypt)
-4. **Save**
-
-#### 4.3 Healthcheck
-1. Application **Health** tab
-2. **Path:** `/up`
-3. **Port:** 3000
-4. **Interval:** 30s
-5. **Timeout:** 10s
-6. **Retries:** 3
+Rails uses `config.assume_ssl = true` and excludes `/up` from HTTPS redirects so Railway's internal health probes succeed.
 
 ---
 
-### 5. Database Migration & Initial Deploy
+## Config files
 
-#### 5.1 Prepare Database
-Before first deploy, run migrations:
-
-```bash
-# Via Coolify terminal
-docker exec escolhe_ai_web bundle exec rails db:migrate
-docker exec escolhe_ai_web bundle exec rails db:seed  # If needed
-```
-
-Or configure auto-migration in Dockerfile:
-```dockerfile
-CMD ["sh", "-c", "bundle exec rails db:migrate && bundle exec rails server -b 0.0.0.0 -p ${PORT:-3000}"]
-```
-
-#### 5.2 Deploy
-1. Coolify dashboard → Application
-2. Click **Deploy** button
-3. Watch logs (should take 2-5 min)
-4. Check status → **Running** ✅
+| File | Role |
+|------|------|
+| `railway.toml` | Docker builder, start command, healthcheck, restart policy |
+| `Dockerfile` | Ruby 3.3.5 image, Node for assets, `assets:precompile`, migrate + Puma |
+| `config/environments/production.rb` | `assume_ssl`, `force_ssl`, hosts, mailer |
 
 ---
 
-### 6. Post-Deployment Checks
+## Migrations & one-off tasks
 
-#### 6.1 Verify App is Running
 ```bash
-curl https://escolhe-ai.net/up
-# Should return: {"status":"ok"}
+# Via Railway CLI
+railway run bundle exec rails db:migrate
+railway run bundle exec rails db:seed
+railway run bundle exec rails console
 ```
 
-#### 6.2 Check Logs
-- Coolify dashboard → **Logs** tab
-- Should see Rails startup messages, no errors
-
-#### 6.3 Test Website
-- Open https://escolhe-ai.net in browser
-- Login with Google OAuth
-- Test basic functionality
+Or use **Railway dashboard → service → shell**.
 
 ---
 
-### 7. Backup Configuration
+## Logs & rollback
 
-#### 7.1 PostgreSQL Backups (Weekly)
-Option A: **Coolify Built-in** (if available)
-1. Application **Backups** tab
-2. Enable automatic backups
-3. Schedule: Weekly (Sunday 2 AM)
-4. Retention: 4 weeks
-
-Option B: **Manual Backup Script**
-```bash
-# SSH into server and add to crontab
-# Sunday 2 AM backup
-0 2 * * 0 docker exec escolhe_ai_db pg_dump -U escolhe_ai escolhe_ai_production | gzip > /backups/db-$(date +\%Y\%m\%d).sql.gz
-```
+- **Logs:** Railway dashboard → service → **Deployments** / **Logs**
+- **Rollback:** Redeploy a previous successful deployment from the Deployments list
 
 ---
 
-### 8. Email Alerts
+## Checklist after cutover from Hetzner/Kamal
 
-#### 8.1 Coolify Monitoring
-1. **Settings** → **Monitoring**
-2. Enable SMTP alerts
-3. Use SendGrid SMTP (already configured in app):
-   - **Host:** smtp.sendgrid.net
-   - **Port:** 587
-   - **User:** `apikey`
-   - **Password:** Your SendGrid API key
-   - **To email:** joana.jou@gmail.com
-
-#### 8.2 Alert Triggers
-- Application down (healthcheck fails 3 times)
-- Database connection lost
-- Container restart
-- Disk space low
+- [ ] Postgres provisioned and `DATABASE_URL` linked
+- [ ] All secrets set in Railway Variables
+- [ ] Domain DNS pointed to Railway
+- [ ] SSL active on custom domain
+- [ ] Google OAuth callbacks updated
+- [ ] Smoke test: home, login, recommendations, email
+- [ ] Data migrated from Hetzner Postgres if keeping existing users (`pg_dump` / `pg_restore`)
+- [ ] Old Hetzner VPS / Kamal stack decommissioned when stable
 
 ---
 
-## Maintenance & Updates
+## Cost (approximate)
 
-### Deploy Updates
-```bash
-# After pushing to master branch
-git push origin master
+| Item | Notes |
+|------|--------|
+| Railway Hobby / Pro | Usage-based compute + Postgres |
+| Custom domain + SSL | Included |
 
-# Coolify will auto-detect via webhook and redeploy
-# Watch logs in dashboard
-```
-
-### Manual Redeploy
-- Coolify dashboard → **Deploy** button
-- Or: `git push origin master` (triggers webhook)
-
-### Database Migrations
-```bash
-# SSH into server
-docker exec escolhe_ai_web bundle exec rails db:migrate
-
-# Or configure in Dockerfile to auto-migrate on boot (already done)
-```
-
-### View Logs
-```bash
-# Coolify UI: Logs tab (real-time)
-# OR SSH:
-docker logs -f escolhe_ai_web
-docker logs -f escolhe_ai_db
-```
-
-### SSH into VPS
-```bash
-ssh root@195.201.xxx.xxx
-docker ps  # View containers
-docker exec -it escolhe_ai_web bash  # Shell into Rails app
-```
+Compare with previous Hetzner VPS (~€6–7/month fixed) — Railway trades fixed VPS cost for managed platform ops.
 
 ---
 
-## Troubleshooting
+## References
 
-### App not starting?
-```bash
-docker logs escolhe_ai_web
-# Check DATABASE_URL, RAILS_MASTER_KEY, RAILS_ENV
-```
-
-### Database connection refused?
-```bash
-docker logs escolhe_ai_db
-# Check PostgreSQL is running
-docker exec escolhe_ai_db psql -U escolhe_ai -d escolhe_ai_production -c "SELECT 1"
-```
-
-### SSL certificate not working?
-```bash
-# In Coolify: Domains tab → Regenerate certificate
-# Or wait for auto-renewal (Let's Encrypt renews 30 days before expiry)
-```
-
-### Can't connect to domain?
-```bash
-# Check DNS propagation
-nslookup escolhe-ai.net
-dig escolhe-ai.net
-
-# Check Hetzner firewall rules
-# Make sure ports 80, 443, 22 are open
-```
-
----
-
-## Cost Estimate (Monthly)
-
-| Service | Cost |
-|---------|------|
-| Hetzner CX22 VPS | €5.50 |
-| Bandwidth | Free (20TB/month included) |
-| Let's Encrypt SSL | Free |
-| SendGrid (free tier) | Free (100 emails/day) |
-| **Total** | **~€5.50/month** |
-
----
-
-## Resources
-
-- [Coolify Docs](https://coolify.io/docs)
-- [Rails Deployment](https://guides.rubyonrails.org/deployment.html)
-- [Hetzner Cloud Docs](https://docs.hetzner.cloud)
-- [Let's Encrypt](https://letsencrypt.org)
+- [Railway Docs](https://docs.railway.app)
+- [Railway Docker](https://docs.railway.app/deploy/dockerfiles)
+- [Rails on Railway](https://docs.railway.app/guides/rails)

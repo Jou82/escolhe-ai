@@ -43,15 +43,15 @@ Decision fatigue on streaming platforms is real. With hundreds of titles across 
 | **AI** | OpenAI API (natural language processing) |
 | **Authentication** | Devise + Google OAuth |
 | **Containerization** | Docker |
-| **Orchestration** | Kamal 2 |
-| **Infrastructure** | Hetzner VPS (4GB, Ubuntu 24.04) |
+| **Platform** | Railway (Docker + managed PostgreSQL) |
 | **Version Control** | Git · GitHub |
 
 ---
 
 ## 📋 Documentation
 
-- **[Infrastructure & Operations](./INFRASTRUCTURE.md)** — Production architecture, deployment via Kamal, cost optimization, security, and operational decisions
+- **[Infrastructure & Operations](./INFRASTRUCTURE.md)** — Production architecture on Railway, deployment, security, and operational decisions
+- **[Deployment Guide](./DEPLOYMENT.md)** — Step-by-step Railway setup (Postgres, env vars, domain, OAuth)
 
 ---
 
@@ -63,8 +63,8 @@ The recommendation engine needed to understand nuance — not just genre tags, b
 **Why Ruby on Rails?**
 Rails' convention-over-configuration approach allowed rapid development of a full-stack application with authentication, database management, and API integration within bootcamp constraints — while keeping the codebase organized and maintainable.
 
-**Why Hetzner + Kamal (post-bootcamp)?**
-After launch on Heroku, migrated to a self-managed Hetzner VPS with Kamal 2 orchestration. This reduced infrastructure costs by ~60% (€80→€7/month) while enabling zero-downtime deployments, instant rollback, and infrastructure-as-code practices. This migration demonstrates operational maturity: containerization, secrets management, database provisioning, SSL automation, and cost optimization—critical skills for production systems.
+**Why Railway (current production)?**
+After Heroku and a self-managed Hetzner + Kamal phase, production runs on Railway with the same Docker image. Railway handles TLS, health checks, logs, and managed Postgres; deploys are git-driven via `Dockerfile` + `railway.toml`. The app stays portable (`DATABASE_URL`, standard Rails production config) while reducing host/SSH operational overhead.
 
 ---
 
@@ -109,12 +109,11 @@ Escolhe Aí was built collaboratively during Le Wagon's AI Software Development 
 - Rails ↔ API bridge — the service layer connecting AI to the application
 
 **Post-bootcamp contributions:**
-- **Infrastructure migration** — migrated from Heroku to Hetzner VPS with Kamal 2
-- **Containerization** — designed Docker setup, built production Dockerfile
-- **Secrets management** — implemented secure credential handling (env vars, no git exposure)
-- **Database operations** — PostgreSQL provisioning, user management, backup strategy
-- **Zero-downtime deployment** — configured Kamal for health checks and graceful container swaps
-- **Cost optimization** — reduced monthly costs by ~60% while improving operational control
+- **Infrastructure** — production on Railway (Docker + managed Postgres); prior Hetzner/Kamal ops experience
+- **Containerization** — production Dockerfile and `railway.toml` (build, healthcheck, migrate-on-boot)
+- **Secrets management** — secure credential handling (env vars, no git exposure)
+- **Database operations** — PostgreSQL via `DATABASE_URL`, migrations on deploy, backup/restore playbooks
+- **Deployment reliability** — `/up` health checks, SSL termination-aware Rails config (`assume_ssl`)
 
 **Links:** [GitHub](https://github.com/Jou82) · [LinkedIn](https://linkedin.com/in/joana-dias-57134425)
 

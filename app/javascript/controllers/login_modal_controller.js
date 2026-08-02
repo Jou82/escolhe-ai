@@ -69,6 +69,17 @@ export default class extends Controller {
     this.overlayTarget.addEventListener("click", this.closeOnOverlayClick)
   }
 
+  // Keep OmniAuth / Devise forms in sync with the current session CSRF token
+  // (stale tokens after server restart or Turbo cache cause InvalidAuthenticityToken).
+  _refreshCsrfTokens() {
+    const token = document.querySelector('meta[name="csrf-token"]')?.content
+    if (!token) return
+
+    this.element.querySelectorAll('input[name="authenticity_token"]').forEach((input) => {
+      input.value = token
+    })
+  }
+
   closeOnEscape(event) {
     if (event.key === "Escape") this.close()
   }

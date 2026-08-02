@@ -139,7 +139,12 @@ Railway dashboard → service → Logs (or `railway logs`).
 
 - No secrets in git (`.env*` gitignored; Docker build excludes `.env*` and `master.key`)
 - TLS at the edge; secure cookies via `force_ssl`
+- Host allowlist (no `/.*/`); `/up` excluded for health probes
+- Rack::Attack throttles login, password reset, signup, movie search/create
+- Devise `:lockable` (8 failed attempts → lock; unlock via email or 1 hour) + password min length 8
+- Container runs as non-root `rails` user (UID 1000)
 - Rotate secrets in Railway Variables and redeploy
+- Postgres: keep Public Networking **off**; web uses private `DATABASE_URL`
 
 ---
 

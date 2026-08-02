@@ -3,7 +3,10 @@ builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-startCommand = "bundle exec rails db:migrate && bundle exec rails server -b 0.0.0.0 -p ${PORT:-3000}"
+# Migrations run in a separate pre-deploy step (startCommand is NOT a shell —
+# so "cmd1 && cmd2" would only run cmd1 and never boot Puma).
+preDeployCommand = ["bundle exec rails db:migrate"]
+startCommand = "bundle exec rails server -b 0.0.0.0"
 healthcheckPath = "/up"
 healthcheckTimeout = 120
 restartPolicyType = "ON_FAILURE"

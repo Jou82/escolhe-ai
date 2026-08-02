@@ -73,10 +73,11 @@ https://www.escolheai.net/users/auth/google_oauth2/callback
 - Push to the connected branch (usually `master`) — Railway rebuilds automatically
 - Or click **Deploy** in the Railway dashboard
 
-On boot, `railway.toml` runs:
+On deploy, `railway.toml` runs migrations in `preDeployCommand`, then starts Puma:
 
 ```
-bundle exec rails db:migrate && bundle exec rails server -b 0.0.0.0 -p ${PORT:-3000}
+bundle exec rails db:migrate   # pre-deploy
+bundle exec rails server -b 0.0.0.0   # start (PORT from env)
 ```
 
 Health check: `GET /up` (timeout 120s).

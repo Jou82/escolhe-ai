@@ -24,15 +24,19 @@ RAILS_MASTER_KEY=<from config/master.key>
 SECRET_KEY_BASE=<bundle exec rails secret>
 RAILS_LOG_TO_STDOUT=true
 RAILS_MAX_THREADS=5
+SOLID_QUEUE_IN_PUMA=true
 
 SENDGRID_API_KEY=<SendGrid API key>
 GOOGLE_CLIENT_ID=<Google OAuth client id>
 GOOGLE_CLIENT_SECRET=<Google OAuth client secret>
-OPENAI_API_KEY=<or Anthropic key used by the app>
-CLOUDINARY_URL=<if using Cloudinary>
+ANTHROPIC_API_KEY=<Anthropic API key — required for recommendations>
+TMDB_API_KEY=<TMDB API key — required for search/enrichment>
+CLOUDINARY_URL=<Cloudinary URL — required for logged-in avatar/navbar>
 ```
 
 `DATABASE_URL` is provided by the Railway Postgres plugin — do not hardcode it.
+
+**Critical:** Production uses `config.active_job.queue_adapter = :solid_queue`. Without `SOLID_QUEUE_IN_PUMA=true` (or a separate worker), `GenerateRecommendationsJob` is enqueued but never runs — the UI stays on `/movies/processing` forever. The Docker image sets this by default; still set the Variable on Railway so existing deploys pick it up before the next image rebuild.
 
 **RAILS_MASTER_KEY:**
 ```bash

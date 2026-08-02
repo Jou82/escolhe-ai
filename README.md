@@ -145,15 +145,16 @@ RAILS_MASTER_KEY=          # from config/master.key
 SECRET_KEY_BASE=           # bundle exec rails secret
 RAILS_LOG_TO_STDOUT=true
 RAILS_MAX_THREADS=5
+SOLID_QUEUE_IN_PUMA=true   # required — otherwise recommendations stay on "Processando…" forever
 
 DATABASE_URL=${{Postgres.DATABASE_URL}}
 
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
 SENDGRID_API_KEY=
-ANTHROPIC_API_KEY=
-TMDB_API_KEY=
-CLOUDINARY_URL=
+ANTHROPIC_API_KEY=         # required for the recommendation pipeline
+TMDB_API_KEY=              # required for search / enrichment / home chips
+CLOUDINARY_URL=            # required for logged-in navbar avatar
 ```
 
 CLI example (link the **web** service first — not Postgres):

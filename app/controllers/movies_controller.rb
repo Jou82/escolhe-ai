@@ -10,14 +10,15 @@ class MoviesController < ApplicationController
     query = params[:q].to_s.strip
     api_key = ENV.fetch('TMDB_API_KEY', nil)
 
-    if query.present?
+    if query.present? && api_key.present?
       url = URI("https://api.themoviedb.org/3/search/movie?api_key=#{api_key}&query=#{ERB::Util.url_encode(query)}&language=pt-BR")
 
       begin
         response = Net::HTTP.get(url)
         data = JSON.parse(response)
+        results = Array(data["results"])
 
-        @results = data["results"].map do |movie|
+        @results = results.map do |movie|
           {
             title: movie["title"],
             id: movie["id"],

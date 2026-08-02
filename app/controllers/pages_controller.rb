@@ -5,10 +5,15 @@ class PagesController < ApplicationController
   def home
     @popular_movies = Rails.cache.fetch("trending_movies", expires_in: 1.hour) do
       api_key = ENV.fetch('TMDB_API_KEY', nil)
+      raise "TMDB_API_KEY missing" if api_key.blank?
+
       url = URI("https://api.themoviedb.org/3/movie/popular?api_key=#{api_key}&language=pt-BR&page=1")
       response = Net::HTTP.get(url)
       data = JSON.parse(response)
-      data["results"].first(20).sample(3).map { |m| m["title"].gsub(",", "") }
+      results = data["results"]
+      raise "TMDB popular response missing results" if results.blank?
+
+      results.first(20).sample(3).map { |m| m["title"].to_s.gsub(",", "") }
     end
   rescue StandardError => e
     Rails.logger.error "Erro ao buscar filmes: #{e.message}"

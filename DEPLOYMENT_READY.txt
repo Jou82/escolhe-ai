@@ -19,6 +19,3 @@
     DEPLOYMENT.md
     INFRASTRUCTURE.md
     DEPLOYMENT_CHECKLIST.md
-
-  Cutover from Hetzner/Kamal:
-    pg_dump → restore on Railway → DNS → verify → decommission VPS

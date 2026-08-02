@@ -20,7 +20,7 @@
 
 ### 3. Variáveis
 
-No serviço web → **Variables**:
+No serviço web → **Variables** (ou rode `bash scripts/prepare-deployment.sh`):
 
 ```
 RAILS_ENV=production
@@ -51,14 +51,7 @@ railway run bundle exec rails console
 railway run bundle exec rails db:migrate
 ```
 
-## Docs completas
+## Docs
 
 - [DEPLOYMENT.md](./DEPLOYMENT.md)
 - [INFRASTRUCTURE.md](./INFRASTRUCTURE.md)
-
-## Cutover do Hetzner
-
-1. Dump do Postgres antigo → restore no Postgres Railway
-2. DNS para Railway
-3. Validar app + email + OAuth
-4. Desligar VPS/Kamal quando estável

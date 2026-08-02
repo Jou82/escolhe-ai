@@ -30,10 +30,6 @@ GOOGLE_CLIENT_ID=<Google OAuth client id>
 GOOGLE_CLIENT_SECRET=<Google OAuth client secret>
 OPENAI_API_KEY=<or Anthropic key used by the app>
 CLOUDINARY_URL=<if using Cloudinary>
-
-# Optional — defaults to escolheai.net in production.rb
-# APP_HOST=escolheai.net
-# APP_PROTOCOL=https
 ```
 
 `DATABASE_URL` is provided by the Railway Postgres plugin — do not hardcode it.
@@ -48,13 +44,17 @@ cat config/master.key
 bundle exec rails secret
 ```
 
+Or generate a Variables template locally:
+
+```bash
+bash scripts/prepare-deployment.sh
+```
+
 ### 4. Custom domain + DNS
 
 1. Railway service → **Settings** → **Networking** → **Custom Domain**
 2. Add `escolheai.net` and `www.escolheai.net`
-3. At your DNS provider:
-   - `escolheai.net` → CNAME/A as shown by Railway
-   - `www.escolheai.net` → CNAME to the Railway target
+3. At your DNS provider, apply the records Railway shows
 4. Wait for DNS + Let's Encrypt provisioning
 
 ### 5. Google OAuth redirect URIs
@@ -112,7 +112,6 @@ Rails uses `config.assume_ssl = true` and excludes `/up` from HTTPS redirects so
 ## Migrations & one-off tasks
 
 ```bash
-# Via Railway CLI
 railway run bundle exec rails db:migrate
 railway run bundle exec rails db:seed
 railway run bundle exec rails console
@@ -129,7 +128,7 @@ Or use **Railway dashboard → service → shell**.
 
 ---
 
-## Checklist after cutover from Hetzner/Kamal
+## Go-live checklist
 
 - [ ] Postgres provisioned and `DATABASE_URL` linked
 - [ ] All secrets set in Railway Variables
@@ -137,19 +136,6 @@ Or use **Railway dashboard → service → shell**.
 - [ ] SSL active on custom domain
 - [ ] Google OAuth callbacks updated
 - [ ] Smoke test: home, login, recommendations, email
-- [ ] Data migrated from Hetzner Postgres if keeping existing users (`pg_dump` / `pg_restore`)
-- [ ] Old Hetzner VPS / Kamal stack decommissioned when stable
-
----
-
-## Cost (approximate)
-
-| Item | Notes |
-|------|--------|
-| Railway Hobby / Pro | Usage-based compute + Postgres |
-| Custom domain + SSL | Included |
-
-Compare with previous Hetzner VPS (~€6–7/month fixed) — Railway trades fixed VPS cost for managed platform ops.
 
 ---
 

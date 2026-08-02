@@ -6,6 +6,7 @@
 - [x] `Dockerfile` (Node + assets:precompile com `SECRET_KEY_BASE_DUMMY`)
 - [x] `config.assume_ssl = true` + exclude `/up` do redirect SSL
 - [x] Production usa `ENV["DATABASE_URL"]`
+- [x] Deploy path: Railway only (`railway.toml` + `Dockerfile`)
 
 ## Railway project
 
@@ -31,13 +32,6 @@
 - [ ] SSL ativo
 - [ ] Google OAuth redirect URIs atualizados
 - [ ] Smoke: home, login Google, email, recomendações
-
-## Data & cutover
-
-- [ ] Backup do Postgres anterior
-- [ ] Restore / migrate no Railway (se mantém dados)
-- [ ] Monitorar logs 24–48h
-- [ ] Descomissionar Hetzner/Kamal quando estável
 
 ## Ops
 

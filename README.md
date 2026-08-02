@@ -63,8 +63,8 @@ The recommendation engine needed to understand nuance — not just genre tags, b
 **Why Ruby on Rails?**
 Rails' convention-over-configuration approach allowed rapid development of a full-stack application with authentication, database management, and API integration within bootcamp constraints — while keeping the codebase organized and maintainable.
 
-**Why Railway (current production)?**
-After Heroku and a self-managed Hetzner + Kamal phase, production runs on Railway with the same Docker image. Railway handles TLS, health checks, logs, and managed Postgres; deploys are git-driven via `Dockerfile` + `railway.toml`. The app stays portable (`DATABASE_URL`, standard Rails production config) while reducing host/SSH operational overhead.
+**Why Railway?**
+Production runs on Railway with a Docker image. Railway handles TLS, health checks, logs, and managed Postgres; deploys are git-driven via `Dockerfile` + `railway.toml`. The app stays portable (`DATABASE_URL`, standard Rails production config) without managing a VPS.
 
 ---
 
@@ -109,10 +109,10 @@ Escolhe Aí was built collaboratively during Le Wagon's AI Software Development 
 - Rails ↔ API bridge — the service layer connecting AI to the application
 
 **Post-bootcamp contributions:**
-- **Infrastructure** — production on Railway (Docker + managed Postgres); prior Hetzner/Kamal ops experience
+- **Infrastructure** — production on Railway (Docker + managed Postgres)
 - **Containerization** — production Dockerfile and `railway.toml` (build, healthcheck, migrate-on-boot)
 - **Secrets management** — secure credential handling (env vars, no git exposure)
-- **Database operations** — PostgreSQL via `DATABASE_URL`, migrations on deploy, backup/restore playbooks
+- **Database operations** — PostgreSQL via `DATABASE_URL`, migrations on deploy, backup playbooks
 - **Deployment reliability** — `/up` health checks, SSL termination-aware Rails config (`assume_ssl`)
 
 **Links:** [GitHub](https://github.com/Jou82) · [LinkedIn](https://linkedin.com/in/joana-dias-57134425)

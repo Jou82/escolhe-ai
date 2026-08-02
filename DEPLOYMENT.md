@@ -6,7 +6,7 @@
 
 1. Go to [railway.app](https://railway.app) and sign in with GitHub
 2. **New Project** → **Deploy from GitHub repo** → select `Jou82/escolhe-ai`
-3. Railway detects the `Dockerfile` (see `railway.toml` → `builder = "docker"`)
+3. Railway detects the `Dockerfile` (see `railway.toml` → `builder = "DOCKERFILE"`)
 
 ### 2. Add PostgreSQL
 

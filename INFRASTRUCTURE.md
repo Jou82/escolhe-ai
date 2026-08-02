@@ -40,7 +40,7 @@ Railway PostgreSQL
 ### How a deploy works
 
 1. Push to the connected GitHub branch (or manual Deploy in Railway)
-2. Railway builds the Docker image (`railway.toml` → `builder = "docker"`)
+2. Railway builds the Docker image (`railway.toml` → `builder = "DOCKERFILE"`)
 3. New container starts with start command from `railway.toml`:
    - `rails db:migrate`
    - `rails server -b 0.0.0.0 -p $PORT`
@@ -59,7 +59,8 @@ In Railway → **Deployments** → select a previous successful deploy → redep
 
 ```toml
 [build]
-builder = "docker"
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
 
 [deploy]
 startCommand = "bundle exec rails db:migrate && bundle exec rails server -b 0.0.0.0 -p ${PORT:-3000}"

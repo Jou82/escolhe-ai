@@ -11,7 +11,7 @@
 ### 1. Projeto + repo
 
 1. Railway → **New Project** → **Deploy from GitHub** → `escolhe-ai`
-2. Confirme build via Docker (`railway.toml` já define `builder = "docker"`)
+2. Confirme build via Docker (`railway.toml` já define `builder = "DOCKERFILE"`)
 
 ### 2. Postgres
 

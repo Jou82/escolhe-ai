@@ -58,10 +58,18 @@
       display: none;
     }
 
+    .search-field {
+      width: 100%;
+    }
+
     .search-input {
       width: 100%;
-      text-align: center;
-      padding: 0.6rem;
+      text-align: left;
+      padding: 0.6rem 0.2rem;
+    }
+
+    .search-chip-label {
+      max-width: 140px;
     }
 
     .btn-suggest {

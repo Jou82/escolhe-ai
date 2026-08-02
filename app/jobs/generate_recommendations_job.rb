@@ -9,9 +9,10 @@ class GenerateRecommendationsJob < ApplicationJob
   def perform(user_id, movies_input, exclude_titles = [], session_id = nil)
     start_time = Time.current
     user = User.find(user_id)
+    movie_titles = normalize_titles(movies_input)
 
     Rails.logger.info "🎬 [JOB] Iniciado em #{start_time}"
-    Rails.logger.info "📽️  [INPUT] Filmes: #{movies_input.join(', ')}"
+    Rails.logger.info "📽️  [INPUT] Filmes: #{movie_titles.join(', ')}"
     Rails.logger.info "📊 Exclude limitado: #{exclude_titles.size} → #{exclude_titles.size} filmes"
 
     begin
@@ -63,7 +64,7 @@ class GenerateRecommendationsJob < ApplicationJob
         session_record.save!
 
         # Bulk insert: filmes de input → likes com suggestion: false
-        input_movie_ids = movies_input.map do |title|
+        input_movie_ids = movie_titles.map do |title|
           Movie.find_or_create_by!(title: title.strip).id
         end
         existing_input_likes = session_record.likes.where(suggestion: false, movie_id: input_movie_ids).pluck(:movie_id)
@@ -122,6 +123,17 @@ class GenerateRecommendationsJob < ApplicationJob
   end
 
   private
+
+  def normalize_titles(movies_input)
+    Array(movies_input).map do |entry|
+      case entry
+      when Hash
+        (entry["title"] || entry[:title]).to_s
+      else
+        entry.to_s
+      end
+    end.map(&:strip).reject(&:blank?)
+  end
 
   def handle_failure(session_id, user, message)
     if session_id

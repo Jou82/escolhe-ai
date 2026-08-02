@@ -1,5 +1,3 @@
-require 'net/http'
-
 class MoviesController < ApplicationController
   before_action :check_rate_limit, only: [:create]
 
@@ -7,33 +5,7 @@ class MoviesController < ApplicationController
   end
 
   def search
-    query = params[:q].to_s.strip
-    api_key = ENV.fetch('TMDB_API_KEY', nil)
-
-    if query.present? && api_key.present?
-      url = URI("https://api.themoviedb.org/3/search/movie?api_key=#{api_key}&query=#{ERB::Util.url_encode(query)}&language=pt-BR")
-
-      begin
-        response = Net::HTTP.get(url)
-        data = JSON.parse(response)
-        results = Array(data["results"])
-
-        @results = results.map do |movie|
-          {
-            title: movie["title"],
-            id: movie["id"],
-            year: movie["release_date"]&.slice(0, 4)
-          }
-        end
-      rescue StandardError => e
-        Rails.logger.error "Erro na busca da API: #{e.message}"
-        @results = []
-      end
-    else
-      @results = []
-    end
-
-    render json: @results
+    render json: MovieSearchService.call(params[:q])
   end
 
   def show
@@ -47,16 +19,14 @@ class MoviesController < ApplicationController
   end
 
   def create
-    if params[:movies].is_a?(Array)
-      @movie_titles = params[:movies].reject(&:blank?)
-    else
-      @movie_titles = params[:movies].to_s.split(',').map(&:strip).reject(&:blank?)
-    end
+    @movie_inputs = parse_movie_inputs
 
-    if @movie_titles.length != 3
+    if @movie_inputs.length != 3
       flash[:alert] = "Por favor, selecione 3 filmes válidos."
       return redirect_to root_path
     end
+
+    @movie_titles = @movie_inputs.map { |m| m[:title] }
 
     previous_recommendations = current_user.sessions
                                            .where(status: 1)
@@ -72,13 +42,13 @@ class MoviesController < ApplicationController
     Rails.logger.info "📚 Filmes já recomendados: #{previous_recommendations.join(', ')}"
 
     session_record = current_user.sessions.create!(
-      input_movies: @movie_titles,
+      input_movies: @movie_inputs.map { |m| m.stringify_keys },
       status: 0
     )
 
     GenerateRecommendationsJob.perform_later(
       current_user.id,
-      @movie_titles,
+      @movie_inputs.map { |m| m.stringify_keys },
       previous_recommendations,
       session_record.id
     )
@@ -119,6 +89,29 @@ class MoviesController < ApplicationController
   end
 
   private
+
+  # Accepts either:
+  # - movies[] + tmdb_ids[] + years[] from the chip UI
+  # - legacy comma-separated movies string
+  def parse_movie_inputs
+    if params[:movies].is_a?(Array)
+      titles = params[:movies].map { |t| t.to_s.strip }.reject(&:blank?)
+      ids = Array(params[:tmdb_ids]).map { |id| id.to_s.strip.presence }
+      years = Array(params[:years]).map { |y| y.to_s.strip.presence }
+
+      titles.each_with_index.map do |title, index|
+        {
+          title: title,
+          tmdb_id: ids[index]&.to_i&.positive? ? ids[index].to_i : nil,
+          year: years[index]
+        }
+      end
+    else
+      params[:movies].to_s.split(",").map(&:strip).reject(&:blank?).map do |title|
+        { title: title, tmdb_id: nil, year: nil }
+      end
+    end
+  end
 
   def check_rate_limit
     # Only completed searches count. Stuck "processing" sessions (e.g. when

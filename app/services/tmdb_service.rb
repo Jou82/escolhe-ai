@@ -28,9 +28,10 @@ class TmdbService
     "Looke" => 47
   }.freeze
 
-  def initialize(title, year = nil)
+  def initialize(title, year = nil, tmdb_id: nil)
     @title = title
-    @year  = year
+    @year = year
+    @tmdb_id = tmdb_id
   end
 
   def call
@@ -70,9 +71,26 @@ class TmdbService
     false
   end
 
+  def self.normalize_input(entry)
+    case entry
+    when Hash
+      title = entry["title"] || entry[:title]
+      year = entry["year"] || entry[:year]
+      tmdb_id = entry["tmdb_id"] || entry[:tmdb_id]
+      { title: title.to_s, year: year.presence, tmdb_id: tmdb_id.presence&.to_i }
+    else
+      { title: entry.to_s, year: nil, tmdb_id: nil }
+    end
+  end
+
   def self.find_candidates(movies, top_n: 15)
     user_movies = movies
-                  .map { |title| Thread.new { new(title).send(:search_movie) } }
+                  .map { |entry| normalize_input(entry) }
+                  .map { |input|
+                    Thread.new {
+                      new(input[:title], input[:year], tmdb_id: input[:tmdb_id]).send(:search_movie)
+                    }
+                  }
                   .filter_map do |t|
                     movie = t.value
                     next unless movie
@@ -511,6 +529,8 @@ class TmdbService
   private
 
   def search_movie
+    return fetch_movie_by_id(@tmdb_id) if @tmdb_id.present?
+
     params = {
       api_key: ENV.fetch("TMDB_API_KEY", nil),
       query: @title,
@@ -528,6 +548,22 @@ class TmdbService
     JSON.parse(body)["results"]&.first
   rescue JSON::ParserError, Faraday::Error => e
     Rails.logger.warn "TMDB error searching '#{@title}': #{e.message}"
+    nil
+  end
+
+  def fetch_movie_by_id(tmdb_id)
+    response = Faraday.get(
+      "#{BASE_URL}/movie/#{tmdb_id}",
+      { api_key: ENV.fetch("TMDB_API_KEY", nil), language: "pt-BR" }
+    )
+    return nil unless response.status == 200
+
+    body = response.body
+    return nil if body.nil? || body.start_with?("<")
+
+    JSON.parse(body)
+  rescue JSON::ParserError, Faraday::Error => e
+    Rails.logger.warn "TMDB error fetching id=#{tmdb_id}: #{e.message}"
     nil
   end
 

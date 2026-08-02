@@ -1,0 +1,21 @@
+╔══════════════════════════════════════════════════════════════════════╗
+║                 escolhe-ai — Railway deployment ready                ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+  Platform:  Railway (Docker)
+  Database:  Railway PostgreSQL (DATABASE_URL)
+  Config:    railway.toml + Dockerfile
+  Health:    GET /up (timeout 120s)
+
+  Quick path:
+    1. railway.app → New Project → GitHub repo Jou82/escolhe-ai
+    2. Add PostgreSQL and link DATABASE_URL
+    3. Set RAILS_MASTER_KEY, SECRET_KEY_BASE, SendGrid, Google OAuth, API keys
+    4. Custom domain escolheai.net + www
+    5. Deploy / push master
+
+  Docs:
+    DEPLOY_RAPIDO.md
+    DEPLOYMENT.md
+    INFRASTRUCTURE.md
+    DEPLOYMENT_CHECKLIST.md

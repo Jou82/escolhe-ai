@@ -223,7 +223,7 @@ Escolhe Aí was built collaboratively during Le Wagon's AI Software Development 
 ### 🤖 Joana — AI & Operations
 
 **Bootcamp contributions:**
-- OpenAI API integration — connecting the Rails back-end to the OpenAI endpoint
+- AI API integration — connecting the Rails back-end to the recommendation model
 - Prompt engineering — crafting prompts that translate user input into meaningful taste analysis
 - Recommendation logic — processing and structuring AI responses into usable recommendations
 - Rails ↔ API bridge — the service layer connecting AI to the application
@@ -231,8 +231,9 @@ Escolhe Aí was built collaboratively during Le Wagon's AI Software Development 
 **Post-bootcamp contributions:**
 - **Infrastructure** — production on Railway (Docker + managed Postgres)
 - **Containerization** — production Dockerfile and `railway.toml` (build, healthcheck, migrate-on-boot)
-- **Secrets management** — secure credential handling (env vars, no git exposure)
-- **Database operations** — PostgreSQL via `DATABASE_URL`, migrations on deploy, backup playbooks
+- **Secrets management** — env vars on the web service (Google, SendGrid, AI, TMDB, Cloudinary)
+- **Database operations** — `DATABASE_URL` from Railway Postgres (`postgres.railway.internal`)
+- **DNS / domain** — Namecheap CNAMEs → Railway custom domains + SSL
 - **Deployment reliability** — `/up` health checks, SSL termination-aware Rails config (`assume_ssl`)
 
 **Links:** [GitHub](https://github.com/Jou82) · [LinkedIn](https://linkedin.com/in/joana-dias-57134425)

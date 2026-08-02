@@ -54,8 +54,7 @@ class Rack::Attack
   end
 end
 
+# rack-attack's Railtie already inserts the middleware — do not `middleware.use` again.
 Rails.application.config.after_initialize do
   Rack::Attack.cache.store = Rails.cache
 end
-
-Rails.application.config.middleware.use Rack::Attack unless Rails.env.test?

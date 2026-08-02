@@ -2,7 +2,9 @@
 builder = "docker"
 
 [deploy]
-startCommand = "bundle exec rails db:migrate && bundle exec rails server -b 0.0.0.0 -p ${PORT:-3000}"
+# Do not pass `-p ${PORT:-3000}` — Railway may not shell-expand that and Rails/Thor
+# receives the literal string. Puma already binds ENV["PORT"] via config/puma.rb.
+startCommand = "bundle exec rails db:migrate && bundle exec rails server -b 0.0.0.0"
 healthcheckPath = "/up"
 healthcheckTimeout = 120
 restartPolicyType = "ON_FAILURE"

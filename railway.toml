@@ -4,8 +4,9 @@ dockerfilePath = "Dockerfile"
 
 [deploy]
 preDeployCommand = ["bundle exec rails db:migrate"]
-startCommand = "bundle exec rails server -b 0.0.0.0 -p ${PORT:-3000}"
+startCommand = "bundle exec rails server -b 0.0.0.0 -p $PORT"
 healthcheckPath = "/up"
 healthcheckTimeout = 120
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 3
+

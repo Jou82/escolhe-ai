@@ -94,7 +94,9 @@ Set in Railway → service → **Variables** (never commit):
 
 - `config.assume_ssl = true` — Railway terminates TLS
 - `force_ssl = true` with `/up` excluded from redirect
-- Hosts allow `escolheai.net`, `www.escolheai.net`, and `*.up.railway.app`
+- Host allowlist: `escolheai.net`, `www.escolheai.net`, `*.up.railway.app`, `*.railway.app`
+- `GET /up` is excluded from host authorization (Railway health probes)
+- Do **not** use `config.hosts << /.*/` — that disables Host protection
 
 ---
 

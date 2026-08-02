@@ -93,20 +93,18 @@ config.action_mailer.smtp_settings = {
   config.active_record.attributes_for_inspect = [ :id ]
 
   # Enable DNS rebinding protection and other `Host` header attacks.
-  # config.hosts = [
-  #   "example.com",     # Allow requests from example.com
-  #   /.*\.example\.com/ # Allow requests from subdomains like `www.example.com`
-  # ]
-  #
-  # Skip DNS rebinding protection for the default health check endpoint.
-  # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
-   config.middleware.use Rack::Deflater
-  # Host authorization — domínio customizado + hostnames Railway (healthcheck / preview)
-  config.hosts << "www.escolheai.net"
-  config.hosts << "escolheai.net"
-  config.hosts << /.*\.up\.railway\.app/
-  config.hosts << /.*\.railway\.app/
-  config.hosts << /.*/  # libera o hostname interno do container no healthcheck
-  config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
-  config.hosts << "localhost"  # para testes internos
+  config.middleware.use Rack::Deflater
+
+  # Allow only our public hosts + Railway preview/public URLs.
+  # Do NOT use /.*/ — that disables Host protection entirely.
+  # Railway health probes hit GET /up and are excluded below (no Host check).
+  config.hosts = [
+    "escolheai.net",
+    "www.escolheai.net",
+    /.*\.up\.railway\.app\z/,
+    /.*\.railway\.app\z/
+  ]
+  config.host_authorization = {
+    exclude: ->(request) { request.path == "/up" }
+  }
 end

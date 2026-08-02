@@ -13,7 +13,10 @@
       </div>
       <div class="login-modal-oauth">
         <%= button_to user_google_oauth2_omniauth_authorize_path,
-            method: :post, data: { turbo: false }, class: "login-oauth-btn" do %>
+            method: :post,
+            authenticity_token: true,
+            form: { data: { turbo: false } },
+            class: "login-oauth-btn" do %>
           <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" alt="Google" width="18" height="18">
           Continuar com Google
         <% end %>
@@ -48,7 +51,10 @@
       </div>
       <div class="login-modal-oauth">
         <%= button_to user_google_oauth2_omniauth_authorize_path,
-            method: :post, data: { turbo: false }, class: "login-oauth-btn" do %>
+            method: :post,
+            authenticity_token: true,
+            form: { data: { turbo: false } },
+            class: "login-oauth-btn" do %>
           <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" alt="Google" width="18" height="18">
           Continuar com Google
         <% end %>

@@ -142,9 +142,11 @@ Railway dashboard → service → Logs (or `railway logs`).
 - Host allowlist (no `/.*/`); `/up` excluded for health probes
 - Rack::Attack throttles login, password reset, signup, movie search/create
 - Devise `:lockable` (8 failed attempts → lock; unlock via email or 1 hour) + password min length 8
-- Container runs as non-root `rails` user (UID 1000)
 - Rotate secrets in Railway Variables and redeploy
 - Postgres: keep Public Networking **off**; web uses private `DATABASE_URL`
+
+Note: container currently runs as root in the Railway image for deploy reliability
+(Railway volume/UID quirks). Prefer network isolation + app controls above.
 
 ---
 

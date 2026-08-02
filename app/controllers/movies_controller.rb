@@ -95,9 +95,19 @@ class MoviesController < ApplicationController
   end
 
   def check_status
-    session_record = current_user.sessions.select(:id, :status, :error_message).find_by(id: params[:id])
+    session_record = current_user.sessions.find_by(id: params[:id])
 
     return render json: { status: "not_found" }, status: :not_found unless session_record
+
+    # Jobs that never ran leave status=processing forever; surface as failed
+    # so the UI can stop polling (common when Solid Queue worker was down).
+    if session_record.processing? && session_record.created_at < 3.minutes.ago
+      session_record.update!(
+        status: :failed,
+        error_message: session_record.error_message.presence ||
+          "A geração demorou demais ou o worker de jobs não está a correr. Tente novamente."
+      )
+    end
 
     if session_record.completed?
       render json: { status: "completed", url: movie_session_path(session_record) }
@@ -111,9 +121,12 @@ class MoviesController < ApplicationController
   private
 
   def check_rate_limit
+    # Only completed searches count. Stuck "processing" sessions (e.g. when
+    # Solid Queue was not running) must not burn the daily quota, and failed
+    # attempts are already excluded.
     count = current_user.sessions
                         .where("created_at >= ?", 24.hours.ago)
-                        .where.not(status: 2)
+                        .where(status: Session.statuses[:completed])
                         .count
 
     if count >= 3

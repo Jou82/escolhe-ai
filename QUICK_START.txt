@@ -1,68 +1,21 @@
-╔═══════════════════════════════════════════════════════════╗
-║     🚀 ESCOLHE-AI DEPLOY — QUICK START (1 página)        ║
-╚═══════════════════════════════════════════════════════════╝
+QUICK START — Deploy escolhe-ai na Railway
+==========================================
 
-✅ STATUS: Tudo pronto! Docker build em andamento...
+1. Conta Railway + repo GitHub conectado
+2. Adicionar PostgreSQL (DATABASE_URL automático)
+3. Variáveis: RAILS_MASTER_KEY, SECRET_KEY_BASE, SendGrid, Google OAuth, API keys
+4. Domínio customizado + DNS
+5. Push em master (ou Deploy no dashboard)
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Healthcheck: /up
+Start: migrate + rails server na $PORT
 
-📋 PASSO-A-PASSO (3 minutos de leitura)
+Detalhes: DEPLOY_RAPIDO.md e DEPLOYMENT.md
 
-1. 🐳 DOCKER BUILD (acontecendo agora)
-   Aguarde o build terminar (~10 min)
+Local (dev):
+  bundle install
+  rails db:setup
+  rails server
 
-2. ⚡ RODOU DEPLOY SCRIPT (5 minutos)
-   bash scripts/deploy-to-hetzner.sh
-
-   O script vai pedir:
-   - Hetzner API Token
-   - SendGrid API Key
-   - Google OAuth ID/Secret
-
-3. 🖥️ CONFIGURAR COOLIFY (5 minutos)
-   Abrir dashboard Coolify → adicionar repo → Deploy
-
-4. ✅ PRONTO! (1 minuto)
-   curl https://escolhe-ai.net/up
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-📚 DOCUMENTAÇÃO (escolha uma)
-
-Quer rápido?       → DEPLOY_RAPIDO.md (30-45 min)
-Quer detalhado?    → DEPLOYMENT.md (completo)
-Quer checklist?    → DEPLOYMENT_CHECKLIST.md
-Quer saber status? → DEPLOY_SUMMARY.md
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-🎯 PRÓXIMO COMANDO
-
-Quando Docker terminar, execute:
-
-    bash scripts/deploy-to-hetzner.sh
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-✨ TUDO JÁ ESTÁ PREPARADO ✨
-
-- ✅ Código atualizado
-- ✅ Docker Compose pronto
-- ✅ Rails config otimizado
-- ✅ Scripts de automação
-- ✅ Documentação completa
-- ✅ Checklist de validação
-
-VOCÊ SÓ PRECISA:
-1. Aguardar Docker build
-2. Rodar script deploy
-3. Clicar botão em Coolify
-4. Pronto! 🚀
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Tempo total estimado: 30-45 minutos
-Custo mensal: €5.50 (Hetzner VPS)
-Downtime: 0 (deploy zero-downtime com Coolify)
-
-Ready? Go! 🚀
+Docker local (opcional):
+  docker compose up --build

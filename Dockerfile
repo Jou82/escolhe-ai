@@ -23,4 +23,6 @@ RUN RAILS_ENV=production SECRET_KEY_BASE_DUMMY=1 bundle exec rails assets:precom
   && mkdir -p tmp/pids tmp/cache log
 
 EXPOSE 3000
-CMD ["sh", "-c", "bundle exec rails db:migrate && bundle exec rails server -b 0.0.0.0 -p ${PORT:-3000}"]
+# Puma binds ENV["PORT"] (see config/puma.rb). Avoid `-p ${PORT:-3000}` in
+# Railway startCommand — it can be passed unexpanded and crash Thor.
+CMD ["sh", "-c", "bundle exec rails db:migrate && bundle exec rails server -b 0.0.0.0"]

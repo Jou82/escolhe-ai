@@ -1,8 +1,11 @@
 # Ranks TMDB movie search results for the existing autocomplete UI.
-# Keeps the same JSON shape: [{ id, title, year }, ...]
+# Title relevance first — not blockbuster popularity.
+# JSON shape stays: [{ id, title, year }, ...]
 class MovieSearchService
   RESULT_LIMIT = 8
-  MIN_VOTES_SOFT = 40
+  MIN_VOTES_FOR_RATING = 80
+  SPAM_VOTE_FLOOR = 15
+  BLOCKBUSTER_POPULARITY = 120.0
 
   def self.call(query)
     new(query).call
@@ -41,7 +44,6 @@ class MovieSearchService
       api_key: api_key,
       query: @query,
       language: "pt-BR",
-      region: "BR",
       include_adult: false,
       page: 1
     }
@@ -75,35 +77,54 @@ class MovieSearchService
     rating = movie["vote_average"].to_f
     year = movie["release_date"].to_s.slice(0, 4)
 
+    exact = title == normalized_query || original == normalized_query
+    prefix = title.start_with?(normalized_query) || original.start_with?(normalized_query)
+    contains = title.include?(normalized_query) || original.include?(normalized_query)
+
     score = 0.0
 
-    # Exact / prefix / contains matches beat raw TMDB order.
-    if title == normalized_query || original == normalized_query
-      score += 120
-    elsif title.start_with?(normalized_query) || original.start_with?(normalized_query)
-      score += 70
-    elsif title.include?(normalized_query) || original.include?(normalized_query)
-      score += 35
+    # 1) Title match dominates ranking.
+    if exact
+      score += 200
+    elsif prefix
+      score += 110
+    elsif contains
+      score += 55
     end
 
-    # Token overlap helps multi-word titles ("o poderoso chefao").
-    query_tokens = normalized_query.split
+    query_tokens = normalized_query.split.reject { |t| t.length < 2 }
     title_tokens = "#{title} #{original}".split
-    overlap = query_tokens.count { |token| title_tokens.any? { |t| t.include?(token) } }
-    score += overlap * 12
+    if query_tokens.any?
+      overlap = query_tokens.count { |token| title_tokens.any? { |t| t.include?(token) } }
+      score += (overlap.to_f / query_tokens.size) * 40
+    end
 
-    # Prefer known movies over obscure near-matches.
-    score += Math.log10([popularity, 1].max) * 14
-    score += Math.log10([votes, 1].max) * 8
-    score += rating * 1.5
+    # Prefer shorter titles when match quality is similar
+    # ("Matrix" over "The Matrix Reloaded: ...").
+    if exact || prefix
+      score += [0, 18 - title.split.size].max * 2
+    end
 
-    # Soft-penalize thin / hard-to-identify results.
-    score -= 55 if movie["poster_path"].blank?
-    score -= 35 if votes < MIN_VOTES_SOFT && title != normalized_query && original != normalized_query
-    score -= 20 if year.blank?
+    # 2) Quality signal (rating), only when enough votes exist.
+    #    No boost for raw popularity / vote volume.
+    if votes >= MIN_VOTES_FOR_RATING
+      score += (rating - 5.0) * 6
+    elsif votes >= SPAM_VOTE_FLOOR
+      score += (rating - 5.0) * 2
+    end
 
-    # If user typed a year, boost that year strongly.
-    score += 40 if @year.present? && year == @year
+    # 3) Soft-dampen mega-blockbusters when the title isn't an exact match,
+    #    so franchise hits don't bury better-fitting titles.
+    if !exact && popularity >= BLOCKBUSTER_POPULARITY
+      score -= Math.log10(popularity) * 6
+    end
+
+    # 4) Filter noise, not chase hits.
+    score -= 50 if movie["poster_path"].blank?
+    score -= 40 if votes < SPAM_VOTE_FLOOR && !exact
+    score -= 15 if year.blank?
+
+    score += 50 if @year.present? && year == @year
 
     score
   end

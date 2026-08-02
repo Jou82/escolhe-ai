@@ -40,3 +40,9 @@
 *.swp
 .DS_Store
 .env.production.local
+
+# Python virtualenv (never commit)
+/venv/
+
+# Local Bundler path installs
+/vendor/bundle/

@@ -1,0 +1,198 @@
+// ============================================
+// Legal pages (Privacy / Terms)
+// Following the project's dark theme
+// ============================================
+
+// Top navigation tabs
+.top-nav {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1.5rem 1rem 0;
+
+  button {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: $text-muted;
+    padding: 0.5rem 1.25rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    &:hover {
+      color: $text-light;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    &.active {
+      background: $accent-blue;
+      color: $text-white;
+      border-color: $accent-blue;
+    }
+  }
+}
+
+.legal-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 5rem;
+  color: $text-light;
+
+  @media (max-width: 768px) {
+    padding: 2rem 1rem 3rem;
+  }
+}
+
+// Language switcher (PT | EN | DE)
+.legal-page__lang-switcher {
+  display: inline-flex;
+  gap: 0.25rem;
+  margin-bottom: 2.5rem;
+  padding: 0.25rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+}
+
+.legal-page__lang {
+  padding: 0.4rem 1rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: $text-muted;
+  text-decoration: none;
+  transition: all 0.15s ease;
+
+  &:hover {
+    color: $text-white;
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  &--active {
+    color: $text-white;
+    background: $accent-blue;
+
+    &:hover {
+      color: $text-white;
+      background: darken($accent-blue, 10%);
+    }
+  }
+}
+
+.legal-page__header {
+  margin-bottom: 2.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.legal-page__eyebrow {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $accent-blue;
+  margin-bottom: 0.5rem;
+}
+
+.legal-page__title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: $text-white;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.01em;
+
+  @media (max-width: 768px) {
+    font-size: 1.8rem;
+  }
+}
+
+.legal-page__updated {
+  font-size: 0.85rem;
+  color: $text-dim;
+}
+
+// Content sections
+.legal-page__content {
+  color: $text-light;
+  line-height: 1.8;
+}
+
+.legal-page__section {
+  margin-bottom: 2.5rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+
+  &:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  h2 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: $text-white;
+    margin-bottom: 0.75rem;
+    margin-top: 0;
+  }
+
+  h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: $text-light;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    font-size: 1rem;
+    color: $text-muted;
+    margin-bottom: 0.75rem;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  ul {
+    padding-left: 1.5rem;
+    margin-bottom: 0.75rem;
+
+    li {
+      font-size: 1rem;
+      color: $text-muted;
+      margin-bottom: 0.5rem;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+}
+
+// Highlight/alert box
+.legal-page__highlight {
+  background: rgba(96, 165, 250, 0.08);
+  border-left: 3px solid $accent-blue;
+  padding: 1rem 1.5rem;
+  border-radius: 4px;
+  margin: 1rem 0;
+
+  p {
+    margin-bottom: 0;
+    color: $text-light;
+  }
+}
+
+// Footer
+.legal-page__footer {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 0.85rem;
+  color: $text-dim;
+}

@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["emailModal", "emailInput", "saveBtn", "nameInput"]
+  static targets = ["emailModal", "emailInput", "saveBtn", "nameInput", "deleteModal", "deleteForm", "deleteBtn"]
 
   connect() {
     this.originalEmail = this.emailInputTarget.value
@@ -71,5 +71,32 @@ export default class extends Controller {
 
   closeEmailModal() {
     this.emailModalTarget.classList.remove('email-modal--open')
+  }
+
+  openDeleteModal() {
+    this.deleteModalTarget.classList.add('delete-modal--open')
+  }
+
+  closeDeleteModal() {
+    this.deleteModalTarget.classList.remove('delete-modal--open')
+  }
+
+  submitDelete(event) {
+    const passwordInput = document.getElementById("delete-password")
+    const checkbox = document.getElementById("delete-confirm-checkbox")
+
+    if (passwordInput) {
+      if (!passwordInput.value) {
+        event.preventDefault()
+        alert("Digite sua senha para continuar.")
+        return false
+      }
+    } else if (checkbox) {
+      if (!checkbox.checked) {
+        event.preventDefault()
+        alert("Confirme que deseja encerrar sua conta.")
+        return false
+      }
+    }
   }
 }

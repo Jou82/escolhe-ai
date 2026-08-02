@@ -1,0 +1,49 @@
+en:
+  profile:
+    header:
+      eyebrow: "Manage your profile preferences"
+      title: "My Profile"
+
+    info_card:
+      avatar_modal_title: "Choose your avatar"
+      avatar_modal_cancel: "Cancel"
+      avatar_modal_save: "Save"
+      display_name_label: "How would you like to be called?"
+      display_name_placeholder: "Your name"
+      email_label: "Email"
+      email_placeholder: "your@email.com"
+      save_changes: "Save changes"
+      email_modal_title: "Confirm your password"
+      email_modal_subtitle: "Enter your current password to change your email."
+      current_password_label: "Current password"
+      email_modal_cancel: "Cancel"
+      email_modal_confirm: "Confirm"
+
+    streaming_card:
+      title: "Where do you stream?"
+      subtitle: "Tell us your streaming platforms for tailored recommendations."
+      search_placeholder: "Search streaming services (Netflix, Prime, etc...)"
+
+    security_card:
+      title: "Security"
+      subtitle: "Strengthen your access integrity with a strong password."
+      current_password_label: "Current Password"
+      new_password_label: "New Password"
+      password_confirmation_label: "Confirm New Password"
+      password_placeholder: "••••••••"
+      update_password_button: "Update password"
+
+    danger_card:
+      title: "Delete account"
+      subtitle: "This action is permanent and will delete all your data."
+      delete_button: "Delete account"
+      delete_modal_title: "Are you sure?"
+      delete_modal_subtitle: "This action cannot be undone. Your account and all your data will be permanently deleted."
+      delete_modal_confirmation_checkbox: "I confirm that I want to permanently delete my account"
+      delete_modal_password_label: "Confirm your password to continue:"
+      delete_modal_password_placeholder: "••••••••"
+      delete_modal_cancel: "Cancel"
+      delete_modal_confirm: "Permanently delete account"
+      incorrect_password: "Incorrect password. Account was not deleted."
+      incorrect_email_confirmation: "Confirmation email does not match. Account was not deleted."
+      account_deleted_success: "Your account and all associated data have been permanently deleted."

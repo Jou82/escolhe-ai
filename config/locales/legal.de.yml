@@ -1,0 +1,109 @@
+de:
+  terms:
+    accept:
+      title: "Nutzungsbedingungen akzeptieren"
+      subtitle: "Bevor Sie fortfahren, bestaetigen Sie bitte, dass Sie unsere Datenschutzerklaerung und Nutzungsbedingungen akzeptieren."
+      description_html: "Um EscolheAi zu nutzen, muessen Sie unsere %{privacy_link} und %{terms_link} akzeptieren."
+      privacy_label: "Datenschutzerklaerung"
+      terms_label: "Nutzungsbedingungen"
+      checkbox_label: "Ich bestaeutige, dass ich die Datenschutzerklaerung und Nutzungsbedingungen gelesen habe und akzeptiere"
+      submit_button: "Fortfahren"
+
+  legal:
+    privacy:
+      title: "Datenschutzerklaerung"
+      updated: "Zuletzt aktualisiert"
+      section_1:
+        title: "1. Datenverantwortlicher"
+        body: "Datenverantwortlicher: Joana Dias. Fuer Datenschutzfragen kontaktieren Sie: joana.jou@gmail.com"
+      section_2:
+        title: "2. Rechtsgrundlage fuer die Verarbeitung"
+        body: "Wir verarbeiten Ihre Daten auf Grundlage von: (a) Vertragserfuellung (Artikel 6(1)(b) DSGVO), (b) Ihrer ausdrucklichen Zustimmung (Artikel 6(1)(a) DSGVO) und (c) berechtigtem Interesse an Sicherheit und Betrieb des Dienstes (Artikel 6(1)(f) DSGVO)."
+      section_3:
+        title: "3. Erhobene personenbezogene Daten"
+        intro: "Wir erfassen die folgenden personenbezogenen Daten:"
+        item_1: "Identitaetsdaten: E-Mail, verschluesseltes Passwort (fuer direktes Anmelden) oder Name und Profilbild (ueber Google OAuth)"
+        item_2: "Praefezenzdaten: Filmbewertunssverlauf, personalisierte Empfehlungen"
+        item_3: "Technische Daten: IP-Adresse, Browsertyp, Zugriffsdatum/-uhrzeit, Sitzungs-Cookies"
+        item_4: "Optionale Daten: bevorzugte Streaming-Plattformen, Anzeigename, Avatar"
+      section_4:
+        title: "4. Zweck der Verarbeitung"
+        intro: "Ihre Daten werden fuer folgende Zwecke verarbeitet:"
+        item_1: "Sichere Authentifizierung ueber E-Mail/Passwort oder Google OAuth"
+        item_2: "Kontoverwaltung und Sicherheit"
+        item_3: "Bereitstellung personalisierter Film- und Serienempfehlungen"
+        item_4: "Einhaltung gesetzlicher Anforderungen und Vorschriften"
+        item_5: "Sicherheit, Betrugspraevention und Missbrauchsschutz"
+      section_5:
+        title: "5. Weitergabe von Daten an Dritte"
+        intro: "Ihre Daten werden mit folgenden Verarbeitern geteilt:"
+        item_1: "<strong>Google LLC</strong> (Google OAuth - optional) - nur E-Mail und Name zur Authentifizierung"
+        item_2: "<strong>The Movie Database (TMDB)</strong> - nur Filmdaten (erhaelt keine personenbezogenen Daten)"
+        item_3: "<strong>Hetzner Online GmbH</strong> - Infrastruktur-Hosting (Server in Deutschland, EU)"
+      section_6:
+        title: "6. Betroffenenrechte (DSGVO)"
+        intro: "Sie haben unter der DSGVO folgende Rechte:"
+        item_1: "Auskunftsrecht: Erhalten Sie eine Kopie Ihrer personenbezogenen Daten"
+        item_2: "Berichtigungsrecht: Korrigieren Sie unrichtige oder unvollstaendige Daten"
+        item_3: "Loeschungsrecht (Recht auf Vergessenwerden): Beantragen Sie die Loeschung Ihrer Daten"
+        item_4: "Recht auf Einschraenkung: Begrenzen Sie die Verarbeitung Ihrer Daten"
+        item_5: "Recht auf Datenuebertragbarkeit: Erhalten Sie Ihre Daten in strukturierter Form"
+        item_6: "Widerspruchsrecht: Widersprechen Sie der Verarbeitung unter bestimmten Umstaenden"
+        extra: "Um diese Rechte geltend zu machen, kontaktieren Sie: joana.jou@gmail.com"
+      section_7:
+        title: "7. Datenspeicherung"
+        body: "Wir speichern Ihre personenbezogenen Daten nur so lange, wie es zur Erbringung des Dienstes und zur Erfuellung gesetzlicher Verpflichtungen erforderlich ist. Nach einer Loeschungsanfrage werden Ihre Daten innerhalb von 30 Tagen geloescht, sofern das Gesetz eine Aufbewahrung nicht vorschreibt. Audit-Daten und Sicherheitsprotokolle koennen bis zu 3 Jahre aufbewahrt werden."
+      section_8:
+        title: "8. Datensicherheit"
+        body: "Wir setzen angemessene technische und organisatorische Massnahmen zum Schutz Ihrer Daten ein, einschliesslich: HTTPS-Verschluesselung, bcrypt-Passwort-Verschluesselung, rollenbasierte Zugriffskontrolle, kontinuierliche Sicherheitsueberwachung und regelmaessige Tests."
+      section_9:
+        title: "9. Internationale Datenuebertraegungen"
+        body: "Ihre Daten werden auf Servern in Deutschland (Europaeische Union) verarbeitet. Wir uebertraegen Daten nicht ausserhalb des Europaeischen Wirtschaftsraums ohne ausdruckliche Zustimmung."
+      section_10:
+        title: "10. Cookies und Tracking"
+        body: "Wir verwenden nur unbedingt erforderliche Cookies, um Ihre Anmeldesitzung beizubehalten. Wir verwenden keine Tracking-, Analyse- oder Werbe-Cookies."
+      section_11:
+        title: "11. Kontakt und Beschwerden"
+        body: "Fuer Datenschutzfragen: joana.jou@gmail.com. Wenn Sie glauben, dass Ihre DSGVO-Rechte verletzt wurden, koennen Sie bei der Datenschutzbehoerde in Ihrer Gerichtsbarkeit eine Beschwerde einreichen."
+      section_12:
+        title: "12. Aenderungen dieser Richtlinie"
+        body: "Wir koennen diese Richtlinie von Zeit zu Zeit aktualisieren. Wesentliche Aenderungen werden per E-Mail mit 30 Tagen Vorankuendigung mitgeteilt."
+
+    terms:
+      title: "Nutzungsbedingungen"
+      updated: "Zuletzt aktualisiert"
+      section_1:
+        title: "1. Ueber den Dienst"
+        body: "Escolhe Ai ist eine kostenlose KI-gesteuerte Film- und Serienempfehlungsplattform, die fuer den brasilianischen Streaming-Markt entwickelt wurde. Indem Sie ein Konto erstellen und den Dienst nutzen, stimmen Sie zu, an diese Nutzungsbedingungen gebunden zu sein."
+      section_2:
+        title: "2. Berechtigung und Konto"
+        body: "Sie muessen mindestens 13 Jahre alt sein, um diesen Dienst zu nutzen. Wenn Sie minderjahrig sind, benoetigen Sie die Zustimmung der Eltern oder des Erziehungsberechtigten. Sie sind verantwortlich fuer die Vertraulichkeit Ihres Passworts und alle Aktivitaeten in Ihrem Konto."
+      section_3:
+        title: "3. Authentifizierung"
+        body: "Sie koennen sich auf zwei Arten anmelden: (a) mit E-Mail und Passwort oder (b) mit Google OAuth. Fuer die Anmeldung per E-Mail/Passwort muessen Sie eine aktive E-Mail-Adresse angeben. Fuer Google OAuth werden Ihre Authentifizierungsdaten von Google nach deren Bedingungen verwaltet."
+      section_4:
+        title: "4. Akzeptable Nutzung"
+        intro: "Sie stimmen zu, diesen Dienst nur zu legitimen Zwecken zu nutzen und nicht zu:"
+        item_1: "Versuchen, auf die Infrastruktur des Dienstes zuzugreifen, sie zu aendern oder zu beschaedigen"
+        item_2: "Den Dienst fuer illegale, betruegende oder schaedliche Zwecke nutzen"
+        item_3: "Belaestigung, Missbrauch oder Diskriminierung gegenueber anderen Nutzern betreiben"
+        item_4: "Den Zugang automatisieren oder Bots ohne ausdruckliche Genehmigung nutzen"
+        item_5: "Ihr Passwort oder Ihre Anmeldedaten an Dritte weitergeben"
+      section_5:
+        title: "5. Inhalte von Dritten"
+        body: "Filmunterlagen werden von TMDB (The Movie Database) bereitgestellt und unterliegen deren Nutzungsbedingungen. EscolheAi ist nicht verantwortlich fuer die Richtigkeit, Integritaet oder Legalitaet dieser Daten."
+      section_6:
+        title: "6. Geistiges Eigentum"
+        body: "Alle Inhalte von EscolheAi, einschliesslich Algorithmen, Design, Empfehlungen und Code, sind durch Urheberrecht und Eigentumsrechte geschuetzt. Sie duerfen diese nicht ohne ausdruckliche Genehmigung vervielfaeltigen, verbreiten, aendern oder weiterverwenden."
+      section_7:
+        title: "7. Verfuegbarkeit und Wartung"
+        body: "Der Dienst wird wie beschrieben bereitgestellt, ohne Garantie fuer kontinuierliche Verfuegbarkeit. Wir fuehren regelmaessige Wartungen und Updates durch, die zu vorbeigehenden Unterbrechungen fuehren koennen. Wir sind nicht verantwortlich fuer Verluste aufgrund von Dienstverfuegbarkeit."
+      section_8:
+        title: "8. Haftungsbeschraenkung"
+        body: "Im groesssten gesetzlich zulaessigen Umfang haftet EscolheAi nicht fuer indirekte, zufaellige, besondere oder Folgeschaeden, die sich aus Ihrer Nutzung oder Nichtverwendung des Dienstes ergeben, auch wenn auf die Moeglichkeit solcher Schaeden hingewiesen wurde."
+      section_9:
+        title: "9. Konto-Kuendigung"
+        body: "Sie koennen Ihr Konto jederzeit von Ihrer Profilseite aus kuendigen, indem Sie auf die Schaltflaeche 'Konto beenden' klicken. Nach der Bestaetigung wird Ihr Konto sofort geloescht. Nach 30 Tagen werden Ihre personenbezogenen Daten vollstaendig aus unseren Systemen entfernt. Wir koennen Konten sperren oder kuendigen, die gegen diese Bedingungen verstossen oder gegen geltende Gesetze verstoessen."
+      section_10:
+        title: "10. Anwendbares Recht und Gerichtsbarkeit"
+        body: "Diese Bedingungen unterliegen brasilianischem Recht. Nutzer in der Europaeischen Union haben zusaetzliche Rechte unter der DSGVO und dem europaeischen Verbraucherschutzrecht. Bei Streitigkeiten koennen Sie sich an die Gerichte Ihrer Gerichtsbarkeit oder an alternative Streitbeilegungsmassnahmen wenden."

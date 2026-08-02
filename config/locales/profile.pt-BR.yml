@@ -1,0 +1,49 @@
+pt-BR:
+  profile:
+    header:
+      eyebrow: "Gerencie suas preferências de perfil"
+      title: "Meu Perfil"
+
+    info_card:
+      avatar_modal_title: "Escolha seu avatar"
+      avatar_modal_cancel: "Cancelar"
+      avatar_modal_save: "Salvar"
+      display_name_label: "Como quer ser chamado?"
+      display_name_placeholder: "Seu nome"
+      email_label: "E-mail"
+      email_placeholder: "seu@email.com"
+      save_changes: "Salvar alterações"
+      email_modal_title: "Confirme sua senha"
+      email_modal_subtitle: "Digite sua senha atual para alterar o e-mail."
+      current_password_label: "Senha atual"
+      email_modal_cancel: "Cancelar"
+      email_modal_confirm: "Confirmar"
+
+    streaming_card:
+      title: "Onde você dá o play?"
+      subtitle: "Informe suas plataformas de streaming para uma curadoria sob medida."
+      search_placeholder: "Procure serviços de streaming (Netflix, Prime, etc...)"
+
+    security_card:
+      title: "Segurança"
+      subtitle: "Reforce a integridade do seu acesso com uma senha robusta."
+      current_password_label: "Senha Atual"
+      new_password_label: "Nova Senha"
+      password_confirmation_label: "Confirmar Nova Senha"
+      password_placeholder: "••••••••"
+      update_password_button: "Atualizar senha"
+
+    danger_card:
+      title: "Encerrar conta"
+      subtitle: "Esta ação é permanente e irá apagar todos os seus dados."
+      delete_button: "Encerrar conta"
+      delete_modal_title: "Tem certeza?"
+      delete_modal_subtitle: "Esta ação não pode ser desfeita. Sua conta e todos os seus dados serão permanentemente deletados."
+      delete_modal_confirmation_checkbox: "Confirmo que desejo encerrar minha conta permanentemente"
+      delete_modal_password_label: "Confirme sua senha para continuar:"
+      delete_modal_password_placeholder: "••••••••"
+      delete_modal_cancel: "Cancelar"
+      delete_modal_confirm: "Encerrar conta permanentemente"
+      incorrect_password: "Senha incorreta. Conta não foi excluída."
+      incorrect_email_confirmation: "E-mail de confirmação não corresponde. Conta não foi excluída."
+      account_deleted_success: "Sua conta e todos os dados associados foram permanentemente deletados."

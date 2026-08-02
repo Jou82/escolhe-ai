@@ -29,6 +29,20 @@ module Users
       end
     end
 
+    def destroy
+      if current_user.provider.present?
+        current_user.destroy
+        sign_out current_user
+        redirect_to root_path, notice: "Conta encerrada com sucesso."
+      elsif current_user.valid_password?(params[:current_password])
+        current_user.destroy
+        sign_out current_user
+        redirect_to root_path, notice: "Conta encerrada com sucesso."
+      else
+        redirect_to profile_path, alert: "Senha incorreta. Conta não foi excluída."
+      end
+    end
+
     private
 
     def account_update_params
@@ -36,7 +50,7 @@ module Users
     end
 
     def sign_up_params
-      params.require(:user).permit(:email, :password, :password_confirmation)
+      params.require(:user).permit(:email, :password, :password_confirmation, :accept_terms)
     end
   end
 end

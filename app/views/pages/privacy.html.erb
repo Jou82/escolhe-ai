@@ -1,0 +1,104 @@
+<%# app/views/pages/privacy.html.erb %>
+<div class="legal-page">
+
+  <div class="legal-page__lang-switcher">
+    <%= link_to "PT", privacy_policy_path(locale: :pt), class: "legal-page__lang #{'legal-page__lang--active' if I18n.locale == :pt}" %>
+    <%= link_to "EN", privacy_policy_path(locale: :en), class: "legal-page__lang #{'legal-page__lang--active' if I18n.locale == :en}" %>
+    <%= link_to "DE", privacy_policy_path(locale: :de), class: "legal-page__lang #{'legal-page__lang--active' if I18n.locale == :de}" %>
+  </div>
+
+  <header class="legal-page__header">
+    <h1 class="legal-page__title"><%= t('legal.privacy.title') %></h1>
+    <p class="legal-page__updated"><%= t('legal.privacy.updated') %>: <%= Date.current.strftime("%d/%m/%Y") %></p>
+  </header>
+
+  <div class="legal-page__content">
+
+    <section class="legal-page__section">
+      <h2><%= t('legal.privacy.section_1.title') %></h2>
+      <p><%= t('legal.privacy.section_1.body') %></p>
+    </section>
+
+    <section class="legal-page__section">
+      <h2><%= t('legal.privacy.section_2.title') %></h2>
+      <p><%= t('legal.privacy.section_2.body') %></p>
+    </section>
+
+    <section class="legal-page__section">
+      <h2><%= t('legal.privacy.section_3.title') %></h2>
+      <p><%= t('legal.privacy.section_3.intro') %></p>
+      <ul>
+        <li><%= t('legal.privacy.section_3.item_1') %></li>
+        <li><%= t('legal.privacy.section_3.item_2') %></li>
+        <li><%= t('legal.privacy.section_3.item_3') %></li>
+        <li><%= t('legal.privacy.section_3.item_4') %></li>
+      </ul>
+    </section>
+
+    <section class="legal-page__section">
+      <h2><%= t('legal.privacy.section_4.title') %></h2>
+      <p><%= t('legal.privacy.section_4.intro') %></p>
+      <ul>
+        <li><%= raw(t('legal.privacy.section_4.item_1')) %></li>
+        <li><%= raw(t('legal.privacy.section_4.item_2')) %></li>
+        <li><%= raw(t('legal.privacy.section_4.item_3')) %></li>
+        <li><%= raw(t('legal.privacy.section_4.item_4')) %></li>
+        <li><%= raw(t('legal.privacy.section_4.item_5')) %></li>
+      </ul>
+    </section>
+
+    <section class="legal-page__section">
+      <h2><%= t('legal.privacy.section_5.title') %></h2>
+      <p><%= t('legal.privacy.section_5.intro') %></p>
+      <ul>
+        <li><%= raw(t('legal.privacy.section_5.item_1')) %></li>
+        <li><%= raw(t('legal.privacy.section_5.item_2')) %></li>
+        <li><%= raw(t('legal.privacy.section_5.item_3')) %></li>
+      </ul>
+    </section>
+
+    <section class="legal-page__section">
+      <h2><%= t('legal.privacy.section_6.title') %></h2>
+      <p><%= t('legal.privacy.section_6.intro') %></p>
+      <ul>
+        <li><%= t('legal.privacy.section_6.item_1') %></li>
+        <li><%= t('legal.privacy.section_6.item_2') %></li>
+        <li><%= t('legal.privacy.section_6.item_3') %></li>
+        <li><%= t('legal.privacy.section_6.item_4') %></li>
+        <li><%= t('legal.privacy.section_6.item_5') %></li>
+      </ul>
+      <p><%= t('legal.privacy.section_6.extra') %></p>
+    </section>
+
+    <section class="legal-page__section">
+      <h2><%= t('legal.privacy.section_7.title') %></h2>
+      <p><%= t('legal.privacy.section_7.body') %></p>
+    </section>
+
+    <section class="legal-page__section">
+      <h2><%= t('legal.privacy.section_8.title') %></h2>
+      <p><%= t('legal.privacy.section_8.body') %></p>
+    </section>
+
+    <section class="legal-page__section">
+      <h2><%= t('legal.privacy.section_9.title') %></h2>
+      <p><%= t('legal.privacy.section_9.body') %></p>
+    </section>
+
+    <section class="legal-page__section">
+      <h2><%= t('legal.privacy.section_10.title') %></h2>
+      <p><%= t('legal.privacy.section_10.body') %></p>
+    </section>
+
+    <section class="legal-page__section">
+      <h2><%= t('legal.privacy.section_11.title') %></h2>
+      <p><%= t('legal.privacy.section_11.body') %></p>
+    </section>
+
+    <section class="legal-page__section">
+      <h2><%= t('legal.privacy.section_12.title') %></h2>
+      <p><%= t('legal.privacy.section_12.body') %></p>
+    </section>
+
+  </div>
+</div>

@@ -10,11 +10,7 @@
       <p><strong>Streaming:</strong> <%= rec.dig("tmdb", :streaming).map { |s| s[:name] }.join(", ") %></p>
     <% end %>
     <% if rec.dig("tmdb", :poster_url) %>
-<<<<<<< HEAD
       <img src="<%= rec.dig("tmdb", :poster_url) %>" width="200" alt="Poster do filme <%= rec["title"] %>">
-=======
-      <img src="<%= rec.dig("tmdb", :poster_url) %>" width="200">
->>>>>>> fa997b1b06b97489b2766c6d4783127abb4a70a4
     <% end %>
   </div>
 <% end %>

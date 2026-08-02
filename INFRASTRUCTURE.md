@@ -63,7 +63,8 @@ builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-startCommand = "bundle exec rails db:migrate && bundle exec rails server -b 0.0.0.0 -p ${PORT:-3000}"
+preDeployCommand = ["bundle exec rails db:migrate"]
+startCommand = "bundle exec rails server -b 0.0.0.0"
 healthcheckPath = "/up"
 healthcheckTimeout = 120
 restartPolicyType = "ON_FAILURE"
@@ -75,7 +76,7 @@ restartPolicyMaxRetries = 3
 - Base: `ruby:3.3.5`
 - Installs Node 20 (asset precompile) + `postgresql-client`
 - `SECRET_KEY_BASE_DUMMY=1` during `assets:precompile` (no master.key in image)
-- Default CMD mirrors the Railway start command (migrate + Puma on `$PORT`)
+- Default CMD boots Puma; migrations run via Railway `preDeployCommand`
 
 ### Secrets / env vars
 

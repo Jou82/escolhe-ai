@@ -9,7 +9,9 @@ export default class extends Controller {
   connect() {
     this.stepIndex = 0
     this.completed = false
+    this.stopped = false
     this.progressInterval = null
+    this.pollTimeout = null
     this.circumference = 339.292 // 2 * PI * 54
 
     this.steps = [
@@ -21,32 +23,31 @@ export default class extends Controller {
       { progress: 95, message: "Finalizando..." }
     ]
 
-    // Inicializa com 0%
     this.updateProgressCircle(0)
 
-    // Inicia as animações
     setTimeout(() => this.updateProgress(), 1000)
     setTimeout(() => this.checkAndRedirect(), 2000)
   }
 
   disconnect() {
-    if (this.progressInterval) {
-      clearTimeout(this.progressInterval)
-    }
+    this.stopped = true
+    if (this.progressInterval) clearTimeout(this.progressInterval)
+    if (this.pollTimeout) clearTimeout(this.pollTimeout)
   }
 
   updateProgressCircle(percent) {
+    if (!this.hasProgressCircleTarget) return
     const offset = this.circumference - (percent / 100) * this.circumference
     this.progressCircleTarget.style.strokeDashoffset = offset
   }
 
   updateProgress() {
-    if (this.completed) return
+    if (this.completed || this.stopped) return
 
     if (this.stepIndex < this.steps.length) {
       const step = this.steps[this.stepIndex]
-      this.progressTextTarget.textContent = step.progress + '%'
-      this.statusMessageTarget.textContent = step.message
+      if (this.hasProgressTextTarget) this.progressTextTarget.textContent = step.progress + '%'
+      if (this.hasStatusMessageTarget) this.statusMessageTarget.textContent = step.message
       this.updateProgressCircle(step.progress)
       this.stepIndex++
 
@@ -56,31 +57,53 @@ export default class extends Controller {
   }
 
   completeProgress() {
-    if (this.progressInterval) {
-      clearTimeout(this.progressInterval)
-    }
+    if (this.progressInterval) clearTimeout(this.progressInterval)
     this.completed = true
-    this.progressTextTarget.textContent = '100%'
-    this.statusMessageTarget.textContent = 'Pronto! Redirecionando...'
+    if (this.hasProgressTextTarget) this.progressTextTarget.textContent = '100%'
+    if (this.hasStatusMessageTarget) this.statusMessageTarget.textContent = 'Pronto! Redirecionando...'
     this.updateProgressCircle(100)
   }
 
+  showFailure(message) {
+    if (this.progressInterval) clearTimeout(this.progressInterval)
+    this.completed = true
+    this.stopped = true
+    if (this.hasProgressTextTarget) this.progressTextTarget.textContent = '!'
+    if (this.hasStatusMessageTarget) {
+      this.statusMessageTarget.textContent = message || "Não foi possível gerar as recomendações. Tente novamente."
+    }
+  }
+
   async checkAndRedirect() {
+    if (this.stopped || this.completed) return
+
     try {
-      const response = await fetch(`/movies/check_status?id=${this.sessionIdValue}`)
+      const response = await fetch(`/movies/check_status?id=${this.sessionIdValue}`, {
+        headers: { Accept: "application/json" }
+      })
       const data = await response.json()
 
       if (data.status === "completed") {
         this.completeProgress()
-        setTimeout(() => {
-          window.location.href = `/sessions/${this.sessionIdValue}`
-        }, 500)
-      } else {
-        setTimeout(() => this.checkAndRedirect(), 2000)
+        const url = data.url || `/sessions/${this.sessionIdValue}`
+        this.pollTimeout = setTimeout(() => { window.location.href = url }, 500)
+        return
       }
+
+      if (data.status === "failed") {
+        this.showFailure(data.error)
+        return
+      }
+
+      if (data.status === "not_found") {
+        this.showFailure("Sessão não encontrada. Volte e tente de novo.")
+        return
+      }
+
+      this.pollTimeout = setTimeout(() => this.checkAndRedirect(), 2000)
     } catch (error) {
       console.error('Erro ao verificar status:', error)
-      setTimeout(() => this.checkAndRedirect(), 3000)
+      this.pollTimeout = setTimeout(() => this.checkAndRedirect(), 3000)
     }
   }
 }

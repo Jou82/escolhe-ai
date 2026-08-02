@@ -7,32 +7,8 @@ class MoviesController < ApplicationController
   end
 
   def search
-    query = params[:q].to_s.strip
-    api_key = ENV.fetch('TMDB_API_KEY', nil)
-
-    if query.present?
-      url = URI("https://api.themoviedb.org/3/search/movie?api_key=#{api_key}&query=#{ERB::Util.url_encode(query)}&language=pt-BR")
-
-      begin
-        response = Net::HTTP.get(url)
-        data = JSON.parse(response)
-
-        @results = data["results"].map do |movie|
-          {
-            title: movie["title"],
-            id: movie["id"],
-            year: movie["release_date"]&.slice(0, 4)
-          }
-        end
-      rescue StandardError => e
-        Rails.logger.error "Erro na busca da API: #{e.message}"
-        @results = []
-      end
-    else
-      @results = []
-    end
-
-    render json: @results
+    # Same UI payload (title/id/year); better ranking via MovieSearchService.
+    render json: MovieSearchService.call(params[:q])
   end
 
   def show
@@ -94,9 +70,19 @@ class MoviesController < ApplicationController
   end
 
   def check_status
-    session_record = current_user.sessions.select(:id, :status, :error_message).find_by(id: params[:id])
+    session_record = current_user.sessions.find_by(id: params[:id])
 
     return render json: { status: "not_found" }, status: :not_found unless session_record
+
+    # Jobs that never ran leave status=processing forever; surface as failed
+    # so the UI can stop polling (common when Solid Queue worker was down).
+    if session_record.processing? && session_record.created_at < 3.minutes.ago
+      session_record.update!(
+        status: :failed,
+        error_message: session_record.error_message.presence ||
+          "A geração demorou demais ou o worker de jobs não está a correr. Tente novamente."
+      )
+    end
 
     if session_record.completed?
       render json: { status: "completed", url: movie_session_path(session_record) }
@@ -110,9 +96,12 @@ class MoviesController < ApplicationController
   private
 
   def check_rate_limit
+    # Only completed searches count. Stuck "processing" sessions (e.g. when
+    # Solid Queue was not running) must not burn the daily quota, and failed
+    # attempts are already excluded.
     count = current_user.sessions
                         .where("created_at >= ?", 24.hours.ago)
-                        .where.not(status: 2)
+                        .where(status: Session.statuses[:completed])
                         .count
 
     if count >= 3

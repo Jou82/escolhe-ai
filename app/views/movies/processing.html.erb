@@ -49,6 +49,9 @@
       Processando suas recomendações...
     </p>
 
+    <!-- Turbo Stream target for job broadcasts (status / error / redirect) -->
+    <div id="recommendations_container" class="processing-stream-target" aria-live="polite"></div>
+
     <!-- Link para voltar -->
     <div class="processing-back">
       <%= link_to "← Voltar para o início", root_path, class: "back-link" %>

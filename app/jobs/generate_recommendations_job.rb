@@ -138,11 +138,13 @@ class GenerateRecommendationsJob < ApplicationJob
   end
 
   def broadcast_completion(user, session_record)
-    Turbo::StreamsChannel.broadcast_replace_to(
+    url = Rails.application.routes.url_helpers.movie_session_path(session_record)
+    # Custom StreamActions.redirect (see application.js). Keep this as a
+    # top-level turbo-stream so ActionCable clients execute it immediately;
+    # the processing page also polls check_status as a fallback.
+    Turbo::StreamsChannel.broadcast_stream_to(
       "user_#{user.id}_recommendations",
-      target: "recommendations_container",
-      partial: "movies/redirect",
-      locals: { session_id: session_record.id }
+      content: %(<turbo-stream action="redirect" url="#{ERB::Util.html_escape(url)}"></turbo-stream>)
     )
   end
 

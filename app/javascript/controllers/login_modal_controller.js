@@ -16,16 +16,19 @@ export default class extends Controller {
   }
 
   open() {
+    this._refreshCsrfTokens()
     this._showPanel("login")
     this._openOverlay()
   }
 
   openRegister() {
+    this._refreshCsrfTokens()
     this._showPanel("register")
     this._openOverlay()
   }
 
   openForgot() {
+    this._refreshCsrfTokens()
     this._showPanel("forgot")
     this._openOverlay()
   }

@@ -2,6 +2,11 @@ FROM ruby:3.3.5
 
 WORKDIR /app
 
+# Single-service Railway deploy: run Solid Queue inside Puma so
+# GenerateRecommendationsJob actually executes (otherwise the UI
+# stays forever on /movies/processing).
+ENV SOLID_QUEUE_IN_PUMA=true
+
 RUN apt-get update && \
   apt-get install -y curl && \
   curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \

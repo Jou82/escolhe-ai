@@ -1,0 +1,10 @@
+pt-BR:
+  terms:
+    accept:
+      title: "Aceitar Termos de Uso"
+      subtitle: "Antes de continuar, confirme que você aceita nossa Política de Privacidade e Termos de Uso."
+      description_html: "Para usar o EscolheAi, você precisa aceitar nossa %{privacy_link} e os %{terms_link}."
+      privacy_label: "Política de Privacidade"
+      terms_label: "Termos de Uso"
+      checkbox_label: "Confirmo que li e aceito a Política de Privacidade e os Termos de Uso"
+      submit_button: "Continuar"

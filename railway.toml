@@ -3,10 +3,12 @@ builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 
 [deploy]
+# Migrate before traffic; keep startCommand free of shell `${PORT:-…}` /
+# even `$PORT` can be passed literally to Thor on some Railway setups.
+# Puma binds ENV["PORT"] via config/puma.rb.
 preDeployCommand = ["bundle exec rails db:migrate"]
-startCommand = "bundle exec rails server -b 0.0.0.0 -p $PORT"
+startCommand = "bundle exec rails server -b 0.0.0.0"
 healthcheckPath = "/up"
 healthcheckTimeout = 120
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 3
-

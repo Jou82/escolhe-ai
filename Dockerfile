@@ -19,10 +19,10 @@ RUN bundle install
 COPY . .
 
 # SECRET_KEY_BASE_DUMMY evita precisar de master.key durante o build
-RUN RAILS_ENV=production SECRET_KEY_BASE_DUMMY=1 bundle exec rails assets:precompile
+RUN RAILS_ENV=production SECRET_KEY_BASE_DUMMY=1 bundle exec rails assets:precompile \
+  && mkdir -p tmp/pids tmp/cache log
 
 EXPOSE 3000
-CMD ["sh", "-c", "bundle exec rails db:migrate && bundle exec rails server -b 0.0.0.0 -p ${PORT:-3000}"]
-
-# Note: db:seed is optional and can be run manually
-# Rails will auto-create schema if needed via db:migrate
+# Puma binds ENV["PORT"] (see config/puma.rb). Avoid `-p ${PORT:-3000}` in
+# Railway startCommand — it can be passed unexpanded and crash Thor.
+CMD ["sh", "-c", "bundle exec rails db:migrate && bundle exec rails server -b 0.0.0.0"]

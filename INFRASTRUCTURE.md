@@ -94,7 +94,9 @@ Set in Railway → service → **Variables** (never commit):
 
 - `config.assume_ssl = true` — Railway terminates TLS
 - `force_ssl = true` with `/up` excluded from redirect
-- Hosts allow `escolheai.net`, `www.escolheai.net`, and `*.up.railway.app`
+- Host allowlist: `escolheai.net`, `www.escolheai.net`, `*.up.railway.app`, `*.railway.app`
+- `GET /up` is excluded from host authorization (Railway health probes)
+- Do **not** use `config.hosts << /.*/` — that disables Host protection
 
 ---
 
@@ -137,7 +139,14 @@ Railway dashboard → service → Logs (or `railway logs`).
 
 - No secrets in git (`.env*` gitignored; Docker build excludes `.env*` and `master.key`)
 - TLS at the edge; secure cookies via `force_ssl`
+- Host allowlist (no `/.*/`); `/up` excluded for health probes
+- Rack::Attack throttles login, password reset, signup, movie search/create
+- Devise `:lockable` (8 failed attempts → lock; unlock via email or 1 hour) + password min length 8
 - Rotate secrets in Railway Variables and redeploy
+- Postgres: keep Public Networking **off**; web uses private `DATABASE_URL`
+
+Note: container currently runs as root in the Railway image for deploy reliability
+(Railway volume/UID quirks). Prefer network isolation + app controls above.
 
 ---
 

@@ -85,3 +85,5 @@ end
 gem 'parallel'
 gem 'sitemap_generator'
 gem 'image_optim'
+
+gem "rack-attack", "~> 6.7"

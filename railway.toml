@@ -1,10 +1,13 @@
 [build]
-builder = "docker"
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
 
 [deploy]
-# Do not pass `-p ${PORT:-3000}` — Railway may not shell-expand that and Rails/Thor
-# receives the literal string. Puma already binds ENV["PORT"] via config/puma.rb.
-startCommand = "bundle exec rails db:migrate && bundle exec rails server -b 0.0.0.0"
+# Migrate before traffic; keep startCommand free of shell `${PORT:-…}` /
+# even `$PORT` can be passed literally to Thor on some Railway setups.
+# Puma binds ENV["PORT"] via config/puma.rb.
+preDeployCommand = ["bundle exec rails db:migrate"]
+startCommand = "bundle exec rails server -b 0.0.0.0"
 healthcheckPath = "/up"
 healthcheckTimeout = 120
 restartPolicyType = "ON_FAILURE"
